@@ -17,17 +17,28 @@ public:
         L = 7,
     };
 
+
     std::array<uint8_t, 8> r8; // register 
     uint16_t SP; //stack pointer
     uint16_t PC; //program countet
 
     //FLAGS (register F is combinacion this)
-    uint8_t z; //zero flag
-    uint8_t n; //substraction flag
-    uint8_t h; //half carry flag
-    uint8_t c; //carry flag
+    
+    //zero flag
+    //substraction flag
+    //half carry flag
+    //carry flag
 
+    uint8_t getZ() const { return (r8[F] >> 7) & 1 ; } 
+    uint8_t getN() const { return (r8[F] >> 6) & 1 ; }
+    uint8_t getH() const { return (r8[F] >> 5) & 1 ; }
+    uint8_t getC() const { return (r8[F] >> 4) & 1 ; }
 
+    void setZero() { r8[F] |= (1 << 7); }
+    void setSubstraction() { r8[F] |= (1 << 6); }
+    void setHalf() { r8[F] |= (1 << 5); }
+    void setCarry() { r8[F] |= (1 << 4); }
+    
     //GETERS AND SETERS VIRTUAL REGISTERS 16 BITS
 
     uint16_t getAF() const 
