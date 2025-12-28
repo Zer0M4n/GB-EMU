@@ -17,7 +17,6 @@ public:
         L = 7,
     };
 
-
     std::array<uint8_t, 8> r8; // register 
     uint16_t SP; //stack pointer
     uint16_t PC; //program countet

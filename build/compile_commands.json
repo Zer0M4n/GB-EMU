@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/developer/projects/GB-EMU/build",
+  "command": "/usr/bin/g++   -g -o CMakeFiles/app.dir/main.cpp.o -c /home/developer/projects/GB-EMU/main.cpp",
+  "file": "/home/developer/projects/GB-EMU/main.cpp"
+}
+]
