@@ -11,6 +11,8 @@ class mmu
             std::array<uint8_t, 0x0080> IO; // 128 Bytes input/outpur
             std::array<uint8_t, 0x00A0> OAM; // Object Attribute memory
 
+            uint8_t IE; //INTERRUPT ENABLE
+
             uint16_t offSet(uint16_t direction, uint16_t var)
             {
                 return direction - var;
@@ -31,6 +33,11 @@ class mmu
 
         uint8_t readMemory(uint16_t direction) 
         {   
+            if (direction == 0xFFFF)
+            {
+                return IE;
+            }
+            
             
             if(0x0000 <= direction && direction <= 0x7FFF) //ROM cartridge
             {   
@@ -44,6 +51,11 @@ class mmu
             {
                 return  WRAM[offSet(direction , 0xC000)];
             }
+            else if (0xE000 <= direction && direction <= 0xFDFF) // ECHO RAM
+            {
+                return  WRAM[offSet(direction , 0xE000)];
+            }
+            
              else if (0xFE00 <= direction && direction <= 0xFE9F ) //OAM
             {
                 return OAM[offSet(direction , 0xFE00)];
@@ -73,6 +85,12 @@ class mmu
                 DMA(value);
                 return;
             }
+            if (direction == 0xFFFF)
+            {
+                IE = value;
+                return;
+            }
+            
             
             if (0x8000 <= direction && direction <= 0x9FFF ) // VRAM
             {

@@ -1,4 +1,10 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/app.dir/core/cpu/cpu.cpp.o"
+  "CMakeFiles/app.dir/core/cpu/cpu.cpp.o.d"
+  "CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o"
+  "CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o.d"
+  "CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o"
+  "CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o.d"
   "CMakeFiles/app.dir/main.cpp.o"
   "CMakeFiles/app.dir/main.cpp.o.d"
   "app"

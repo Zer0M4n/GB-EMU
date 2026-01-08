@@ -83,17 +83,65 @@ CMakeFiles/app.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/app.dir/main.cpp.s"
 	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/main.cpp -o CMakeFiles/app.dir/main.cpp.s
 
+CMakeFiles/app.dir/core/cpu/cpu.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/core/cpu/cpu.cpp.o: /home/developer/projects/GB-EMU/core/cpu/cpu.cpp
+CMakeFiles/app.dir/core/cpu/cpu.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/app.dir/core/cpu/cpu.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/core/cpu/cpu.cpp.o -MF CMakeFiles/app.dir/core/cpu/cpu.cpp.o.d -o CMakeFiles/app.dir/core/cpu/cpu.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/cpu.cpp
+
+CMakeFiles/app.dir/core/cpu/cpu.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/app.dir/core/cpu/cpu.cpp.i"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cpu/cpu.cpp > CMakeFiles/app.dir/core/cpu/cpu.cpp.i
+
+CMakeFiles/app.dir/core/cpu/cpu.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/app.dir/core/cpu/cpu.cpp.s"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/cpu.cpp -o CMakeFiles/app.dir/core/cpu/cpu.cpp.s
+
+CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o: /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp
+CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o -MF CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o.d -o CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp
+
+CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.i"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp > CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.i
+
+CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.s"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp -o CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.s
+
+CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o: /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp
+CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o -MF CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o.d -o CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp
+
+CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.i"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp > CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.i
+
+CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.s"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp -o CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.s
+
 # Object files for target app
 app_OBJECTS = \
-"CMakeFiles/app.dir/main.cpp.o"
+"CMakeFiles/app.dir/main.cpp.o" \
+"CMakeFiles/app.dir/core/cpu/cpu.cpp.o" \
+"CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o" \
+"CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o"
 
 # External object files for target app
 app_EXTERNAL_OBJECTS =
 
 app: CMakeFiles/app.dir/main.cpp.o
+app: CMakeFiles/app.dir/core/cpu/cpu.cpp.o
+app: CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o
+app: CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o
 app: CMakeFiles/app.dir/build.make
 app: CMakeFiles/app.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable app"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/app.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

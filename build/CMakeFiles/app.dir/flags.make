@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/g++
 CXX_DEFINES = 
 
-CXX_INCLUDES = 
+CXX_INCLUDES = -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cpu/instructions
 
 CXX_FLAGS = -g
 

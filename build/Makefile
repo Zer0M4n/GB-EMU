@@ -129,6 +129,78 @@ app/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/build
 .PHONY : app/fast
 
+core/cpu/cpu.o: core/cpu/cpu.cpp.o
+.PHONY : core/cpu/cpu.o
+
+# target to build an object file
+core/cpu/cpu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/cpu.cpp.o
+.PHONY : core/cpu/cpu.cpp.o
+
+core/cpu/cpu.i: core/cpu/cpu.cpp.i
+.PHONY : core/cpu/cpu.i
+
+# target to preprocess a source file
+core/cpu/cpu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/cpu.cpp.i
+.PHONY : core/cpu/cpu.cpp.i
+
+core/cpu/cpu.s: core/cpu/cpu.cpp.s
+.PHONY : core/cpu/cpu.s
+
+# target to generate assembly for a file
+core/cpu/cpu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/cpu.cpp.s
+.PHONY : core/cpu/cpu.cpp.s
+
+core/cpu/instructions/intructions.o: core/cpu/instructions/intructions.cpp.o
+.PHONY : core/cpu/instructions/intructions.o
+
+# target to build an object file
+core/cpu/instructions/intructions.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o
+.PHONY : core/cpu/instructions/intructions.cpp.o
+
+core/cpu/instructions/intructions.i: core/cpu/instructions/intructions.cpp.i
+.PHONY : core/cpu/instructions/intructions.i
+
+# target to preprocess a source file
+core/cpu/instructions/intructions.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.i
+.PHONY : core/cpu/instructions/intructions.cpp.i
+
+core/cpu/instructions/intructions.s: core/cpu/instructions/intructions.cpp.s
+.PHONY : core/cpu/instructions/intructions.s
+
+# target to generate assembly for a file
+core/cpu/instructions/intructions.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.s
+.PHONY : core/cpu/instructions/intructions.cpp.s
+
+core/cpu/mmu/mmu.o: core/cpu/mmu/mmu.cpp.o
+.PHONY : core/cpu/mmu/mmu.o
+
+# target to build an object file
+core/cpu/mmu/mmu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o
+.PHONY : core/cpu/mmu/mmu.cpp.o
+
+core/cpu/mmu/mmu.i: core/cpu/mmu/mmu.cpp.i
+.PHONY : core/cpu/mmu/mmu.i
+
+# target to preprocess a source file
+core/cpu/mmu/mmu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.i
+.PHONY : core/cpu/mmu/mmu.cpp.i
+
+core/cpu/mmu/mmu.s: core/cpu/mmu/mmu.cpp.s
+.PHONY : core/cpu/mmu/mmu.s
+
+# target to generate assembly for a file
+core/cpu/mmu/mmu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.s
+.PHONY : core/cpu/mmu/mmu.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -162,6 +234,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... app"
+	@echo "... core/cpu/cpu.o"
+	@echo "... core/cpu/cpu.i"
+	@echo "... core/cpu/cpu.s"
+	@echo "... core/cpu/instructions/intructions.o"
+	@echo "... core/cpu/instructions/intructions.i"
+	@echo "... core/cpu/instructions/intructions.s"
+	@echo "... core/cpu/mmu/mmu.o"
+	@echo "... core/cpu/mmu/mmu.i"
+	@echo "... core/cpu/mmu/mmu.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

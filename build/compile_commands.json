@@ -1,7 +1,22 @@
 [
 {
   "directory": "/home/developer/projects/GB-EMU/build",
-  "command": "/usr/bin/g++   -g -o CMakeFiles/app.dir/main.cpp.o -c /home/developer/projects/GB-EMU/main.cpp",
+  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cpu/instructions -g -o CMakeFiles/app.dir/main.cpp.o -c /home/developer/projects/GB-EMU/main.cpp",
   "file": "/home/developer/projects/GB-EMU/main.cpp"
+},
+{
+  "directory": "/home/developer/projects/GB-EMU/build",
+  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cpu/instructions -g -o CMakeFiles/app.dir/core/cpu/cpu.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/cpu.cpp",
+  "file": "/home/developer/projects/GB-EMU/core/cpu/cpu.cpp"
+},
+{
+  "directory": "/home/developer/projects/GB-EMU/build",
+  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cpu/instructions -g -o CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp",
+  "file": "/home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp"
+},
+{
+  "directory": "/home/developer/projects/GB-EMU/build",
+  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cpu/instructions -g -o CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp",
+  "file": "/home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp"
 }
 ]
