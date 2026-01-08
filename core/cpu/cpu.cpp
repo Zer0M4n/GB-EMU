@@ -1,5 +1,6 @@
  #include <iostream>
  #include <array>
+ #include "mmu.h"
 class cpu
 {
     public:
