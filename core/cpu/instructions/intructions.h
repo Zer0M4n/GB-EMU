@@ -1,3 +1,6 @@
+#ifndef INSTRUCTIONS_H
+#define INSTRUCTIONS_H
+
 class intructions
 {
 private:
@@ -6,3 +9,4 @@ public:
     
     ~intructions();
 };
+#endif // INTRUCTIONS

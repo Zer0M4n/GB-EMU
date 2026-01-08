@@ -1,9 +1,10 @@
  #include <iostream>
  #include <array>
  #include "mmu.h"
+ #include "intructions.h"
 class cpu
 {
-    public:
+    private:
         enum R8
         {
             A = 0,
@@ -15,11 +16,14 @@ class cpu
             H = 6,
             L = 7,
         };
-
+        
         std::array<uint8_t, 8> r8; // register 
         uint16_t SP; //stack pointer
         uint16_t PC; //program countet
 
+        using Intructions = void(cpu::*)(uint8_t);
+
+        std::array<Intructions,1> table_opcode {};
 
         //FLAGS (register F is combinacion this)
         
@@ -71,7 +75,39 @@ class cpu
             r8[H]  = val >> 8;
             r8[L] = val & 0xFF;
         }
-    
+
+        //INTRUCTIONS
+        void NOP(uint8_t var)
+        {
+
+        }
+    public:
+        cpu()
+        {
+            table_opcode.fill(nullptr);
+            table_opcode[0x0] = &cpu::NOP;
+        }
+        uint8_t fetch(mmu& memory)
+        {
+            uint8_t opcode = memory.readMemory(PC);
+            this->PC++;
+            return opcode;
+        }
+
+        void step(mmu& memory)
+        {
+            uint8_t opcode = fetch(memory);
+
+            //DECODE and EXCUTE
+            if (table_opcode[opcode])
+            {
+                (this->*table_opcode[opcode])(opcode);
+            } 
+            else
+            {
+                std::cout << "opcode not impleted or not exist" << "\n";
+            }
+        }
 };
 
 
