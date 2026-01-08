@@ -3,7 +3,6 @@
 class mmu
 { 
     private:
-        private:
             std::array<uint8_t, 0x8000> ROM;  // 32KB (Bank 0 y 1)
             std::array<uint8_t, 0x2000>  VRAM; // 8KB VIDEO RAM
             std::array<uint8_t, 0x2000>  WRAM; // 8KB WORK RAM
@@ -26,9 +25,7 @@ class mmu
                     OAM[i] = DataCopy;
                 }
                 
-            }
-        
-        
+            }        
     public:
 
         uint8_t readMemory(uint16_t direction) 
