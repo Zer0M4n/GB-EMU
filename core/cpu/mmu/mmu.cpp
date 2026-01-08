@@ -1,18 +1,29 @@
  #include <iostream>
  #include <array>
 class mmu
-{
-    
+{ 
     private:
         private:
-            std::array<uint8_t, 0x8000> ROM;  // 32KB (Bancos 0 y 1)
+            std::array<uint8_t, 0x8000> ROM;  // 32KB (Bank 0 y 1)
             std::array<uint8_t, 0x2000>  VRAM; // 8KB VIDEO RAM
             std::array<uint8_t, 0x2000>  WRAM; // 8KB WORK RAM
             std::array<uint8_t, 0x007F>   HRAM; // 127 Bytes (High RAM)
+            std::array<uint8_t, 0x0080> IO; // 128 Bytes input/outpur
+            std::array<uint8_t, 0x00A0> OAM; // Object Attribute memory
 
             uint16_t offSet(uint16_t direction, uint16_t var)
             {
                 return direction - var;
+            }
+            void DMA(uint8_t value) //Direct memory access 
+            {
+                uint8_t DataCopy;
+                for (int i = 0; i < OAM.size() ; i++)
+                {
+                    DataCopy = readMemory((value << 8) + 1);
+                    OAM[i] = DataCopy;
+                }
+                
             }
         
         
@@ -48,6 +59,11 @@ class mmu
 
         void writeMemory(uint16_t direction , uint8_t value) // only write memory for VRAM ,WRAM and HRAM
         {
+            if (direction == 0xFF46)
+            {
+                DMA(value);
+            }
+            
             if (0x8000 <= direction && direction <= 0x9FFF ) // VRAM
             {
                 VRAM[offSet(direction , 0x8000)] = value;
@@ -64,6 +80,5 @@ class mmu
             {
                 std::cout << "Memory address error, not found " << "\n;";
             }
-
         }
 };
