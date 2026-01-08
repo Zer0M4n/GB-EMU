@@ -20,7 +20,7 @@ class mmu
                 uint8_t DataCopy;
                 for (int i = 0; i < OAM.size() ; i++)
                 {
-                    DataCopy = readMemory((value << 8) + 1);
+                    DataCopy = readMemory((value << 8) + i);
                     OAM[i] = DataCopy;
                 }
                 
@@ -44,6 +44,15 @@ class mmu
             {
                 return  WRAM[offSet(direction , 0xC000)];
             }
+             else if (0xFE00 <= direction && direction <= 0xFE9F ) //OAM
+            {
+                return OAM[offSet(direction , 0xFE00)];
+            }
+            else if (0xFF00 <= direction && direction <= 0xFF46) //IO
+            {
+                return IO[offSet(direction , 0xFF00)];
+                
+            }
             else if (0xFF80 <= direction && direction <= 0xFFFE) // HRAM
             {
                 return HRAM[offSet(direction, 0xFF80)];
@@ -62,6 +71,7 @@ class mmu
             if (direction == 0xFF46)
             {
                 DMA(value);
+                return;
             }
             
             if (0x8000 <= direction && direction <= 0x9FFF ) // VRAM
@@ -71,6 +81,15 @@ class mmu
             else if (0xC000 <= direction && direction <=  0xDFFF) // WRAM
             {
                 WRAM[offSet(direction , 0xC000)] = value;
+            }
+            else if (0xFE00 <= direction && direction <= 0xFE9F ) //OAM
+            {
+                OAM[offSet(direction , 0xFE00)] = value;
+            }
+            else if (0xFF00 <= direction && direction <= 0xFF46) //IO
+            {
+                IO[offSet(direction , 0xFF00)] = value;
+                
             }
             else if (0xFF80 <= direction && direction <= 0xFFFE) // HRAM
             {
