@@ -1,12 +1,14 @@
- #include <iostream>
- #include <array>
- #include <vector>
+#include <iostream>
+#include <array>
+#include <vector>
 #include <fstream>
+#include "cartridge.h"
 class mmu
 { 
+    cartridge cartridge;
     private:
             //std::array<uint8_t, 0x8000> ROM;  // 32KB (Bank 0 y 1)
-            std::vector<uint8_t> ROM;
+            std::vector<uint8_t> ROM = cartridge.loadRom("roms/tetris.gb") ;
             std::array<uint8_t, 0x2000>  VRAM; // 8KB VIDEO RAM
             std::array<uint8_t, 0x2000>  WRAM; // 8KB WORK RAM
             std::array<uint8_t, 0x007F>   HRAM; // 127 Bytes (High RAM)
@@ -30,29 +32,6 @@ class mmu
                 
             }        
     public:
-        void loadRom(const std::string& path)
-        {
-            std::ifstream rom(path, std::ios::binary | std::ios::ate);
-
-            if (rom.is_open())
-            {
-                std::streamsize size = rom.tellg();
-                ROM.resize(size);
-
-                rom.seekg(0,std::ios::beg);
-
-                if (rom.read(reinterpret_cast<char*> (ROM.data()) , size))
-                {
-                    std:: cout << "ROM LOAD , SIZE : "<< size << "\n";
-                }
-                
-            } 
-            else
-            {
-                printf("ERROR: ROM not found");
-            }
-        }
-
         uint8_t readMemory(uint16_t direction) 
         {   
             if (direction == 0xFFFF)
