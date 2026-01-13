@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/gb_emu.dir/main.cpp.o CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.o CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o -o gb_emu 

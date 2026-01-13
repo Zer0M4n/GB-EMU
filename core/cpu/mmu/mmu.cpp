@@ -2,13 +2,11 @@
 #include <array>
 #include <vector>
 #include <fstream>
-#include "cartridge.h"
+#include <cartridge.h>
 class mmu
 { 
-    cartridge cartridge;
+    cartridge cart;
     private:
-            //std::array<uint8_t, 0x8000> ROM;  // 32KB (Bank 0 y 1)
-            std::vector<uint8_t> ROM = cartridge.loadRom("roms/tetris.gb") ;
             std::array<uint8_t, 0x2000>  VRAM; // 8KB VIDEO RAM
             std::array<uint8_t, 0x2000>  WRAM; // 8KB WORK RAM
             std::array<uint8_t, 0x007F>   HRAM; // 127 Bytes (High RAM)
@@ -42,7 +40,7 @@ class mmu
             
             if(0x0000 <= direction && direction <= 0x7FFF) //ROM cartridge
             {   
-                return ROM[direction];
+                return cart.readCartridge(direction);
             }
             else if (0x8000 <= direction && direction <= 0x9FFF ) // VRAM
             {

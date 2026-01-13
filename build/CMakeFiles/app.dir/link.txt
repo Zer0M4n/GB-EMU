@@ -1,1 +1,1 @@
-/usr/bin/g++ -g CMakeFiles/app.dir/main.cpp.o CMakeFiles/app.dir/core/cpu/cpu.cpp.o CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o -o app 
+/usr/bin/g++ -g CMakeFiles/app.dir/main.cpp.o CMakeFiles/app.dir/core/cpu/cpu.cpp.o CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o -o app 

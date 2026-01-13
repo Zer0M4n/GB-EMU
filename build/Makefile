@@ -117,24 +117,72 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named app
+# Target rules for targets named gb_emu
 
 # Build rule for target.
-app: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 app
-.PHONY : app
+gb_emu: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gb_emu
+.PHONY : gb_emu
 
 # fast build rule for target.
-app/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/build
-.PHONY : app/fast
+gb_emu/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/build
+.PHONY : gb_emu/fast
+
+core/cartridge/RAM/RomOnly.o: core/cartridge/RAM/RomOnly.cpp.o
+.PHONY : core/cartridge/RAM/RomOnly.o
+
+# target to build an object file
+core/cartridge/RAM/RomOnly.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.o
+.PHONY : core/cartridge/RAM/RomOnly.cpp.o
+
+core/cartridge/RAM/RomOnly.i: core/cartridge/RAM/RomOnly.cpp.i
+.PHONY : core/cartridge/RAM/RomOnly.i
+
+# target to preprocess a source file
+core/cartridge/RAM/RomOnly.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.i
+.PHONY : core/cartridge/RAM/RomOnly.cpp.i
+
+core/cartridge/RAM/RomOnly.s: core/cartridge/RAM/RomOnly.cpp.s
+.PHONY : core/cartridge/RAM/RomOnly.s
+
+# target to generate assembly for a file
+core/cartridge/RAM/RomOnly.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.s
+.PHONY : core/cartridge/RAM/RomOnly.cpp.s
+
+core/cartridge/cartridge.o: core/cartridge/cartridge.cpp.o
+.PHONY : core/cartridge/cartridge.o
+
+# target to build an object file
+core/cartridge/cartridge.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o
+.PHONY : core/cartridge/cartridge.cpp.o
+
+core/cartridge/cartridge.i: core/cartridge/cartridge.cpp.i
+.PHONY : core/cartridge/cartridge.i
+
+# target to preprocess a source file
+core/cartridge/cartridge.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.i
+.PHONY : core/cartridge/cartridge.cpp.i
+
+core/cartridge/cartridge.s: core/cartridge/cartridge.cpp.s
+.PHONY : core/cartridge/cartridge.s
+
+# target to generate assembly for a file
+core/cartridge/cartridge.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.s
+.PHONY : core/cartridge/cartridge.cpp.s
 
 core/cpu/cpu.o: core/cpu/cpu.cpp.o
 .PHONY : core/cpu/cpu.o
 
 # target to build an object file
 core/cpu/cpu.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/cpu.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o
 .PHONY : core/cpu/cpu.cpp.o
 
 core/cpu/cpu.i: core/cpu/cpu.cpp.i
@@ -142,7 +190,7 @@ core/cpu/cpu.i: core/cpu/cpu.cpp.i
 
 # target to preprocess a source file
 core/cpu/cpu.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/cpu.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.i
 .PHONY : core/cpu/cpu.cpp.i
 
 core/cpu/cpu.s: core/cpu/cpu.cpp.s
@@ -150,7 +198,7 @@ core/cpu/cpu.s: core/cpu/cpu.cpp.s
 
 # target to generate assembly for a file
 core/cpu/cpu.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/cpu.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.s
 .PHONY : core/cpu/cpu.cpp.s
 
 core/cpu/instructions/intructions.o: core/cpu/instructions/intructions.cpp.o
@@ -158,7 +206,7 @@ core/cpu/instructions/intructions.o: core/cpu/instructions/intructions.cpp.o
 
 # target to build an object file
 core/cpu/instructions/intructions.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o
 .PHONY : core/cpu/instructions/intructions.cpp.o
 
 core/cpu/instructions/intructions.i: core/cpu/instructions/intructions.cpp.i
@@ -166,7 +214,7 @@ core/cpu/instructions/intructions.i: core/cpu/instructions/intructions.cpp.i
 
 # target to preprocess a source file
 core/cpu/instructions/intructions.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.i
 .PHONY : core/cpu/instructions/intructions.cpp.i
 
 core/cpu/instructions/intructions.s: core/cpu/instructions/intructions.cpp.s
@@ -174,7 +222,7 @@ core/cpu/instructions/intructions.s: core/cpu/instructions/intructions.cpp.s
 
 # target to generate assembly for a file
 core/cpu/instructions/intructions.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.s
 .PHONY : core/cpu/instructions/intructions.cpp.s
 
 core/cpu/mmu/mmu.o: core/cpu/mmu/mmu.cpp.o
@@ -182,7 +230,7 @@ core/cpu/mmu/mmu.o: core/cpu/mmu/mmu.cpp.o
 
 # target to build an object file
 core/cpu/mmu/mmu.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o
 .PHONY : core/cpu/mmu/mmu.cpp.o
 
 core/cpu/mmu/mmu.i: core/cpu/mmu/mmu.cpp.i
@@ -190,7 +238,7 @@ core/cpu/mmu/mmu.i: core/cpu/mmu/mmu.cpp.i
 
 # target to preprocess a source file
 core/cpu/mmu/mmu.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.i
 .PHONY : core/cpu/mmu/mmu.cpp.i
 
 core/cpu/mmu/mmu.s: core/cpu/mmu/mmu.cpp.s
@@ -198,7 +246,7 @@ core/cpu/mmu/mmu.s: core/cpu/mmu/mmu.cpp.s
 
 # target to generate assembly for a file
 core/cpu/mmu/mmu.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.s
 .PHONY : core/cpu/mmu/mmu.cpp.s
 
 main.o: main.cpp.o
@@ -206,7 +254,7 @@ main.o: main.cpp.o
 
 # target to build an object file
 main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/main.cpp.o
 .PHONY : main.cpp.o
 
 main.i: main.cpp.i
@@ -214,7 +262,7 @@ main.i: main.cpp.i
 
 # target to preprocess a source file
 main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/main.cpp.i
 .PHONY : main.cpp.i
 
 main.s: main.cpp.s
@@ -222,7 +270,7 @@ main.s: main.cpp.s
 
 # target to generate assembly for a file
 main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/main.cpp.s
 .PHONY : main.cpp.s
 
 # Help Target
@@ -233,7 +281,13 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... app"
+	@echo "... gb_emu"
+	@echo "... core/cartridge/RAM/RomOnly.o"
+	@echo "... core/cartridge/RAM/RomOnly.i"
+	@echo "... core/cartridge/RAM/RomOnly.s"
+	@echo "... core/cartridge/cartridge.o"
+	@echo "... core/cartridge/cartridge.i"
+	@echo "... core/cartridge/cartridge.s"
 	@echo "... core/cpu/cpu.o"
 	@echo "... core/cpu/cpu.i"
 	@echo "... core/cpu/cpu.s"

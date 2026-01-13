@@ -1,4 +1,8 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o"
+  "CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o.d"
+  "CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o"
+  "CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o.d"
   "CMakeFiles/app.dir/core/cpu/cpu.cpp.o"
   "CMakeFiles/app.dir/core/cpu/cpu.cpp.o.d"
   "CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o"

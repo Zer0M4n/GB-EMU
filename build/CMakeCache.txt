@@ -147,7 +147,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=GB-EMU
+CMAKE_PROJECT_NAME:STATIC=GB_EMU
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -219,6 +219,15 @@ GB-EMU_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 GB-EMU_SOURCE_DIR:STATIC=/home/developer/projects/GB-EMU
+
+//Value Computed by CMake
+GB_EMU_BINARY_DIR:STATIC=/home/developer/projects/GB-EMU/build
+
+//Value Computed by CMake
+GB_EMU_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+GB_EMU_SOURCE_DIR:STATIC=/home/developer/projects/GB-EMU
 
 
 ########################

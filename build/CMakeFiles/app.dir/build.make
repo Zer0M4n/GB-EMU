@@ -125,12 +125,42 @@ CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.s"
 	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp -o CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.s
 
+CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o: /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp
+CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o -MF CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o.d -o CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp
+
+CMakeFiles/app.dir/core/cartridge/cartridge.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/app.dir/core/cartridge/cartridge.cpp.i"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp > CMakeFiles/app.dir/core/cartridge/cartridge.cpp.i
+
+CMakeFiles/app.dir/core/cartridge/cartridge.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/app.dir/core/cartridge/cartridge.cpp.s"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp -o CMakeFiles/app.dir/core/cartridge/cartridge.cpp.s
+
+CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o: /home/developer/projects/GB-EMU/core/cartridge/IMBC/IMBC.cpp
+CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o -MF CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o.d -o CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/IMBC/IMBC.cpp
+
+CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.i"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cartridge/IMBC/IMBC.cpp > CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.i
+
+CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.s"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cartridge/IMBC/IMBC.cpp -o CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.s
+
 # Object files for target app
 app_OBJECTS = \
 "CMakeFiles/app.dir/main.cpp.o" \
 "CMakeFiles/app.dir/core/cpu/cpu.cpp.o" \
 "CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o" \
-"CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o"
+"CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o" \
+"CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o" \
+"CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o"
 
 # External object files for target app
 app_EXTERNAL_OBJECTS =
@@ -139,9 +169,11 @@ app: CMakeFiles/app.dir/main.cpp.o
 app: CMakeFiles/app.dir/core/cpu/cpu.cpp.o
 app: CMakeFiles/app.dir/core/cpu/mmu/mmu.cpp.o
 app: CMakeFiles/app.dir/core/cpu/instructions/intructions.cpp.o
+app: CMakeFiles/app.dir/core/cartridge/cartridge.cpp.o
+app: CMakeFiles/app.dir/core/cartridge/IMBC/IMBC.cpp.o
 app: CMakeFiles/app.dir/build.make
 app: CMakeFiles/app.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable app"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/app.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
