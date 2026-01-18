@@ -36,8 +36,6 @@ class mmu
             {
                 return IE;
             }
-            
-            
             if(0x0000 <= direction && direction <= 0x7FFF) //ROM cartridge
             {   
                 return cart.readCartridge(direction);
@@ -46,6 +44,11 @@ class mmu
             {
                 return VRAM[offSet(direction , 0x8000)];
             }
+            else if (0xA000 <= direction && direction <= 0XBFFF)
+            {
+                return cart.readCartridge(direction);
+            }
+            
             else if (0xC000 <= direction && direction <=  0xDFFF) // WRAM
             {
                 return  WRAM[offSet(direction , 0xC000)];
@@ -77,7 +80,7 @@ class mmu
             
         }
 
-        void writeMemory(uint16_t direction , uint8_t value) // only write memory for VRAM ,WRAM and HRAM
+        void writeMemory(uint16_t direction , uint8_t value) 
         {
             if (direction == 0xFF46)
             {
@@ -89,11 +92,18 @@ class mmu
                 IE = value;
                 return;
             }
-            
-            
-            if (0x8000 <= direction && direction <= 0x9FFF ) // VRAM
+
+            if (direction <= 0x7FFF)
+            {
+                cart.writeCartridge(direction, value);
+            }
+            else if (0x8000 <= direction && direction <= 0x9FFF ) // VRAM
             {
                 VRAM[offSet(direction , 0x8000)] = value;
+            }
+            else if (0xA000 <= direction && direction <= 0XBFFF)
+            {
+                cart.writeCartridge (direction, value);
             }
             else if (0xC000 <= direction && direction <=  0xDFFF) // WRAM
             {
