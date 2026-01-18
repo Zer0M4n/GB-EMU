@@ -4,7 +4,7 @@
 #include <string>
 #include <memory> // include
 #include "IMBC/IMBC.h"
-#include "RAM/RomOnly.h"
+#include "RomOnly.h"
 
 class cartridge
 {
