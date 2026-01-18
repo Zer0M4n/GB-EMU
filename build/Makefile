@@ -129,30 +129,6 @@ gb_emu/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/build
 .PHONY : gb_emu/fast
 
-core/cartridge/RAM/RomOnly.o: core/cartridge/RAM/RomOnly.cpp.o
-.PHONY : core/cartridge/RAM/RomOnly.o
-
-# target to build an object file
-core/cartridge/RAM/RomOnly.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.o
-.PHONY : core/cartridge/RAM/RomOnly.cpp.o
-
-core/cartridge/RAM/RomOnly.i: core/cartridge/RAM/RomOnly.cpp.i
-.PHONY : core/cartridge/RAM/RomOnly.i
-
-# target to preprocess a source file
-core/cartridge/RAM/RomOnly.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.i
-.PHONY : core/cartridge/RAM/RomOnly.cpp.i
-
-core/cartridge/RAM/RomOnly.s: core/cartridge/RAM/RomOnly.cpp.s
-.PHONY : core/cartridge/RAM/RomOnly.s
-
-# target to generate assembly for a file
-core/cartridge/RAM/RomOnly.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.s
-.PHONY : core/cartridge/RAM/RomOnly.cpp.s
-
 core/cartridge/cartridge.o: core/cartridge/cartridge.cpp.o
 .PHONY : core/cartridge/cartridge.o
 
@@ -282,9 +258,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... gb_emu"
-	@echo "... core/cartridge/RAM/RomOnly.o"
-	@echo "... core/cartridge/RAM/RomOnly.i"
-	@echo "... core/cartridge/RAM/RomOnly.s"
 	@echo "... core/cartridge/cartridge.o"
 	@echo "... core/cartridge/cartridge.i"
 	@echo "... core/cartridge/cartridge.s"

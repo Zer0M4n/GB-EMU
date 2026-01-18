@@ -1,6 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.o"
-  "CMakeFiles/gb_emu.dir/core/cartridge/RAM/RomOnly.cpp.o.d"
   "CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o"
   "CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o.d"
   "CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o"

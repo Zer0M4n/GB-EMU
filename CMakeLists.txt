@@ -28,6 +28,4 @@ target_include_directories(gb_emu PRIVATE
     core/cpu/instructions
     core/cartridge
     core/cartridge/IMBC
-    core/cartridge/ROM
-    core/cartridge/RAM
 )

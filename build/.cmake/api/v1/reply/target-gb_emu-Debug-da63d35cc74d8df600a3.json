@@ -73,14 +73,6 @@
 				{
 					"backtrace" : 2,
 					"path" : "/home/developer/projects/GB-EMU/core/cartridge/IMBC"
-				},
-				{
-					"backtrace" : 2,
-					"path" : "/home/developer/projects/GB-EMU/core/cartridge/ROM"
-				},
-				{
-					"backtrace" : 2,
-					"path" : "/home/developer/projects/GB-EMU/core/cartridge/RAM"
 				}
 			],
 			"language" : "CXX",
@@ -98,8 +90,7 @@
 				1,
 				2,
 				3,
-				4,
-				5
+				4
 			]
 		}
 	],
@@ -136,8 +127,7 @@
 				1,
 				2,
 				3,
-				4,
-				5
+				4
 			]
 		}
 	],
@@ -165,12 +155,6 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "core/cpu/mmu/mmu.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "core/cartridge/RAM/RomOnly.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
