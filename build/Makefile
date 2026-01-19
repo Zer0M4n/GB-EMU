@@ -249,6 +249,30 @@ core/cpu/mmu/mmu.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.s
 .PHONY : core/cpu/mmu/mmu.cpp.s
 
+main.o: main.cpp.o
+.PHONY : main.o
+
+# target to build an object file
+main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/main.cpp.o
+.PHONY : main.cpp.o
+
+main.i: main.cpp.i
+.PHONY : main.i
+
+# target to preprocess a source file
+main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/main.cpp.i
+.PHONY : main.cpp.i
+
+main.s: main.cpp.s
+.PHONY : main.s
+
+# target to generate assembly for a file
+main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/main.cpp.s
+.PHONY : main.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -273,6 +297,9 @@ help:
 	@echo "... core/cpu/mmu/mmu.o"
 	@echo "... core/cpu/mmu/mmu.i"
 	@echo "... core/cpu/mmu/mmu.s"
+	@echo "... main.o"
+	@echo "... main.i"
+	@echo "... main.s"
 .PHONY : help
 
 

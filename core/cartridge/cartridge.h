@@ -6,25 +6,34 @@
 #include <memory>
 #include <cstdint>
 
-// Forward declarations
+// Forward declaration (Declaración adelantada para evitar dependencias circulares)
 class IMBC;
 
 class cartridge
 {
 private:
     std::vector<uint8_t> ROM;
-    uint8_t cartridge_type;
-    std::unique_ptr<IMBC> mbc;
+    std::vector<uint8_t> RAM;
+    
+    // Metadata
     std::string Title;
-    std::vector<uint8_t> Entry_Point;
+    uint8_t cartridge_type;
+    uint8_t ROM_type;
+    uint8_t RAM_type;
+    uint16_t rom_banks_count;
+    
+    // Puntero al Memory Bank Controller
+    std::unique_ptr<IMBC> mbc;
 
+    // Funciones internas (Helpers)
     void parseHeader();
     void Get_Title();
-    void cartridgeType();
+    void setCartridgeType(); // Renombrado para claridad
+    bool verifyChecksum();
 
 public:
     explicit cartridge(const std::string& path);
-    ~cartridge();
+    ~cartridge(); // El destructor debe estar definido en el .cpp por el unique_ptr
 
     bool loadRom(const std::string& path);
 

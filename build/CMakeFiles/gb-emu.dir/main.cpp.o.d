@@ -1,10 +1,6 @@
-CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o: \
- /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.cpp \
- /usr/include/stdc-predef.h \
- /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.h \
- /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/../IMBC.h \
- /usr/include/c++/12/fstream /usr/include/c++/12/istream \
- /usr/include/c++/12/ios /usr/include/c++/12/iosfwd \
+CMakeFiles/gb-emu.dir/main.cpp.o: \
+ /home/developer/projects/GB-EMU/main.cpp /usr/include/stdc-predef.h \
+ /usr/include/c++/12/iostream \
  /usr/include/x86_64-linux-gnu/c++/12/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -15,7 +11,8 @@ CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o: \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/cpu_defines.h \
- /usr/include/c++/12/pstl/pstl_config.h \
+ /usr/include/c++/12/pstl/pstl_config.h /usr/include/c++/12/ostream \
+ /usr/include/c++/12/ios /usr/include/c++/12/iosfwd \
  /usr/include/c++/12/bits/stringfwd.h \
  /usr/include/c++/12/bits/memoryfwd.h /usr/include/c++/12/bits/postypes.h \
  /usr/include/c++/12/cwchar /usr/include/wchar.h \
@@ -148,13 +145,30 @@ CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o: \
  /usr/include/c++/12/bits/streambuf_iterator.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/ctype_inline.h \
  /usr/include/c++/12/bits/locale_facets.tcc \
- /usr/include/c++/12/bits/basic_ios.tcc /usr/include/c++/12/ostream \
- /usr/include/c++/12/bits/ostream.tcc \
- /usr/include/c++/12/bits/istream.tcc /usr/include/c++/12/bits/codecvt.h \
- /usr/include/x86_64-linux-gnu/c++/12/bits/basic_file.h \
- /usr/include/x86_64-linux-gnu/c++/12/bits/c++io.h \
- /usr/include/c++/12/bits/fstream.tcc /usr/include/c++/12/iostream \
+ /usr/include/c++/12/bits/basic_ios.tcc \
+ /usr/include/c++/12/bits/ostream.tcc /usr/include/c++/12/istream \
+ /usr/include/c++/12/bits/istream.tcc \
+ /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.h \
+ /usr/include/c++/12/array /usr/include/c++/12/compare \
  /usr/include/c++/12/vector /usr/include/c++/12/bits/stl_uninitialized.h \
  /usr/include/c++/12/bits/stl_vector.h \
  /usr/include/c++/12/bits/stl_bvector.h \
- /usr/include/c++/12/bits/vector.tcc
+ /usr/include/c++/12/bits/vector.tcc \
+ /home/developer/projects/GB-EMU/core/cartridge/cartridge.h \
+ /usr/include/c++/12/memory /usr/include/c++/12/bits/stl_tempbuf.h \
+ /usr/include/c++/12/bits/stl_raw_storage_iter.h \
+ /usr/include/c++/12/bits/align.h /usr/include/c++/12/bit \
+ /usr/include/c++/12/bits/uses_allocator.h \
+ /usr/include/c++/12/bits/unique_ptr.h /usr/include/c++/12/tuple \
+ /usr/include/c++/12/bits/shared_ptr.h \
+ /usr/include/c++/12/bits/shared_ptr_base.h \
+ /usr/include/c++/12/bits/allocated_ptr.h \
+ /usr/include/c++/12/ext/aligned_buffer.h \
+ /usr/include/c++/12/ext/concurrence.h \
+ /usr/include/c++/12/bits/shared_ptr_atomic.h \
+ /usr/include/c++/12/bits/atomic_base.h \
+ /usr/include/c++/12/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/12/backward/auto_ptr.h \
+ /usr/include/c++/12/pstl/glue_memory_defs.h \
+ /usr/include/c++/12/pstl/execution_defs.h \
+ /home/developer/projects/GB-EMU/core/cpu/cpu.h

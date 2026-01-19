@@ -13,6 +13,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp" "CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o.d"
   "/home/developer/projects/GB-EMU/core/cpu/cpu.cpp" "CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.o.d"
   "/home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp" "CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o.d"
+  "/home/developer/projects/GB-EMU/main.cpp" "CMakeFiles/gb-emu.dir/main.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/main.cpp.o.d"
   )
 
 # Targets to which this target links.

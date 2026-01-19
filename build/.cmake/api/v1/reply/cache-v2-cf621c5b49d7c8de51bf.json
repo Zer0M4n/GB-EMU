@@ -847,7 +847,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "GB_EMU"
+			"value" : "GB-EMU"
 		},
 		{
 			"name" : "CMAKE_PROJECT_VERSION",

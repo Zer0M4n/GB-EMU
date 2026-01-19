@@ -1,131 +1,123 @@
+#include "mmu.h"
 #include <iostream>
-#include <array>
-#include <vector>
-#include <fstream>
-#include "cartridge/cartridge.h"
-class mmu
-{ 
-    cartridge cart;
-    private:
-            std::array<uint8_t, 0x2000>  VRAM; // 8KB VIDEO RAM
-            std::array<uint8_t, 0x2000>  WRAM; // 8KB WORK RAM
-            std::array<uint8_t, 0x007F>   HRAM; // 127 Bytes (High RAM)
-            std::array<uint8_t, 0x0080> IO; // 128 Bytes input/outpur
-            std::array<uint8_t, 0x00A0> OAM; // Object Attribute memory
 
-            uint8_t IE; //INTERRUPT ENABLE
+// --- Constructor ---
+mmu::mmu(const std::string& romPath) : cart(romPath) 
+{
+    // Inicializar memorias a 0
+    VRAM.fill(0);
+    WRAM.fill(0);
+    HRAM.fill(0);
+    IO.fill(0);
+    OAM.fill(0);
+    IE = 0;
+    std::cout << "MMU Inicializada. Cartucho conectado: " << romPath << "\n";
+}
 
-            uint16_t offSet(uint16_t direction, uint16_t var)
-            {
-                return direction - var;
-            }
-            void DMA(uint8_t value) //Direct memory access 
-            {
-                uint8_t DataCopy;
-                for (int i = 0; i < OAM.size() ; i++)
-                {
-                    DataCopy = readMemory((value << 8) + i);
-                    OAM[i] = DataCopy;
-                }
-                
-            }        
-    public:
-        uint8_t readMemory(uint16_t direction) 
-        {   
-            if (direction == 0xFFFF)
-            {
-                return IE;
-            }
-            if(0x0000 <= direction && direction <= 0x7FFF) //ROM cartridge
-            {   
-                return cart.readCartridge(direction);
-            }
-            else if (0x8000 <= direction && direction <= 0x9FFF ) // VRAM
-            {
-                return VRAM[offSet(direction , 0x8000)];
-            }
-            else if (0xA000 <= direction && direction <= 0XBFFF)
-            {
-                return cart.readCartridge(direction);
-            }
-            
-            else if (0xC000 <= direction && direction <=  0xDFFF) // WRAM
-            {
-                return  WRAM[offSet(direction , 0xC000)];
-            }
-            else if (0xE000 <= direction && direction <= 0xFDFF) // ECHO RAM
-            {
-                return  WRAM[offSet(direction , 0xE000)];
-            }
-            
-             else if (0xFE00 <= direction && direction <= 0xFE9F ) //OAM
-            {
-                return OAM[offSet(direction , 0xFE00)];
-            }
-            else if (0xFF00 <= direction && direction <= 0xFF46) //IO
-            {
-                return IO[offSet(direction , 0xFF00)];
-                
-            }
-            else if (0xFF80 <= direction && direction <= 0xFFFE) // HRAM
-            {
-                return HRAM[offSet(direction, 0xFF80)];
-            }
-            else
-            {
-                std::cout << "Memory address error, not found " << "\n;";
-                return NULL;
-            }
+// --- Helper: Calcular Offset ---
+uint16_t mmu::offSet(uint16_t address, uint16_t base)
+{
+    return address - base;
+}
 
-            
-        }
+// --- Helper: DMA Transfer ---
+void mmu::DMA(uint8_t value) 
+{
+    uint16_t base = value << 8;
+    for (size_t i = 0; i < OAM.size(); i++) // 'size_t' para evitar warning
+    {
+        OAM[i] = readMemory(base + static_cast<uint16_t>(i));
+    }
+}
 
-        void writeMemory(uint16_t direction , uint8_t value) 
-        {
-            if (direction == 0xFF46)
-            {
-                DMA(value);
-                return;
-            }
-            if (direction == 0xFFFF)
-            {
-                IE = value;
-                return;
-            }
+// --- Lectura de Memoria ---
+uint8_t mmu::readMemory(uint16_t address) 
+{   
+    if (address == 0xFFFF) {
+        return IE;
+    }
+    
+    // Cartucho (ROM)
+    if (address <= 0x7FFF) {   
+        return cart.readCartridge(address);
+    }
+    // VRAM
+    else if (address >= 0x8000 && address <= 0x9FFF) {
+        return VRAM[offSet(address, 0x8000)];
+    }
+    // Cartucho (RAM externa)
+    else if (address >= 0xA000 && address <= 0xBFFF) {
+        return cart.readCartridge(address);
+    }
+    // WRAM
+    else if (address >= 0xC000 && address <= 0xDFFF) {
+        return WRAM[offSet(address, 0xC000)];
+    }
+    // ECHO RAM (Espejo de WRAM)
+    else if (address >= 0xE000 && address <= 0xFDFF) {
+        return WRAM[offSet(address, 0xE000)];
+    }
+    // OAM
+    else if (address >= 0xFE00 && address <= 0xFE9F) {
+        return OAM[offSet(address, 0xFE00)];
+    }
+    // I/O Registers
+    else if (address >= 0xFF00 && address <= 0xFF46) { // Nota: El rango de IO es mayor, pero seguimos tu logica
+        return IO[offSet(address, 0xFF00)];
+    }
+    // HRAM
+    else if (address >= 0xFF80 && address <= 0xFFFE) {
+        return HRAM[offSet(address, 0xFF80)];
+    }
+    else {
+        // std::cout << "Memory Read Error: Address not mapped " << std::hex << address << "\n";
+        return 0xFF; // Retornamos 0xFF en bus abierto (mejor que NULL)
+    }
+}
 
-            if (direction <= 0x7FFF)
-            {
-                cart.writeCartridge(direction, value);
-            }
-            else if (0x8000 <= direction && direction <= 0x9FFF ) // VRAM
-            {
-                VRAM[offSet(direction , 0x8000)] = value;
-            }
-            else if (0xA000 <= direction && direction <= 0XBFFF)
-            {
-                cart.writeCartridge (direction, value);
-            }
-            else if (0xC000 <= direction && direction <=  0xDFFF) // WRAM
-            {
-                WRAM[offSet(direction , 0xC000)] = value;
-            }
-            else if (0xFE00 <= direction && direction <= 0xFE9F ) //OAM
-            {
-                OAM[offSet(direction , 0xFE00)] = value;
-            }
-            else if (0xFF00 <= direction && direction <= 0xFF46) //IO
-            {
-                IO[offSet(direction , 0xFF00)] = value;
-                
-            }
-            else if (0xFF80 <= direction && direction <= 0xFFFE) // HRAM
-            {
-                HRAM[offSet(direction, 0xFF80)] = value;
-            }
-            else
-            {
-                std::cout << "Memory address error, not found " << "\n;";
-            }
-        }
+// --- Escritura de Memoria ---
+void mmu::writeMemory(uint16_t address, uint8_t value) 
+{
+    // Registro DMA
+    if (address == 0xFF46) {
+        DMA(value);
+        return;
+    }
+    // Interrupt Enable
+    if (address == 0xFFFF) {
+        IE = value;
+        return;
+    }
 
-    };
+    // Cartucho (ROM - Banking)
+    if (address <= 0x7FFF) {
+        cart.writeCartridge(address, value);
+    }
+    // VRAM
+    else if (address >= 0x8000 && address <= 0x9FFF) {
+        VRAM[offSet(address, 0x8000)] = value;
+    }
+    // Cartucho (RAM)
+    else if (address >= 0xA000 && address <= 0xBFFF) {
+        cart.writeCartridge(address, value);
+    }
+    // WRAM
+    else if (address >= 0xC000 && address <= 0xDFFF) {
+        WRAM[offSet(address, 0xC000)] = value;
+    }
+    // OAM
+    else if (address >= 0xFE00 && address <= 0xFE9F) {
+        OAM[offSet(address, 0xFE00)] = value;
+    }
+    // I/O Registers
+    else if (address >= 0xFF00 && address < 0xFF80) { // Ajustado para cubrir IO
+        IO[offSet(address, 0xFF00)] = value;
+    }
+    // HRAM
+    else if (address >= 0xFF80 && address <= 0xFFFE) {
+        HRAM[offSet(address, 0xFF80)] = value;
+    }
+    else {
+        // std::cout << "Memory Write Error: Address not mapped\n";
+    }
+}

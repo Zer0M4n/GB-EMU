@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.o.d"
   "CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o"
   "CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o.d"
+  "CMakeFiles/gb-emu.dir/main.cpp.o"
+  "CMakeFiles/gb-emu.dir/main.cpp.o.d"
   "gb-emu"
   "gb-emu.pdb"
 )

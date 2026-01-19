@@ -1,56 +1,37 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.10)
 
-project(GB_EMU
-    VERSION 0.1
-    LANGUAGES CXX
+# Nombre del proyecto
+project(GB-EMU)
+
+# Usar C++17 (Recomendado para emuladores modernos)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# 1. DIRECTORIOS DE CABECERA (.h)
+# Esto permite que tus #include funcionen sin poner rutas kilométricas
+include_directories(
+    ${CMAKE_SOURCE_DIR}
+    core
+    core/cpu
+    core/cpu/mmu
+    core/cartridge
+    core/cartridge/IMBC
 )
 
-# -------------------------
-# C++ standard
-# -------------------------
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# -------------------------
-# Export compile_commands.json (VS Code IntelliSense)
-# -------------------------
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# -------------------------
-# Sources
-# -------------------------
+# 2. DEFINICIÓN DE ARCHIVOS FUENTE (.cpp)
+# Aquí listamos TODOS los archivos .cpp que se ven en tu imagen
 set(SOURCES
+    main.cpp
+    
+    # CPU y MMU
+    core/cpu/cpu.cpp
+    core/cpu/mmu/mmu.cpp
+    
+    # Cartridge y MBCs
     core/cartridge/cartridge.cpp
     core/cartridge/IMBC/type_cartridge/MBC1.cpp
     core/cartridge/IMBC/type_cartridge/RomOnly.cpp
-    core/cpu/cpu.cpp
-    core/cpu/mmu/mmu.cpp
 )
 
-# (si luego tienes main.cpp)
-# list(APPEND SOURCES main.cpp)
-
-# -------------------------
-# Executable
-# -------------------------
+# 3. CREAR EL EJECUTABLE
 add_executable(gb-emu ${SOURCES})
-
-# -------------------------
-# Include directories
-# -------------------------
-# UN SOLO ROOT → core/
-target_include_directories(gb-emu PRIVATE
-    ${CMAKE_SOURCE_DIR}/core
-)
-
-# -------------------------
-# Warnings (opcional pero recomendado)
-# -------------------------
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(gb-emu PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-    )
-endif()
