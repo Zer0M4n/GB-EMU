@@ -1,6 +1,6 @@
 #include <vector>
 #include <iostream>
-#include <IMBC.h>
+#include "cartridge/IMBC/IMBC.h"
 class RomOnly : public IMBC {
     private:
         std::vector<uint8_t>& romRef;
