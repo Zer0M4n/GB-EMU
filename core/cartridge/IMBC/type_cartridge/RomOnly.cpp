@@ -1,31 +1,24 @@
-#include <vector>
-#include <iostream>
-#include "cartridge/IMBC/IMBC.h"
-class RomOnly : public IMBC {
-    private:
-        std::vector<uint8_t>& romRef;
-        // Eliminamos la referencia a RAM si el cartucho no la tiene físicamente
+#include "RomOnly.h"
 
-    public:
-        RomOnly(std::vector<uint8_t>& rom) : romRef(rom) {}
+// Constructor: Guardamos la referencia a la ROM
+RomOnly::RomOnly(std::vector<uint8_t>& rom_ref) : rom(rom_ref) {}
 
-        uint8_t readROM(uint16_t address) override {
-            // Validación básica de rango para evitar salidas del vector
-            if (address < romRef.size()) {
-                return romRef[address];
-            }
-            return 0xFF;
-        }
+uint8_t RomOnly::readROM(uint16_t address) {
+    if (address < rom.size())
+        return rom[address];
+    return 0xFF;
+}
 
-        void writeROM(uint16_t address, uint8_t value) override {
-            // No sucede nada: es solo lectura y no hay registros de control
-        }
+void RomOnly::writeROM(uint16_t address, uint8_t value) {
+    // RomOnly no permite escribir en ROM (no tiene bancos)
+    (void)address; (void)value; 
+}
 
-        uint8_t readRAM(uint16_t address) override {
-            return 0xFF; // No hay RAM física conectada
-        }
+uint8_t RomOnly::readRAM(uint16_t address) {
+    (void)address;
+    return 0xFF; // No tiene RAM
+}
 
-        void writeRAM(uint16_t address, uint8_t value) override {
-            // No hay donde escribir
-        }
-};
+void RomOnly::writeRAM(uint16_t address, uint8_t value) {
+    (void)address; (void)value; // No tiene RAM
+}

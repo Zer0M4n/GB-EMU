@@ -1,113 +1,109 @@
- #include <iostream>
- #include <array>
- #include "mmu/mmu.h"
-class cpu
+#include "cpu.h"
+
+// --- Constructor ---
+cpu::cpu(mmu& mmu_ref) : memory(mmu_ref) 
 {
-    private:
-        enum R8
-        {
-            A = 0,
-            F = 1,
-            B = 2,
-            C = 3,
-            D = 4,
-            E = 5,
-            H = 6,
-            L = 7,
-        };
-        
-        std::array<uint8_t, 8> r8; // register 
-        uint16_t SP; //stack pointer
-        uint16_t PC; //program countet
+    PC = 0x100; // Punto de entrada estándar para juegos de GB
+    SP = 0xFFFE; // El stack suele empezar al final de la HRAM
+    
+    // Inicializar registros a 0 (o valores típicos de boot)
+    r8.fill(0);
 
-        using Intructions = void(cpu::*)(uint8_t);
+    // Inicializar tabla de opcodes con nullptr
+    table_opcode.fill(nullptr);
 
-        std::array<Intructions,1> table_opcode {};
+    // Mapear instrucciones implementadas
+    table_opcode[0x00] = &cpu::NOP;
+}
 
-        //FLAGS (register F is combinacion this)
-        
-        //zero flag
-        //substraction flag
-        //half carry flag
-        //carry flag
+// --- Ciclo Principal (Step) ---
+void cpu::step()
+{
+    uint8_t opcode = fetch();
 
-        uint8_t getZ() const { return (r8[F] >> 7) & 1 ; } 
-        uint8_t getN() const { return (r8[F] >> 6) & 1 ; }
-        uint8_t getH() const { return (r8[F] >> 5) & 1 ; }
-        uint8_t getC() const { return (r8[F] >> 4) & 1 ; }
+    // Decodificar y Ejecutar
+    if (table_opcode[opcode] != nullptr)
+    {
+        (this->*table_opcode[opcode])(opcode);
+    } 
+    else
+    {
+        std::cout << "Opcode no implementado: 0x" << std::hex << (int)opcode << "\n";
+    }
+}
 
-        void setZero() { r8[F] |= (1 << 7); }
-        void setSubstraction() { r8[F] |= (1 << 6); }
-        void setHalf() { r8[F] |= (1 << 5); }
-        void setCarry() { r8[F] |= (1 << 4); }
-        
-        //GETERS AND SETERS VIRTUAL REGISTERS 16 BITS
+// --- Helpers de Lectura ---
+uint8_t cpu::fetch() {
+    uint8_t opcode = memory.readMemory(PC);
+    PC++;
+    return opcode;
+}
 
-        uint16_t getAF() const 
-        { return 
-            (r8[A] << 8) | 
-            (r8[F] & 0xF0); 
-        }
-        void setAF(uint16_t val) 
-        { 
-            r8[A] = val >> 8; 
-            r8[F] = val & 0xF0; 
-        }
+uint8_t cpu::readImmediateByte() {
+    uint8_t value = memory.readMemory(PC);
+    PC++; 
+    return value;
+}
 
-        uint16_t getBC() const {return (r8[B] << 8) | r8[C];}
-        void setBC(const uint16_t val) 
-        {
-            r8[B]  = val>> 8;
-            r8[C] = val & 0xFF;
-        }
+uint16_t cpu::readImmediateWord() {
+    uint8_t low = readImmediateByte();
+    uint8_t high = readImmediateByte();
+    return (high << 8) | low;
+}
 
-        uint16_t getDE() const {return (r8[D] << 8) | r8[E]; }
-        void setDE(const uint16_t val) 
-        {
-            r8[D]  = val >> 8;
-            r8[E] = val & 0xFF;
-        }
+// --- Instrucciones ---
+void cpu::NOP(uint8_t opcode) {
+    (void)opcode; // Evita warning de variable no usada
+    // NOP no hace nada, solo consume ciclos (que gestionaremos luego)
+}
 
-        uint16_t getHL() const {return (r8[H] << 8) | r8[L];}
-        void setHL(const uint16_t val) 
-        {
-            r8[H]  = val >> 8;
-            r8[L] = val & 0xFF;
-        }
+// --- FLAGS (Getters) ---
+uint8_t cpu::getZ() const { return (r8[F] >> 7) & 1; } 
+uint8_t cpu::getN() const { return (r8[F] >> 6) & 1; }
+uint8_t cpu::getH() const { return (r8[F] >> 5) & 1; }
+uint8_t cpu::getC() const { return (r8[F] >> 4) & 1; }
 
-        //INTRUCTIONS
-        void NOP(uint8_t var)
-        {
+// --- FLAGS (Setters) ---
+void cpu::setZ(bool on) { 
+    if (on) r8[F] |= (1 << 7); 
+    else    r8[F] &= ~(1 << 7); 
+}
+void cpu::setN(bool on) { 
+    if (on) r8[F] |= (1 << 6); 
+    else    r8[F] &= ~(1 << 6); 
+}
+void cpu::setH(bool on) { 
+    if (on) r8[F] |= (1 << 5); 
+    else    r8[F] &= ~(1 << 5); 
+}
+void cpu::setC(bool on) { 
+    if (on) r8[F] |= (1 << 4); 
+    else    r8[F] &= ~(1 << 4); 
+}
 
-        }
-        
-    public:
-        cpu()
-        {
-            table_opcode.fill(nullptr);
-            table_opcode[0x0] = &cpu::NOP;
-        }
-        uint8_t fetch(mmu& memory)
-        {
-            uint8_t opcode = memory.readMemory(PC);
-            this->PC++;
-            return opcode;
-        }
+// --- Registros 16-bits (Getters/Setters) ---
+uint16_t cpu::getAF() const { 
+    return (r8[A] << 8) | (r8[F] & 0xF0); // Los 4 bits bajos de F siempre son 0
+}
+void cpu::setAF(uint16_t val) { 
+    r8[A] = val >> 8; 
+    r8[F] = val & 0xF0; 
+}
 
-        void step(mmu& memory)
-        {
-            uint8_t opcode = fetch(memory);
+uint16_t cpu::getBC() const { return (r8[B] << 8) | r8[C]; }
+void cpu::setBC(const uint16_t val) {
+    r8[B] = val >> 8;
+    r8[C] = val & 0xFF;
+}
 
-            //DECODE and EXCUTE
-            if (table_opcode[opcode])
-            {
-                (this->*table_opcode[opcode])(opcode);
-            } 
-            else
-            {
-                std::cout << "opcode not impleted or not exist" << "\n";
-            }
-        }
-};
+uint16_t cpu::getDE() const { return (r8[D] << 8) | r8[E]; }
+void cpu::setDE(const uint16_t val) {
+    r8[D] = val >> 8;
+    r8[E] = val & 0xFF;
+}
 
-
+uint16_t cpu::getHL() const { return (r8[H] << 8) | r8[L]; }
+void cpu::setHL(const uint16_t val) {
+    r8[H] = val >> 8;
+    r8[L] = val & 0xFF;
+}
