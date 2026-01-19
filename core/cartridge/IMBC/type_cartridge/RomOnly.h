@@ -1,9 +1,9 @@
-#ifndef ROM_ONLY_H
-#define ROM_ONLY_H
+#ifndef ROMONLY_H
+#define ROMONLY_H
 
 #include <vector>
 #include <cstdint>
-#include "IMBC.h"
+#include "cartridge/IMBC/IMBC.h"
 
 class RomOnly : public IMBC
 {

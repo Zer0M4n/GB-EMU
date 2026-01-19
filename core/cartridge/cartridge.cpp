@@ -5,6 +5,8 @@
 #include <memory> // include
 #include "IMBC/IMBC.h"
 #include "cartridge/IMBC/type_cartridge/RomOnly.h"
+#include "cartridge/IMBC/type_cartridge/"
+
 
 class cartridge
 {
@@ -37,11 +39,11 @@ class cartridge
             cartridgeType();
             switch (cartridge_type)
             {
-                case 0x00:
+                case 0x00: //OnlyROM
                 mbc = std::make_unique<RomOnly>(ROM);
                     break;
-                case 0x01:
-
+                case 0x01: //MBC 1
+                    mbc = std::make_unique<>(ROM);
                     break;
                 
                 default:

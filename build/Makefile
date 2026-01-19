@@ -117,41 +117,137 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named gb_emu
+# Target rules for targets named gb-emu
 
 # Build rule for target.
-gb_emu: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gb_emu
-.PHONY : gb_emu
+gb-emu: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gb-emu
+.PHONY : gb-emu
 
 # fast build rule for target.
-gb_emu/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/build
-.PHONY : gb_emu/fast
+gb-emu/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/build
+.PHONY : gb-emu/fast
 
-main.o: main.cpp.o
-.PHONY : main.o
+core/cartridge/IMBC/type_cartridge/MBC1.o: core/cartridge/IMBC/type_cartridge/MBC1.cpp.o
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC1.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/main.cpp.o
-.PHONY : main.cpp.o
+core/cartridge/IMBC/type_cartridge/MBC1.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC1.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+core/cartridge/IMBC/type_cartridge/MBC1.i: core/cartridge/IMBC/type_cartridge/MBC1.cpp.i
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC1.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/main.cpp.i
-.PHONY : main.cpp.i
+core/cartridge/IMBC/type_cartridge/MBC1.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.i
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC1.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+core/cartridge/IMBC/type_cartridge/MBC1.s: core/cartridge/IMBC/type_cartridge/MBC1.cpp.s
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC1.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/main.cpp.s
-.PHONY : main.cpp.s
+core/cartridge/IMBC/type_cartridge/MBC1.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.s
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC1.cpp.s
+
+core/cartridge/IMBC/type_cartridge/RomOnly.o: core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o
+.PHONY : core/cartridge/IMBC/type_cartridge/RomOnly.o
+
+# target to build an object file
+core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o
+.PHONY : core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o
+
+core/cartridge/IMBC/type_cartridge/RomOnly.i: core/cartridge/IMBC/type_cartridge/RomOnly.cpp.i
+.PHONY : core/cartridge/IMBC/type_cartridge/RomOnly.i
+
+# target to preprocess a source file
+core/cartridge/IMBC/type_cartridge/RomOnly.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.i
+.PHONY : core/cartridge/IMBC/type_cartridge/RomOnly.cpp.i
+
+core/cartridge/IMBC/type_cartridge/RomOnly.s: core/cartridge/IMBC/type_cartridge/RomOnly.cpp.s
+.PHONY : core/cartridge/IMBC/type_cartridge/RomOnly.s
+
+# target to generate assembly for a file
+core/cartridge/IMBC/type_cartridge/RomOnly.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.s
+.PHONY : core/cartridge/IMBC/type_cartridge/RomOnly.cpp.s
+
+core/cartridge/cartridge.o: core/cartridge/cartridge.cpp.o
+.PHONY : core/cartridge/cartridge.o
+
+# target to build an object file
+core/cartridge/cartridge.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o
+.PHONY : core/cartridge/cartridge.cpp.o
+
+core/cartridge/cartridge.i: core/cartridge/cartridge.cpp.i
+.PHONY : core/cartridge/cartridge.i
+
+# target to preprocess a source file
+core/cartridge/cartridge.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.i
+.PHONY : core/cartridge/cartridge.cpp.i
+
+core/cartridge/cartridge.s: core/cartridge/cartridge.cpp.s
+.PHONY : core/cartridge/cartridge.s
+
+# target to generate assembly for a file
+core/cartridge/cartridge.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.s
+.PHONY : core/cartridge/cartridge.cpp.s
+
+core/cpu/cpu.o: core/cpu/cpu.cpp.o
+.PHONY : core/cpu/cpu.o
+
+# target to build an object file
+core/cpu/cpu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.o
+.PHONY : core/cpu/cpu.cpp.o
+
+core/cpu/cpu.i: core/cpu/cpu.cpp.i
+.PHONY : core/cpu/cpu.i
+
+# target to preprocess a source file
+core/cpu/cpu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.i
+.PHONY : core/cpu/cpu.cpp.i
+
+core/cpu/cpu.s: core/cpu/cpu.cpp.s
+.PHONY : core/cpu/cpu.s
+
+# target to generate assembly for a file
+core/cpu/cpu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.s
+.PHONY : core/cpu/cpu.cpp.s
+
+core/cpu/mmu/mmu.o: core/cpu/mmu/mmu.cpp.o
+.PHONY : core/cpu/mmu/mmu.o
+
+# target to build an object file
+core/cpu/mmu/mmu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o
+.PHONY : core/cpu/mmu/mmu.cpp.o
+
+core/cpu/mmu/mmu.i: core/cpu/mmu/mmu.cpp.i
+.PHONY : core/cpu/mmu/mmu.i
+
+# target to preprocess a source file
+core/cpu/mmu/mmu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.i
+.PHONY : core/cpu/mmu/mmu.cpp.i
+
+core/cpu/mmu/mmu.s: core/cpu/mmu/mmu.cpp.s
+.PHONY : core/cpu/mmu/mmu.s
+
+# target to generate assembly for a file
+core/cpu/mmu/mmu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.s
+.PHONY : core/cpu/mmu/mmu.cpp.s
 
 # Help Target
 help:
@@ -161,10 +257,22 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... gb_emu"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... gb-emu"
+	@echo "... core/cartridge/IMBC/type_cartridge/MBC1.o"
+	@echo "... core/cartridge/IMBC/type_cartridge/MBC1.i"
+	@echo "... core/cartridge/IMBC/type_cartridge/MBC1.s"
+	@echo "... core/cartridge/IMBC/type_cartridge/RomOnly.o"
+	@echo "... core/cartridge/IMBC/type_cartridge/RomOnly.i"
+	@echo "... core/cartridge/IMBC/type_cartridge/RomOnly.s"
+	@echo "... core/cartridge/cartridge.o"
+	@echo "... core/cartridge/cartridge.i"
+	@echo "... core/cartridge/cartridge.s"
+	@echo "... core/cpu/cpu.o"
+	@echo "... core/cpu/cpu.i"
+	@echo "... core/cpu/cpu.s"
+	@echo "... core/cpu/mmu/mmu.o"
+	@echo "... core/cpu/mmu/mmu.i"
+	@echo "... core/cpu/mmu/mmu.s"
 .PHONY : help
 
 

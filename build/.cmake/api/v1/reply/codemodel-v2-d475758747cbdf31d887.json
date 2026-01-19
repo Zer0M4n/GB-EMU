@@ -9,7 +9,7 @@
 					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
-						"string" : "3.10"
+						"string" : "3.20"
 					},
 					"projectIndex" : 0,
 					"source" : ".",
@@ -38,9 +38,9 @@
 			[
 				{
 					"directoryIndex" : 0,
-					"id" : "gb_emu::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-gb_emu-Debug-b46223a403a9243cc3c9.json",
-					"name" : "gb_emu",
+					"id" : "gb-emu::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-gb-emu-Debug-a6fc9e74ed6609c70151.json",
+					"name" : "gb-emu",
 					"projectIndex" : 0
 				}
 			]

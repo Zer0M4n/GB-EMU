@@ -2,7 +2,7 @@
 #include <array>
 #include <vector>
 #include <fstream>
-#include <cartridge.h>
+#include "cartridge/cartridge.h"
 class mmu
 { 
     cartridge cart;

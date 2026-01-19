@@ -1,7 +1,6 @@
  #include <iostream>
  #include <array>
- #include "mmu.h"
- #include "intructions.h"
+ #include "mmu/mmu.h"
 class cpu
 {
     private:
