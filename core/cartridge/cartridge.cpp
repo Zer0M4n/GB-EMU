@@ -4,7 +4,7 @@
 #include <string>
 #include <memory> // include
 #include "IMBC/IMBC.h"
-#include "RomOnly.h"
+#include "cartridge/IMBC/type_cartridge/RomOnly.h"
 
 class cartridge
 {
@@ -40,8 +40,12 @@ class cartridge
                 case 0x00:
                 mbc = std::make_unique<RomOnly>(ROM);
                     break;
+                case 0x01:
+
+                    break;
                 
                 default:
+                    std::cout << "not found, address: " << cartridge_type << "\n"; 
                     break;
             }
         }
