@@ -1,12 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o"
-  "CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o.d"
-  "CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o"
-  "CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o.d"
-  "CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o"
-  "CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o.d"
-  "CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o"
-  "CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o.d"
   "CMakeFiles/gb_emu.dir/main.cpp.o"
   "CMakeFiles/gb_emu.dir/main.cpp.o.d"
   "gb_emu"

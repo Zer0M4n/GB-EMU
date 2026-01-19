@@ -13,6 +13,9 @@ class MBC1 : public IMBC
         
     public:
         MBC1(std::vector<uint8_t>& rom) : romRef(rom) {};
-        
+        uint8_t readROM(uint16_t address) override
+        {
+
+        }
         ~MBC1();
 };

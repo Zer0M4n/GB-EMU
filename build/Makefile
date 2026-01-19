@@ -129,102 +129,6 @@ gb_emu/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/build
 .PHONY : gb_emu/fast
 
-core/cartridge/cartridge.o: core/cartridge/cartridge.cpp.o
-.PHONY : core/cartridge/cartridge.o
-
-# target to build an object file
-core/cartridge/cartridge.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o
-.PHONY : core/cartridge/cartridge.cpp.o
-
-core/cartridge/cartridge.i: core/cartridge/cartridge.cpp.i
-.PHONY : core/cartridge/cartridge.i
-
-# target to preprocess a source file
-core/cartridge/cartridge.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.i
-.PHONY : core/cartridge/cartridge.cpp.i
-
-core/cartridge/cartridge.s: core/cartridge/cartridge.cpp.s
-.PHONY : core/cartridge/cartridge.s
-
-# target to generate assembly for a file
-core/cartridge/cartridge.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.s
-.PHONY : core/cartridge/cartridge.cpp.s
-
-core/cpu/cpu.o: core/cpu/cpu.cpp.o
-.PHONY : core/cpu/cpu.o
-
-# target to build an object file
-core/cpu/cpu.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o
-.PHONY : core/cpu/cpu.cpp.o
-
-core/cpu/cpu.i: core/cpu/cpu.cpp.i
-.PHONY : core/cpu/cpu.i
-
-# target to preprocess a source file
-core/cpu/cpu.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.i
-.PHONY : core/cpu/cpu.cpp.i
-
-core/cpu/cpu.s: core/cpu/cpu.cpp.s
-.PHONY : core/cpu/cpu.s
-
-# target to generate assembly for a file
-core/cpu/cpu.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.s
-.PHONY : core/cpu/cpu.cpp.s
-
-core/cpu/instructions/intructions.o: core/cpu/instructions/intructions.cpp.o
-.PHONY : core/cpu/instructions/intructions.o
-
-# target to build an object file
-core/cpu/instructions/intructions.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o
-.PHONY : core/cpu/instructions/intructions.cpp.o
-
-core/cpu/instructions/intructions.i: core/cpu/instructions/intructions.cpp.i
-.PHONY : core/cpu/instructions/intructions.i
-
-# target to preprocess a source file
-core/cpu/instructions/intructions.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.i
-.PHONY : core/cpu/instructions/intructions.cpp.i
-
-core/cpu/instructions/intructions.s: core/cpu/instructions/intructions.cpp.s
-.PHONY : core/cpu/instructions/intructions.s
-
-# target to generate assembly for a file
-core/cpu/instructions/intructions.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.s
-.PHONY : core/cpu/instructions/intructions.cpp.s
-
-core/cpu/mmu/mmu.o: core/cpu/mmu/mmu.cpp.o
-.PHONY : core/cpu/mmu/mmu.o
-
-# target to build an object file
-core/cpu/mmu/mmu.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o
-.PHONY : core/cpu/mmu/mmu.cpp.o
-
-core/cpu/mmu/mmu.i: core/cpu/mmu/mmu.cpp.i
-.PHONY : core/cpu/mmu/mmu.i
-
-# target to preprocess a source file
-core/cpu/mmu/mmu.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.i
-.PHONY : core/cpu/mmu/mmu.cpp.i
-
-core/cpu/mmu/mmu.s: core/cpu/mmu/mmu.cpp.s
-.PHONY : core/cpu/mmu/mmu.s
-
-# target to generate assembly for a file
-core/cpu/mmu/mmu.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb_emu.dir/build.make CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.s
-.PHONY : core/cpu/mmu/mmu.cpp.s
-
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -258,18 +162,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... gb_emu"
-	@echo "... core/cartridge/cartridge.o"
-	@echo "... core/cartridge/cartridge.i"
-	@echo "... core/cartridge/cartridge.s"
-	@echo "... core/cpu/cpu.o"
-	@echo "... core/cpu/cpu.i"
-	@echo "... core/cpu/cpu.s"
-	@echo "... core/cpu/instructions/intructions.o"
-	@echo "... core/cpu/instructions/intructions.i"
-	@echo "... core/cpu/instructions/intructions.s"
-	@echo "... core/cpu/mmu/mmu.o"
-	@echo "... core/cpu/mmu/mmu.i"
-	@echo "... core/cpu/mmu/mmu.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

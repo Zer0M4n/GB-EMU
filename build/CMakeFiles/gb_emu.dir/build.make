@@ -83,81 +83,17 @@ CMakeFiles/gb_emu.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gb_emu.dir/main.cpp.s"
 	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/main.cpp -o CMakeFiles/gb_emu.dir/main.cpp.s
 
-CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o: CMakeFiles/gb_emu.dir/flags.make
-CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o: /home/developer/projects/GB-EMU/core/cpu/cpu.cpp
-CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o: CMakeFiles/gb_emu.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o -MF CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o.d -o CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/cpu.cpp
-
-CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cpu/cpu.cpp > CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.i
-
-CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/cpu.cpp -o CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.s
-
-CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o: CMakeFiles/gb_emu.dir/flags.make
-CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o: /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp
-CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o: CMakeFiles/gb_emu.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o -MF CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o.d -o CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp
-
-CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp > CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.i
-
-CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/instructions/intructions.cpp -o CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.s
-
-CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o: CMakeFiles/gb_emu.dir/flags.make
-CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o: /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp
-CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o: CMakeFiles/gb_emu.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o -MF CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o.d -o CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp
-
-CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp > CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.i
-
-CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp -o CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.s
-
-CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o: CMakeFiles/gb_emu.dir/flags.make
-CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o: /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp
-CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o: CMakeFiles/gb_emu.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o -MF CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o.d -o CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp
-
-CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp > CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.i
-
-CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp -o CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.s
-
 # Object files for target gb_emu
 gb_emu_OBJECTS = \
-"CMakeFiles/gb_emu.dir/main.cpp.o" \
-"CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o" \
-"CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o" \
-"CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o" \
-"CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o"
+"CMakeFiles/gb_emu.dir/main.cpp.o"
 
 # External object files for target gb_emu
 gb_emu_EXTERNAL_OBJECTS =
 
 gb_emu: CMakeFiles/gb_emu.dir/main.cpp.o
-gb_emu: CMakeFiles/gb_emu.dir/core/cpu/cpu.cpp.o
-gb_emu: CMakeFiles/gb_emu.dir/core/cpu/instructions/intructions.cpp.o
-gb_emu: CMakeFiles/gb_emu.dir/core/cpu/mmu/mmu.cpp.o
-gb_emu: CMakeFiles/gb_emu.dir/core/cartridge/cartridge.cpp.o
 gb_emu: CMakeFiles/gb_emu.dir/build.make
 gb_emu: CMakeFiles/gb_emu.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable gb_emu"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable gb_emu"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/gb_emu.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
