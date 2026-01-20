@@ -3,49 +3,66 @@
 #include "core/cpu/mmu/mmu.h"
 #include "core/cpu/cpu.h"
 
-// 1. Incluir cabecera de Emscripten solo si estamos compilando para web
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
-// Puntero global necesario para que la función estática de WASM vea la CPU
+// Variables globales para el contexto Web
 cpu* global_cpu = nullptr;
+int debug_steps = 0; // Contador de pasos para detener el bucle
 
-// Función de bucle para el navegador (ejecuta 1 frame y devuelve el control)
+// Esta función se llama 60 veces por segundo (aprox)
 void main_loop() {
-    if(global_cpu) {
-        // Ejecutar instrucciones equivalentes a un frame (aprox 70,000 ciclos)
-        // Por ahora ponemos 1 paso para probar
-        global_cpu->step(); 
+    if (global_cpu) {
+        // Ejecutamos 1 instrucción
+        global_cpu->step();
+        
+        // Aumentamos contador
+        debug_steps++;
+
+        // --- FRENO DE EMERGENCIA PARA DEBUG ---
+        // Si llegamos a 50 pasos, detenemos el emulador web
+        if (debug_steps >= 50) {
+            std::cout << "--- Límite de prueba alcanzado (50 pasos). Deteniendo loop. ---\n";
+            #ifdef __EMSCRIPTEN__
+                emscripten_cancel_main_loop(); // <--- ESTO DETIENE EL BUCLE INFINITO
+            #endif
+        }
     }
 }
 
 int main(int argc, char **argv) {
-    std::string romPath = "tetris.gb"; // Nombre fijo para la prueba web
-    
-    // Si hay argumentos (Desktop), úsalos. En Web, usaremos el archivo precargado.
-    if (argc > 1) romPath = argv[1];
+    std::cout << "--- Iniciando Emulador Game Boy (Web/Desktop) ---" << "\n";
+
+    std::string romPath = "roms/tetris.gb"; 
+
+    if (argc > 1) {
+        romPath = argv[1];
+    } else {
+        std::cout << "Info: Cargando ROM por defecto: " << romPath << "\n";
+    }
 
     try {
-        static mmu memoryBus(romPath); // static para que no muera al salir de main
+        static mmu memoryBus(romPath);
         static cpu processor(memoryBus);
-        global_cpu = &processor; // Guardamos referencia para el loop
-
-        std::cout << "Sistema listo. Iniciando...\n";
+        
+        global_cpu = &processor;
+        
+        std::cout << "Sistema listo. CPU arrancando...\n";
 
         #ifdef __EMSCRIPTEN__
-            // 2. MODO WEB: Le decimos al navegador qué función llamar repetidamente
-            // 0 = fps por defecto (requestAnimationFrame), 1 = loop infinito simulado
+            // Iniciamos el bucle web
             emscripten_set_main_loop(main_loop, 0, 1);
         #else
-            // 3. MODO DESKTOP (Tu código original)
-            while(true) {
+            // Bucle Desktop
+            for(int i = 0; i < 50; i++) {
                 processor.step();
             }
         #endif
 
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << "\n";
+        std::cerr << "Error Fatal: " << e.what() << "\n";
+        return -1;
     }
 
     return 0;
