@@ -1,0 +1,1 @@
+/home/developer/emsdk/upstream/emscripten/em++ --preload-file /home/developer/projects/GB-EMU/roms@/roms -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=0 @CMakeFiles/gb-emu.dir/objects1 -o gb-emu.html 

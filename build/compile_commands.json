@@ -1,8 +1,8 @@
 [
 {
   "directory": "/home/developer/projects/GB-EMU/build",
-  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU -I/home/developer/projects/GB-EMU/core -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cartridge -I/home/developer/projects/GB-EMU/core/cartridge/IMBC -g -std=gnu++17 -o CMakeFiles/gb-emu.dir/main.cpp.o -c /home/developer/projects/GB-EMU/main.cpp",
-  "file": "/home/developer/projects/GB-EMU/main.cpp"
+  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU -I/home/developer/projects/GB-EMU/core -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cartridge -I/home/developer/projects/GB-EMU/core/cartridge/IMBC -g -std=gnu++17 -o CMakeFiles/gb-emu.dir/emc_main.cpp.o -c /home/developer/projects/GB-EMU/emc_main.cpp",
+  "file": "/home/developer/projects/GB-EMU/emc_main.cpp"
 },
 {
   "directory": "/home/developer/projects/GB-EMU/build",
@@ -21,12 +21,12 @@
 },
 {
   "directory": "/home/developer/projects/GB-EMU/build",
-  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU -I/home/developer/projects/GB-EMU/core -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cartridge -I/home/developer/projects/GB-EMU/core/cartridge/IMBC -g -std=gnu++17 -o CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC1.cpp",
-  "file": "/home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC1.cpp"
+  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU -I/home/developer/projects/GB-EMU/core -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cartridge -I/home/developer/projects/GB-EMU/core/cartridge/IMBC -g -std=gnu++17 -o CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.cpp",
+  "file": "/home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.cpp"
 },
 {
   "directory": "/home/developer/projects/GB-EMU/build",
-  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU -I/home/developer/projects/GB-EMU/core -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cartridge -I/home/developer/projects/GB-EMU/core/cartridge/IMBC -g -std=gnu++17 -o CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.cpp",
-  "file": "/home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.cpp"
+  "command": "/usr/bin/g++  -I/home/developer/projects/GB-EMU -I/home/developer/projects/GB-EMU/core -I/home/developer/projects/GB-EMU/core/cpu -I/home/developer/projects/GB-EMU/core/cpu/mmu -I/home/developer/projects/GB-EMU/core/cartridge -I/home/developer/projects/GB-EMU/core/cartridge/IMBC -g -std=gnu++17 -o CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC1.cpp",
+  "file": "/home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC1.cpp"
 }
 ]
