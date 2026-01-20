@@ -70,7 +70,7 @@ uint8_t mmu::readMemory(uint16_t address)
         return HRAM[offSet(address, 0xFF80)];
     }
     else {
-        // std::cout << "Memory Read Error: Address not mapped " << std::hex << address << "\n";
+         std::cout << "Memory Read Error: Address not mapped " << std::hex << address << "\n";
         return 0xFF; // Retornamos 0xFF en bus abierto (mejor que NULL)
     }
 }
@@ -118,6 +118,6 @@ void mmu::writeMemory(uint16_t address, uint8_t value)
         HRAM[offSet(address, 0xFF80)] = value;
     }
     else {
-        // std::cout << "Memory Write Error: Address not mapped\n";
+         std::cout << "Memory Write Error: Address not mapped\n";
     }
 }

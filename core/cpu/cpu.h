@@ -64,4 +64,5 @@ private:
 
     // Instrucciones individuales
     void NOP(uint8_t opcode);
+    void JP(uint8_t opcode);
 };
