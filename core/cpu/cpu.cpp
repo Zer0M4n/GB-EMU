@@ -14,6 +14,7 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
 
     // Mapear instrucciones implementadas
     table_opcode[0x00] = &cpu::NOP;
+    table_opcode[0xC3] = &cpu::JP;
 }
 
 // --- Ciclo Principal (Step) ---
@@ -54,7 +55,16 @@ uint16_t cpu::readImmediateWord() {
 // --- Instrucciones ---
 void cpu::NOP(uint8_t opcode) {
     (void)opcode; // Evita warning de variable no usada
-    // NOP no hace nada, solo consume ciclos (que gestionaremos luego)
+    PC++;
+     std::cout << "DEBUG: Nop: 0x" << std::hex << PC << "\n";
+}
+void cpu::JP(uint8_t opcode) {
+    (void)opcode;
+    // JP lee los siguientes 2 bytes y salta a esa dirección
+    uint16_t targetAddress = readImmediateWord(); 
+    PC = targetAddress;
+    
+    std::cout << "DEBUG: Salto JP realizado a: 0x" << std::hex << PC << "\n";
 }
 
 // --- FLAGS (Getters) ---
