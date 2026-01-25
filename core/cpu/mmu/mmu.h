@@ -30,7 +30,8 @@ private:
     std::array<uint8_t, 0x00A0> OAM;  // Object Attribute Memory
 
     uint8_t IE; // Interrupt Enable (0xFFFF)
-
+    uint8_t IF; // Interrupt flag (0xFFFF)
+    
     // Funciones auxiliares privadas
     uint16_t offSet(uint16_t address, uint16_t base);
     void DMA(uint8_t value);

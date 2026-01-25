@@ -33,6 +33,12 @@ void mmu::DMA(uint8_t value)
 // --- Lectura de Memoria ---
 uint8_t mmu::readMemory(uint16_t address) 
 {   
+    if (address == 0xFF0F)
+    {
+        return IF;
+    }
+    
+
     if (address == 0xFFFF) {
         return IE;
     }
@@ -81,6 +87,11 @@ void mmu::writeMemory(uint16_t address, uint8_t value)
     // Registro DMA
     if (address == 0xFF46) {
         DMA(value);
+        return;
+    }
+    if (address = 0xFF0F)
+    {
+        IF = value;
         return;
     }
     // Interrupt Enable
