@@ -16,21 +16,45 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     table_opcode[0x00] = &cpu::NOP;
     table_opcode[0xC3] = &cpu::JP;
 }
+void cpu::push(uint16_t value)
+{
+    uint8_t byte_hight = (value >> 8) & 0xFF;
+    uint8_t byte_low = value & 0xFF;
+
+    SP--;
+    memory.writeMemory(SP , byte_hight);
+
+    SP--;
+    memory.writeMemory(SP , byte_low);
+}
+uint16_t cpu::pop()
+{
+    uint8_t byte_low = memory.readMemory(SP);
+    SP++;
+
+    uint8_t byte_hight = memory.readMemory(SP);
+    SP++;
+
+    return (byte_hight << 8) | byte_low;
+}
 
 // --- Ciclo Principal (Step) ---
-void cpu::step()
+int cpu::step()
 {
     uint8_t opcode = fetch();
+    int cycle;
 
     // Decodificar y Ejecutar
     if (table_opcode[opcode] != nullptr)
     {
-        (this->*table_opcode[opcode])(opcode);
+        return (this->*table_opcode[opcode])(opcode);
     } 
     else
     {
         std::cout << "Opcode no implementado: 0x" << std::hex << (int)opcode << "\n";
+        return 0;
     }
+    return 0;
 }
 
 // --- Helpers de Lectura ---
@@ -53,18 +77,18 @@ uint16_t cpu::readImmediateWord() {
 }
 
 // --- Instrucciones ---
-void cpu::NOP(uint8_t opcode) {
+int cpu::NOP(uint8_t opcode) {
     (void)opcode; // Evita warning de variable no usada
-    PC++;
      std::cout << "DEBUG: Nop: 0x" << std::hex << PC << "\n";
+     return 4;
 }
-void cpu::JP(uint8_t opcode) {
+int cpu::JP(uint8_t opcode) {
     (void)opcode;
     // JP lee los siguientes 2 bytes y salta a esa dirección
     uint16_t targetAddress = readImmediateWord(); 
     PC = targetAddress;
-    
     std::cout << "DEBUG: Salto JP realizado a: 0x" << std::hex << PC << "\n";
+    return 16;
 }
 
 // --- FLAGS (Getters) ---
