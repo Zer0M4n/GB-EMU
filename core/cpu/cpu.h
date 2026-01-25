@@ -14,7 +14,7 @@ public:
     cpu(mmu& mmu_ref);
 
     // Función principal para avanzar un paso
-    void step();
+    int step();
 
 private:
     // Referencia a la memoria (MMU)
@@ -55,14 +55,16 @@ private:
     uint8_t fetch();                 // Trae el opcode y avanza PC
     uint8_t readImmediateByte();     // Lee d8
     uint16_t readImmediateWord();    // Lee d16
+    void push(uint16_t value);
+    uint16_t pop();
 
     // --- SISTEMA DE INSTRUCCIONES ---
-    using Instruction = void(cpu::*)(uint8_t); // Puntero a función miembro
+    using Instruction = int(cpu::*)(uint8_t); // Puntero a función miembro
     
     // Game Boy tiene 256 opcodes posibles (0x00 a 0xFF)
     std::array<Instruction, 256> table_opcode; 
 
     // Instrucciones individuales
-    void NOP(uint8_t opcode);
-    void JP(uint8_t opcode);
+    int NOP(uint8_t opcode);
+    int JP(uint8_t opcode);
 };

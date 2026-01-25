@@ -36,7 +36,7 @@ mkdir \-p build && cd build
 cmake ..  
 make \-j16
 
-\# 3\. Ejecutar  
+\# 3\. Ejecuta  
 \# Uso: ./gb-emu \<ruta\_al\_rom\>  
 \# Si no pasas argumentos, buscará roms/tetris.gb por defecto  
 ./gb-emu ../roms/tetris.gb

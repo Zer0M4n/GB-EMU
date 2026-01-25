@@ -144,11 +144,13 @@ void cartridge::parseHeader()
     {
         case 0x00: // ROM Only
             mbc = std::make_unique<RomOnly>(ROM);
+            std::cout << "IMBC : RomONly" << "\n";
             break;
         case 0x01: // MBC1
         case 0x02: // MBC1 + RAM
         case 0x03: // MBC1 + RAM + BATTERY
             mbc = std::make_unique<MBC1>(ROM, RAM, rom_banks_count);
+            std::cout << "IMBC : RomONly" << "\n";
             break;
         
         default:
@@ -156,5 +158,5 @@ void cartridge::parseHeader()
             // Fallback a RomOnly para evitar crash inmediato
             mbc = std::make_unique<RomOnly>(ROM);
             break;
-    }
+    } 
 }
