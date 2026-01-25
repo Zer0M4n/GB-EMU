@@ -3,10 +3,13 @@
 // --- Constructor ---
 cpu::cpu(mmu& mmu_ref) : memory(mmu_ref) 
 {
-    PC = 0x100; // Punto de entrada estándar para juegos de GB
-    SP = 0xFFFE; // El stack suele empezar al final de la HRAM
+    IME = false;
+    isStopped = false;
+    isHalted = false;
+    PC = 0x100;   // Punto de entrada estándar
+    SP = 0xFFFE;  // Final de la HRAM
     
-    // Inicializar registros a 0 (o valores típicos de boot)
+    // Inicializar registros a 0
     r8.fill(0);
 
     // Inicializar tabla de opcodes con nullptr
@@ -14,37 +17,109 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
 
     // Mapear instrucciones implementadas
     table_opcode[0x00] = &cpu::NOP;
+    table_opcode[0x10] = &cpu::STOP;
+    table_opcode[0x27] = &cpu::DAA;
+    table_opcode[0x76] = &cpu::HALT; // ¡Nuevo!
     table_opcode[0xC3] = &cpu::JP;
+    table_opcode[0xF3] = &cpu::DI;   // ¡Nuevo!
+    table_opcode[0xFB] = &cpu::EI;   // ¡Nuevo!
 }
+
+// --- Gestión del Stack ---
 void cpu::push(uint16_t value)
 {
-    uint8_t byte_hight = (value >> 8) & 0xFF;
+    uint8_t byte_high = (value >> 8) & 0xFF;
     uint8_t byte_low = value & 0xFF;
 
     SP--;
-    memory.writeMemory(SP , byte_hight);
+    memory.writeMemory(SP, byte_high);
 
     SP--;
-    memory.writeMemory(SP , byte_low);
+    memory.writeMemory(SP, byte_low);
 }
+
 uint16_t cpu::pop()
 {
     uint8_t byte_low = memory.readMemory(SP);
     SP++;
 
-    uint8_t byte_hight = memory.readMemory(SP);
+    uint8_t byte_high = memory.readMemory(SP);
     SP++;
 
-    return (byte_hight << 8) | byte_low;
+    return (byte_high << 8) | byte_low;
+}
+
+// --- Helpers de Interrupciones ---
+void cpu::requestInterrupt(int bit) {
+    uint8_t if_reg = memory.readMemory(0xFF0F);
+    if_reg |= (1 << bit);
+    memory.writeMemory(0xFF0F, if_reg);
+}
+
+void cpu::executeInterrupt(int bit) {
+    // 1. Limpiar el bit de la interrupción en IF (0xFF0F)
+    uint8_t if_reg = memory.readMemory(0xFF0F);
+    if_reg &= ~(1 << bit);
+    memory.writeMemory(0xFF0F, if_reg);
+
+    // 2. Deshabilitar interrupciones globales
+    IME = false;
+
+    // 3. Guardar el PC actual en el Stack
+    push(PC);
+
+    // 4. Saltar al vector correspondiente
+    // Vectores: 0x40 (Vblank), 0x48 (LCD), 0x50 (Timer), 0x58 (Serial), 0x60 (Joypad)
+    PC = 0x0040 + (bit * 8);
+}
+
+void cpu::handleInterrupts() {
+    uint8_t if_reg = memory.readMemory(0xFF0F);
+    uint8_t ie_reg = memory.readMemory(0xFFFF);
+
+    // Interrupciones pendientes = Solicitadas (IF) AND Habilitadas (IE)
+    uint8_t pending = if_reg & ie_reg;
+
+    if (pending > 0) {
+        // Despertar a la CPU si estaba dormida
+        isHalted = false;
+        isStopped = false;
+
+        // Si el IME está activo, ejecutamos la interrupción
+        if (IME) {
+            // Buscamos la interrupción con mayor prioridad (bit más bajo)
+            for (int i = 0; i < 5; i++) {
+                if ((pending >> i) & 1) {
+                    executeInterrupt(i);
+                    break; // Solo atendemos una interrupción por ciclo
+                }
+            }
+        }
+    }
+}
+
+// --- Helper de Seguridad para Flags ---
+void cpu::maskF()
+{
+    // Los 4 bits bajos del registro F siempre deben ser 0
+    r8[F] &= 0xF0;
 }
 
 // --- Ciclo Principal (Step) ---
 int cpu::step()
 {
-    uint8_t opcode = fetch();
-    int cycle;
+    // 1. Revisar interrupciones antes de ejecutar nada
+    handleInterrupts();
 
-    // Decodificar y Ejecutar
+    // 2. Si la CPU está parada, no ejecutamos instrucciones
+    if (isHalted || isStopped) {
+        return 4; // Consumimos ciclos mientras esperamos
+    }
+
+    // 3. Fetch (Traer instrucción)
+    uint8_t opcode = fetch();
+
+    // 4. Decode & Execute
     if (table_opcode[opcode] != nullptr)
     {
         return (this->*table_opcode[opcode])(opcode);
@@ -54,7 +129,6 @@ int cpu::step()
         std::cout << "Opcode no implementado: 0x" << std::hex << (int)opcode << "\n";
         return 0;
     }
-    return 0;
 }
 
 // --- Helpers de Lectura ---
@@ -77,18 +151,88 @@ uint16_t cpu::readImmediateWord() {
 }
 
 // --- Instrucciones ---
-int cpu::NOP(uint8_t opcode) {
-    (void)opcode; // Evita warning de variable no usada
-     std::cout << "DEBUG: Nop: 0x" << std::hex << PC << "\n";
-     return 4;
+
+int cpu::DAA(uint8_t opcode)
+{
+    (void)opcode;
+    uint8_t adjustment = 0;
+    bool carry = false;
+
+    // --- PASO 1: Determinar el ajuste ---
+    if (getN() == 0) { // Suma
+        if (getC() || r8[A] > 0x99) {
+            adjustment |= 0x60;
+            carry = true;
+        }
+        if (getH() || (r8[A] & 0x0F) > 0x09) {
+            adjustment |= 0x06;
+        }
+        r8[A] += adjustment;
+    } 
+    else { // Resta
+        if (getC()) {
+            adjustment |= 0x60;
+            carry = true;
+        }
+        if (getH()) {
+            adjustment |= 0x06;
+        }
+        r8[A] -= adjustment;
+    }
+
+    // --- PASO 2: Actualizar Banderas ---
+    setZ(r8[A] == 0);
+    setH(false);
+    setC(carry);
+    std::cout <<"DAA " << "\n";
+
+    // NOTA: No hacemos PC++ aquí, fetch() ya lo hizo.
+    return 4; 
 }
+
+int cpu::STOP(uint8_t opcode)
+{
+    (void)opcode;
+    // STOP es 0x10 0x00, saltamos el byte extra
+    PC++; 
+    isStopped = true;
+    std::cout <<"stop " << "\n";
+    return 4;
+}
+
+int cpu::HALT(uint8_t opcode) {
+    (void)opcode;
+    isHalted = true;
+    std::cout <<"halt " << "\n";
+    return 4; 
+}
+
+int cpu::NOP(uint8_t opcode) {
+    (void)opcode;
+    std::cout <<"nop " << "\n";
+    return 4;
+}
+
 int cpu::JP(uint8_t opcode) {
     (void)opcode;
-    // JP lee los siguientes 2 bytes y salta a esa dirección
     uint16_t targetAddress = readImmediateWord(); 
     PC = targetAddress;
-    std::cout << "DEBUG: Salto JP realizado a: 0x" << std::hex << PC << "\n";
+    std::cout <<"jump " << "\n";
     return 16;
+}
+
+int cpu::DI(uint8_t opcode) {
+    (void)opcode;
+    IME = false;
+    std::cout <<"di " << "\n";
+    return 4;
+}
+
+int cpu::EI(uint8_t opcode) {
+    (void)opcode;
+    IME = true;
+    std::cout <<"ei " << "\n";
+    return 4;
 }
 
 // --- FLAGS (Getters) ---
@@ -101,23 +245,27 @@ uint8_t cpu::getC() const { return (r8[F] >> 4) & 1; }
 void cpu::setZ(bool on) { 
     if (on) r8[F] |= (1 << 7); 
     else    r8[F] &= ~(1 << 7); 
+    maskF();
 }
 void cpu::setN(bool on) { 
     if (on) r8[F] |= (1 << 6); 
-    else    r8[F] &= ~(1 << 6); 
+    else    r8[F] &= ~(1 << 6);
+    maskF(); 
 }
 void cpu::setH(bool on) { 
     if (on) r8[F] |= (1 << 5); 
     else    r8[F] &= ~(1 << 5); 
+    maskF();
 }
 void cpu::setC(bool on) { 
     if (on) r8[F] |= (1 << 4); 
     else    r8[F] &= ~(1 << 4); 
+    maskF();
 }
 
 // --- Registros 16-bits (Getters/Setters) ---
 uint16_t cpu::getAF() const { 
-    return (r8[A] << 8) | (r8[F] & 0xF0); // Los 4 bits bajos de F siempre son 0
+    return (r8[A] << 8) | (r8[F] & 0xF0); 
 }
 void cpu::setAF(uint16_t val) { 
     r8[A] = val >> 8; 
