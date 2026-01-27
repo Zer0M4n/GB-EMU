@@ -25,7 +25,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 55,
+				"line" : 57,
 				"parent" : 0
 			},
 			{
@@ -64,6 +64,10 @@
 				},
 				{
 					"backtrace" : 2,
+					"path" : "/home/developer/projects/GB-EMU/core/cpu/ppu"
+				},
+				{
+					"backtrace" : 2,
 					"path" : "/home/developer/projects/GB-EMU/core/cpu/mmu"
 				},
 				{
@@ -91,7 +95,8 @@
 				2,
 				3,
 				4,
-				5
+				5,
+				6
 			]
 		}
 	],
@@ -129,7 +134,8 @@
 				2,
 				3,
 				4,
-				5
+				5,
+				6
 			]
 		}
 	],
@@ -145,6 +151,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "core/cpu/cpu.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "core/cpu/ppu/ppu.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

@@ -249,6 +249,30 @@ core/cpu/mmu/mmu.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.s
 .PHONY : core/cpu/mmu/mmu.cpp.s
 
+core/cpu/ppu/ppu.o: core/cpu/ppu/ppu.cpp.o
+.PHONY : core/cpu/ppu/ppu.o
+
+# target to build an object file
+core/cpu/ppu/ppu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o
+.PHONY : core/cpu/ppu/ppu.cpp.o
+
+core/cpu/ppu/ppu.i: core/cpu/ppu/ppu.cpp.i
+.PHONY : core/cpu/ppu/ppu.i
+
+# target to preprocess a source file
+core/cpu/ppu/ppu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.i
+.PHONY : core/cpu/ppu/ppu.cpp.i
+
+core/cpu/ppu/ppu.s: core/cpu/ppu/ppu.cpp.s
+.PHONY : core/cpu/ppu/ppu.s
+
+# target to generate assembly for a file
+core/cpu/ppu/ppu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.s
+.PHONY : core/cpu/ppu/ppu.cpp.s
+
 emc_main.o: emc_main.cpp.o
 .PHONY : emc_main.o
 
@@ -297,6 +321,9 @@ help:
 	@echo "... core/cpu/mmu/mmu.o"
 	@echo "... core/cpu/mmu/mmu.i"
 	@echo "... core/cpu/mmu/mmu.s"
+	@echo "... core/cpu/ppu/ppu.o"
+	@echo "... core/cpu/ppu/ppu.i"
+	@echo "... core/cpu/ppu/ppu.s"
 	@echo "... emc_main.o"
 	@echo "... emc_main.i"
 	@echo "... emc_main.s"

@@ -13,6 +13,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp" "CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o.d"
   "/home/developer/projects/GB-EMU/core/cpu/cpu.cpp" "CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.o.d"
   "/home/developer/projects/GB-EMU/core/cpu/mmu/mmu.cpp" "CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o.d"
+  "/home/developer/projects/GB-EMU/core/cpu/ppu/ppu.cpp" "CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o.d"
   "/home/developer/projects/GB-EMU/emc_main.cpp" "CMakeFiles/gb-emu.dir/emc_main.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/emc_main.cpp.o.d"
   )
 

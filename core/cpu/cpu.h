@@ -93,4 +93,6 @@ private:
     
     // Saltos
     int JP(uint8_t opcode);
+
+    int LD_r8_r8(uint8_t opcode);
 };
