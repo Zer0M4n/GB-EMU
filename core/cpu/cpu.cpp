@@ -23,6 +23,10 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     table_opcode[0xC3] = &cpu::JP;
     table_opcode[0xF3] = &cpu::DI;   // ¡Nuevo!
     table_opcode[0xFB] = &cpu::EI;   // ¡Nuevo!
+
+    for (int i = 0x40; i <= 0x7F; i++) {
+        table_opcode[i] = &cpu::LD_r8_r8;
+    }
 }
 
 // --- Gestión del Stack ---
@@ -233,6 +237,44 @@ int cpu::EI(uint8_t opcode) {
     IME = true;
     std::cout <<"ei " << "\n";
     return 4;
+}
+//LOAD INTRUCTIONS
+int cpu::LD_r8_r8(uint8_t opcode) {
+    // 1. Extraer índices de hardware (3 bits cada uno)
+    int destBits = (opcode >> 3) & 0x07;
+    int srcBits = opcode & 0x07;
+
+    // 2. Mapa: Hardware Code -> Tu enum R8
+    // Hardware: 0=B, 1=C, 2=D, 3=E, 4=H, 5=L, 6=[HL], 7=A
+    static const R8 hardwareToYourEnum[] = {B, C, D, E, H, L, H, A}; 
+
+    // 3. Caso especial: 0x76 es HALT, no LD [HL], [HL]
+    if (opcode == 0x76) {
+            std::cout <<"halt " << "\n";
+        return HALT(opcode); 
+    }
+
+    // 4. Lógica de ejecución
+    if (destBits == 6) { // LD [HL], r8
+        uint16_t address = getHL();
+        uint8_t value = r8[hardwareToYourEnum[srcBits]];
+        memory.writeMemory(address, value);
+            std::cout <<"LD [HL], r8 " << "\n";
+
+        return 8; // Escribir en memoria toma más tiempo
+    } 
+    else if (srcBits == 6) { // LD r8, [HL]
+        uint16_t address = getHL();
+        uint8_t value = memory.readMemory(address);
+        r8[hardwareToYourEnum[destBits]] = value;
+         std::cout <<"LD r8, [HL] " << "\n";
+        return 8; // Leer de memoria toma más tiempo
+    } 
+    else { // LD r8, r8 (Registro a Registro)
+         std::cout <<"LD r8, r8 " << "\n";
+        r8[hardwareToYourEnum[destBits]] = r8[hardwareToYourEnum[srcBits]];
+        return 4; // Operación interna rápida
+    }
 }
 
 // --- FLAGS (Getters) ---

@@ -9,8 +9,10 @@
 // pero según tu CMake, esto debería funcionar:
 #include "cartridge/cartridge.h"
 
+class ppu;
 class mmu
 {
+    friend class ppu;
 public:
     // Constructor explícito que recibe la ruta
     explicit mmu(const std::string& romPath);

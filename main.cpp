@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
         // Bucle infinito (por ahora lo limitamos para no spamear tu terminal)
         // En el futuro esto será while(true)
-        for(int i = 0; i < 50; i++) {
+        for(int i = 0; i < 100; i++) {
             processor.step();
         }
 

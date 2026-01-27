@@ -10,6 +10,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}
     core
     core/cpu
+    core/cpu/ppu
     core/cpu/mmu
     core/cartridge
     core/cartridge/IMBC
@@ -18,6 +19,7 @@ include_directories(
 # 2. Archivos fuente del NÚCLEO (Compartidos entre Web y Desktop)
 set(CORE_SOURCES
     core/cpu/cpu.cpp
+    core/cpu/ppu/ppu.cpp
     core/cpu/mmu/mmu.cpp
     core/cartridge/cartridge.cpp
     core/cartridge/IMBC/type_cartridge/RomOnly.cpp
