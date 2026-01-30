@@ -141,4 +141,50 @@ private:
     // --- CARGAS ESPECIALES ---
     int LDI_A_HL(uint8_t opcode);// 0x2A (LD A, [HL+]) Carga y aumenta HL
     int LD_DE_A(uint8_t opcode); // 0x12 (LD [DE], A)
+    // --- Cargas 16 bits ---
+    int LD_SP_d16(uint8_t opcode); // 0x31
+    int LD_A_DE(uint8_t opcode);   // 0x1A (Cargar A desde [DE])
+
+    // --- Aritmética 16 bits ---
+    int ADD_HL_r16(uint8_t opcode);// 0x09, 0x19, 0x29, 0x39
+
+    // --- Aritmética 8 bits ---
+    int CP_d8(uint8_t opcode);     // 0xFE (Comparar inmediato)
+    int SUB_r8(uint8_t opcode);    // 0x90 - 0x97 (Resta)
+
+    // --- PREFIJO CB ---
+    int PREFIX_CB(uint8_t opcode); // El manejador del 0xCB
+
+    // --- STACK (PUSH / POP) ---
+    int PUSH_r16(uint8_t opcode);  // 0xC5, 0xD5, 0xE5, 0xF5
+    int POP_r16(uint8_t opcode);   // 0xC1, 0xD1, 0xE1, 0xF1
+    int LD_a16_SP(uint8_t opcode); // 0x08 (Guardar SP en memoria)
+
+    // --- ARITMÉTICA CON CARRY (ADC / SBC) ---
+    int ADC_A_r8(uint8_t opcode);  // 0x88 - 0x8F
+    int SBC_A_r8(uint8_t opcode);  // 0x98 - 0x9F
+    int SBC_A_d8(uint8_t opcode);  // 0xDE
+
+    // --- LÓGICA 8 BITS ---
+    int AND_r8(uint8_t opcode);  // 0xA0 - 0xA7
+
+    // --- CONTROL DE FLUJO CONDICIONAL ---
+    int RET_cc(uint8_t opcode);  // 0xC0 (NZ), 0xC8 (Z), 0xD0 (NC), 0xD8 (C)
+    // --- ARITMÉTICA 8 BITS ---
+    int INC_r8(uint8_t opcode);  // 0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x34, 0x3C
+    int ADD_A_d8(uint8_t opcode);// 0xC6 (Suma inmediata)
+
+    // --- CARGAS ESPECIALES ---
+    int LD_C_A(uint8_t opcode);  // 0xE2 (Escribir en I/O usando C: LD [0xFF00+C], A)
+    int LD_A_a16(uint8_t opcode);// 0xFA (Leer A desde memoria absoluta: LD A, [a16])
+
+    // --- BANDERAS ---
+    int SCF(uint8_t opcode);     // 0x37 (Set Carry Flag)
+    // --- SALTOS RELATIVOS ---
+    int JR_d8(uint8_t opcode);     // 0x18 (Incondicional)
+    int JR_cc_d8(uint8_t opcode);  // 0x20, 0x28, 0x30, 0x38 (Condicionales)
+    // --- CONTROL DE FLUJO ---
+    int RETI(uint8_t opcode); // 0xD9 Return from Interrupt
+    // --- LOAD INCREMENT/DECREMENT ---
+    int LDI_HL_A(uint8_t opcode); // 0x22: LD (HL+), A
 };

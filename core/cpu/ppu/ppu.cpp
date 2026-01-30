@@ -1,156 +1,213 @@
 #include "ppu.h"
 
-// Direcciones de registros importantes (para referencia)
-// LCDC = 0xFF40
-// STAT = 0xFF41
-// SCY  = 0xFF42
-// SCX  = 0xFF43
-// LY   = 0xFF44 
-
 ppu::ppu(mmu& mmu_ref) : memory(mmu_ref)
 {
-    // 1. Inicializamos contadores
     scanline_counter = 0;
+    frame_complete = false;
+    
+    // Inicializamos buffer gráfico (160 * 144 píxeles)
+    gfx.resize(160 * 144);
+    std::fill(gfx.begin(), gfx.end(), 0xFF0FBC9B); // Color base verde claro
 
-    // 2. Limpiamos la pantalla (llenar de blanco/verde claro)
-    gfx.fill(0xFF0FBC9B); 
-
-    // 3. Cargamos la Paleta "Matrix Green" (0xAABBGGRR)
-    palette[0] = 0xFF0FBC9B; // Blanco
-    palette[1] = 0xFF0FAC8B; // Gris Claro
-    palette[2] = 0xFF306230; // Gris Oscuro
-    palette[3] = 0xFF0F380F; // Negro
+    // Paleta clásica "Game Boy" (Formato 0xAARRGGBB o similar según tu frontend)
+    // 0: Blanco/Verde claro, 3: Negro/Verde oscuro
+    palette[0] = 0xFF0FBC9B; 
+    palette[1] = 0xFF0FAC8B; 
+    palette[2] = 0xFF306230; 
+    palette[3] = 0xFF0F380F; 
 }
+
 void ppu::step(int cycles) {
-    update_stat_register(); // Actualiza el estado (HBlank, VBlank, etc.)
+    // 1. Actualizamos el estado (STAT) antes de procesar
+    //    Esto decide en qué Modo estamos (HBlank, VBlank, etc.)
+    update_stat_register();
+
+    // 2. Comprobar si el LCD está ENCENDIDO (Bit 7 de LCDC - 0xFF40)
+    uint8_t lcdc = memory.readMemory(0xFF40);
+    if (!(lcdc & (1 << 7))) {
+        // --- CASO LCD APAGADO ---
+        // Si el LCD se apaga, reseteamos contadores y ponemos la PPU en "reposo"
+        scanline_counter = 0;
+        memory.writeMemory(0xFF44, 0); // LY (Línea actual) a 0
+        
+        // Forzamos el modo a VBlank (Mode 1) en el registro STAT
+        // para evitar que los juegos se bloqueen esperando modos.
+        uint8_t status = memory.readMemory(0xFF41);
+        status &= ~0x03; // Borrar bits 0-1
+        status |= 0x01;  // Poner modo 1
+        memory.writeMemory(0xFF41, status);
+        return;
+    }
+
+    // --- CASO LCD ENCENDIDO ---
     scanline_counter += cycles;
 
-    // Si hemos completado una línea (456 ciclos)...
+    // Una línea de escaneo tarda 456 ciclos de CPU (Dots)
     if (scanline_counter >= 456) {
-        
-        // 1. Restamos los ciclos para mantener la sincronización
+        // Restamos 456 para mantener el remanente de ciclos para la siguiente línea
         scanline_counter -= 456;
 
-        // 2. Leemos la línea actual
+        // Leemos la línea actual (LY)
         uint8_t current_line = memory.readMemory(0xFF44);
 
-        // --- ¡MOMENTO DE DIBUJAR! ---
-        // Si estamos en la zona visible (0-143), dibujamos esta línea en el buffer
+        // A. Si la línea está dentro de la pantalla visible (0 - 143)
         if (current_line < 144) {
-            draw_scanline();
+            draw_scanline(); // ¡Dibujamos píxeles en el buffer!
         }
 
-        // 3. Incrementamos la línea (LY)
-        memory.writeMemory(0xFF44, current_line + 1);
+        // B. Pasamos a la siguiente línea
+        current_line++;
+        memory.writeMemory(0xFF44, current_line);
 
-        // 4. Revisamos si entramos en V-BLANK (Línea 144)
-        uint8_t new_line = memory.readMemory(0xFF44);
-        
-        if (new_line == 144) {
-            // ¡Entramos en V-BLANK!
-            // Activamos la interrupción V-Blank (Bit 0 del registro IF 0xFF0F)
+        // C. Verificar eventos por número de línea
+        if (current_line == 144) {
+            // --- INICIO DE V-BLANK ---
+            // Acabamos de dibujar toda la pantalla.
+            
+            // 1. Solicitamos Interrupción V-Blank (Bit 0 de IF - 0xFF0F)
             uint8_t if_reg = memory.readMemory(0xFF0F);
-            memory.writeMemory(0xFF0F, if_reg | (1 << 0)); // Usamos bitwise OR con bit 0
+            memory.writeMemory(0xFF0F, if_reg | (1 << 0));
+            
+            // 2. Avisamos al frontend que puede pintar el frame
+            frame_complete = true;
         }
-        else if (new_line > 153) {
-            // Fin del V-Blank, volvemos a empezar el frame
+        else if (current_line > 153) {
+            // --- FIN DE V-BLANK ---
+            // La PPU ha terminado las líneas invisibles (144-153).
+            // Volvemos a la línea 0 para empezar un nuevo frame.
             memory.writeMemory(0xFF44, 0);
+            frame_complete = false;
         }
     }
 }
 
+// =============================================================
+// FUNCIÓN UPDATE_STAT: Máquina de estados
+// Controla los modos (0,1,2,3) y las interrupciones LCD
+// =============================================================
 void ppu::update_stat_register() {
+    // Si el LCD está apagado, no actualizamos nada
+    if (!(memory.readMemory(0xFF40) & (1 << 7))) return;
+
     uint8_t current_line = memory.readMemory(0xFF44); // LY
-    uint8_t status = memory.readMemory(0xFF41);       // STAT
-    
-    // Reseteamos solo los bits 0 y 1 (Modo), mantenemos los bits de interrupción (3-6)
-    // ~0x03 es lo mismo que 11111100 en binario
-    status &= ~0x03; 
+    uint8_t status = memory.readMemory(0xFF41);       // Leemos STAT actual
 
-    uint8_t current_mode = 0;
+    // Guardamos el modo actual (bits 0 y 1) para detectar cambios
+    uint8_t current_mode = status & 0x03;
+    uint8_t new_mode = 0;
+    bool req_interrupt = false;
 
-    // Caso 1: V-BLANK (Líneas 144 a 153)
+    // --- 1. DETERMINAR EL NUEVO MODO ---
     if (current_line >= 144) {
-        current_mode = 1;      // Mode 1: V-Blank
-        status |= (1 << 0);    // Ponemos bit 0 en 1
-        // Nota: El bit 1 se queda en 0, así que es 01 (Modo 1)
+        new_mode = 1; // V-BLANK (Líneas 144-153)
+        // Bit 4 de STAT: Interrupción VBlank activada en STAT
+        if (status & (1 << 4)) req_interrupt = true;
     }
     else {
-        // Estamos dibujando una línea visible (0-143)
-        // Decidimos el modo según cuántos ciclos han pasado en esta línea
-        
+        // Líneas visibles (0-143)
         if (scanline_counter < 80) {
-            current_mode = 2;   // Mode 2: OAM Search
-            status |= (1 << 1); // Ponemos bit 1 en 1 -> 10
+            new_mode = 2; // OAM SEARCH (Buscando sprites)
+            // Bit 5 de STAT: Interrupción OAM activada
+            if (status & (1 << 5)) req_interrupt = true;
         }
-        else if (scanline_counter < (80 + 172)) { 
-            current_mode = 3;   // Mode 3: Pixel Transfer
-            status |= (1 << 0); 
-            status |= (1 << 1); // Ponemos ambos -> 11
+        else if (scanline_counter < (80 + 172)) {
+            new_mode = 3; // PIXEL TRANSFER (Dibujando)
+            // El modo 3 no tiene interrupción STAT
         }
         else {
-            current_mode = 0;   // Mode 0: H-Blank
-            // Ambos bits en 0 -> 00
+            new_mode = 0; // H-BLANK (Descanso horizontal)
+            // Bit 3 de STAT: Interrupción HBlank activada
+            if (status & (1 << 3)) req_interrupt = true;
         }
     }
 
-    // Escribimos el nuevo estado en memoria
+    // --- 2. LOGICA DE INTERRUPCIÓN STAT ---
+    // La interrupción se dispara solo cuando CAMBIAMOS de modo
+    if (req_interrupt && (current_mode != new_mode)) {
+        uint8_t if_reg = memory.readMemory(0xFF0F);
+        memory.writeMemory(0xFF0F, if_reg | (1 << 1)); // Bit 1: LCD STAT Interrupt
+    }
+
+    // --- 3. CHECK LY == LYC (Coincidencia) ---
+    uint8_t lyc = memory.readMemory(0xFF45);
+    if (current_line == lyc) {
+        status |= (1 << 2); // Encender bit 2 (Coincidence Flag)
+        
+        // Si la interrupción de coincidencia está activada (Bit 6)
+        if (status & (1 << 6)) {
+             uint8_t if_reg = memory.readMemory(0xFF0F);
+             memory.writeMemory(0xFF0F, if_reg | (1 << 1));
+        }
+    } else {
+        status &= ~(1 << 2); // Apagar bit 2
+    }
+
+    // --- 4. GUARDAR ESTADO ---
+    // Limpiamos los bits de modo antiguos (bits 0-1) y ponemos el nuevo
+    status &= ~0x03; 
+    status |= new_mode;
+    
     memory.writeMemory(0xFF41, status);
 }
 
 void ppu::draw_scanline() {
-    // 1. Obtener registros de control y scroll
     uint8_t lcdc = memory.readMemory(0xFF40);
-    uint8_t scy  = memory.readMemory(0xFF42);
-    uint8_t scx  = memory.readMemory(0xFF43);
-    uint8_t ly   = memory.readMemory(0xFF44); // Línea actual
+    uint8_t scy = memory.readMemory(0xFF42);
+    uint8_t scx = memory.readMemory(0xFF43);
+    uint8_t ly = memory.readMemory(0xFF44);
+    uint8_t bgp = memory.readMemory(0xFF47); // Paleta Fondo
 
-    // Si el LCD está apagado, no dibujamos nada
-    if (!(lcdc & (1 << 7))) return;
+    // Verificar si el Fondo está activado (Bit 0 LCDC)
+    if (!(lcdc & 1)) return; 
 
-    // 2. Determinar dónde está el mapa de tiles (Tile Map)
-    // Bit 3 de LCDC decide si el mapa empieza en 0x9800 o 0x9C00
+    // Mapa de Tiles: ¿0x9C00 o 0x9800? (Bit 3)
     uint16_t tile_map_base = (lcdc & (1 << 3)) ? 0x9C00 : 0x9800;
 
-    // 3. Calcular la fila vertical dentro del mapa gigante (0-255)
-    uint8_t y_pos = scy + ly;
-    
-    // Cada tile mide 8x8, así que dividimos por 8 para saber qué fila de tiles es
-    uint16_t tile_row = (uint16_t)(y_pos / 8) * 32; 
+    // Datos de Tiles: ¿0x8000 o 0x8800? (Bit 4)
+    // 1 = 8000-8FFF (Unsigned 0-255)
+    // 0 = 8800-97FF (Signed -128 a 127)
+    bool signed_tile_addressing = !(lcdc & (1 << 4));
 
-    // 4. Bucle para los 160 píxeles horizontales
+    uint8_t y_pos = scy + ly;
+    uint16_t tile_row = (y_pos / 8) * 32;
+
     for (int x = 0; x < 160; x++) {
         uint8_t x_pos = x + scx;
-
-        // Determinar qué tile de la fila es (x / 8)
-        uint16_t tile_col = (x_pos / 8);
-        uint16_t tile_address = tile_map_base + tile_row + tile_col;
-
-        // Leer el índice del tile (qué dibujo es)
-        uint8_t tile_index = memory.readMemory(tile_address);
-
-        // 5. Buscar los datos del tile (Tile Data)
-        // Por simplicidad, asumimos el modo 0x8000 (donde los índices son 0-255)
-        uint16_t tile_data_address = 0x8000 + (tile_index * 16);
         
-        // Determinar qué línea interna del tile de 8x8 estamos dibujando
-        uint8_t line_inside_tile = (y_pos % 8) * 2;
-        uint8_t byte1 = memory.readMemory(tile_data_address + line_inside_tile);
-        uint8_t byte2 = memory.readMemory(tile_data_address + line_inside_tile + 1);
+        // Qué tile es (columna)
+        uint16_t tile_col = (x_pos / 8);
+        uint16_t tile_addr = tile_map_base + tile_row + tile_col;
+        
+        // Indice del tile
+        uint8_t tile_num = memory.readMemory(tile_addr);
+        
+        // CALCULAR DIRECCIÓN DEL TILE DATA (La corrección importante)
+        uint16_t tile_location = 0;
+        if (signed_tile_addressing) {
+            // Modo 0: 0x9000 base + indice con signo
+            tile_location = 0x9000 + ((int8_t)tile_num * 16);
+        } else {
+            // Modo 1: 0x8000 base + indice sin signo
+            tile_location = 0x8000 + (tile_num * 16);
+        }
 
-        // 6. Extraer el color del píxel (0, 1, 2 o 3)
-        // Hay que invertir el orden porque el bit 7 es el píxel 0
-        int bit_pos = 7 - (x_pos % 8);
-        uint8_t color_bit_low = (byte1 >> bit_pos) & 0x01;
-        uint8_t color_bit_high = (byte2 >> bit_pos) & 0x01;
-        uint8_t color_id = (color_bit_high << 1) | color_bit_low;
+        // Qué línea vertical del tile (0-7) * 2 bytes
+        uint8_t line = (y_pos % 8) * 2;
+        
+        uint8_t data1 = memory.readMemory(tile_location + line);
+        uint8_t data2 = memory.readMemory(tile_location + line + 1);
 
-        // 7. Aplicar la paleta (BGP)
-        uint8_t bgp = memory.readMemory(0xFF47);
-        // La paleta tiene 4 colores, cada uno usa 2 bits de BGP
-        uint8_t palette_index = (bgp >> (color_id * 2)) & 0x03;
+        // Bit del color (invertido, bit 7 es pixel 0)
+        int color_bit = 7 - (x_pos % 8);
+        
+        // Combinar bits
+        int color_num = ((data2 >> color_bit) & 1) << 1;
+        color_num |= ((data1 >> color_bit) & 1);
 
-        // 8. Escribir en el buffer final de 32 bits
-        gfx[ly * 160 + x] = palette[palette_index];
+        // Mapear con paleta (BGP)
+        int color = (bgp >> (color_num * 2)) & 0x03;
+
+        // Escribir en buffer
+        gfx[ly * 160 + x] = palette[color];
     }
 }

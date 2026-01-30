@@ -103,6 +103,148 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     table_opcode[0x80] = &cpu::ADD_A_r8;   // ADD A, B
     table_opcode[0xB1] = &cpu::OR_r8;      // OR C
 
+    // --- GRUPO: STACK & MEMORIA ---
+    table_opcode[0x31] = &cpu::LD_SP_d16;  // LD SP, d16  <-- MUY IMPORTANTE
+    table_opcode[0x1A] = &cpu::LD_A_DE;    // LD A, [DE]
+
+    // --- GRUPO: ARITMÉTICA 16 BITS (ADD HL, ss) ---
+    table_opcode[0x09] = &cpu::ADD_HL_r16; // ADD HL, BC
+    table_opcode[0x19] = &cpu::ADD_HL_r16; // ADD HL, DE  <-- EL QUE TE FALTA
+    table_opcode[0x29] = &cpu::ADD_HL_r16; // ADD HL, HL
+    table_opcode[0x39] = &cpu::ADD_HL_r16; // ADD HL, SP
+
+    // --- GRUPO: COMPARACIONES ---
+    table_opcode[0xFE] = &cpu::CP_d8;      // CP d8       <-- CRÍTICO PARA LOGICA
+
+    // --- GRUPO: RESTA (SUB r8) ---
+    // Mapeamos todo el bloque 0x90-0x97
+    table_opcode[0x90] = &cpu::SUB_r8; // SUB B
+    table_opcode[0x91] = &cpu::SUB_r8; // SUB C
+    table_opcode[0x92] = &cpu::SUB_r8; // SUB D
+    table_opcode[0x93] = &cpu::SUB_r8; // SUB E
+    table_opcode[0x94] = &cpu::SUB_r8; // SUB H       <-- EL QUE TE FALTA
+    table_opcode[0x95] = &cpu::SUB_r8; // SUB L
+    table_opcode[0x96] = &cpu::SUB_r8; // SUB [HL]
+    table_opcode[0x97] = &cpu::SUB_r8; // SUB A
+
+    // --- GRUPO: STACK OPS ---
+    table_opcode[0xC5] = &cpu::PUSH_r16; // PUSH BC
+    table_opcode[0xD5] = &cpu::PUSH_r16; // PUSH DE
+    table_opcode[0xE5] = &cpu::PUSH_r16; // PUSH HL <-- EL QUE PIDE EL LOG
+    table_opcode[0xF5] = &cpu::PUSH_r16; // PUSH AF <-- EL QUE PIDE EL LOG
+    
+    table_opcode[0xC1] = &cpu::POP_r16;  // POP BC
+    table_opcode[0xD1] = &cpu::POP_r16;  // POP DE
+    table_opcode[0xE1] = &cpu::POP_r16;  // POP HL
+    table_opcode[0xF1] = &cpu::POP_r16;  // POP AF <-- EL QUE PIDE EL LOG
+
+    table_opcode[0x08] = &cpu::LD_a16_SP; // LD [a16], SP <-- EL QUE PIDE EL LOG
+
+    // --- GRUPO: PREFIJO CB ---
+    table_opcode[0xCB] = &cpu::PREFIX_CB; // <-- EL JEFE FINAL
+
+    // --- GRUPO: MATH CON CARRY ---
+    table_opcode[0x89] = &cpu::ADC_A_r8;  // ADC A, C
+    table_opcode[0x99] = &cpu::SBC_A_r8;  // SBC A, C
+    table_opcode[0xDE] = &cpu::SBC_A_d8;  // SBC A, d8
+
+    // --- GRUPO: AND (Lógica Y) ---
+    table_opcode[0xA0] = &cpu::AND_r8; // AND B
+    table_opcode[0xA1] = &cpu::AND_r8; // AND C
+    table_opcode[0xA2] = &cpu::AND_r8; // AND D
+    table_opcode[0xA3] = &cpu::AND_r8; // AND E
+    table_opcode[0xA4] = &cpu::AND_r8; // AND H
+    table_opcode[0xA5] = &cpu::AND_r8; // AND L
+    table_opcode[0xA6] = &cpu::AND_r8; // AND [HL]
+    table_opcode[0xA7] = &cpu::AND_r8; // AND A  <-- EL QUE PIDE EL LOG
+
+    // --- GRUPO: RET CONDICIONAL ---
+    table_opcode[0xC0] = &cpu::RET_cc; // RET NZ
+    table_opcode[0xC8] = &cpu::RET_cc; // RET Z  <-- EL QUE PIDE EL LOG
+    table_opcode[0xD0] = &cpu::RET_cc; // RET NC
+    table_opcode[0xD8] = &cpu::RET_cc; // RET C
+    // --- GRUPO: INC r8 (Incrementar registro 8 bits) ---
+    table_opcode[0x04] = &cpu::INC_r8; // INC B
+    table_opcode[0x0C] = &cpu::INC_r8; // INC C  <-- EL QUE PIDE EL LOG
+    table_opcode[0x14] = &cpu::INC_r8; // INC D
+    table_opcode[0x1C] = &cpu::INC_r8; // INC E  <-- EL QUE PIDE EL LOG
+    table_opcode[0x24] = &cpu::INC_r8; // INC H  <-- EL QUE PIDE EL LOG
+    table_opcode[0x2C] = &cpu::INC_r8; // INC L
+    table_opcode[0x34] = &cpu::INC_r8; // INC [HL]
+    table_opcode[0x3C] = &cpu::INC_r8; // INC A
+
+    // --- Cargas y Lógica Variada ---
+    table_opcode[0xE2] = &cpu::LD_C_A;   // LD [C], A (I/O Write) <-- MUY IMPORTANTE
+    table_opcode[0xFA] = &cpu::LD_A_a16; // LD A, [a16]
+    table_opcode[0xC6] = &cpu::ADD_A_d8; // ADD A, d8
+    table_opcode[0x37] = &cpu::SCF;      // SCF
+
+    // --- GRUPO: JUMP RELATIVE (JR) ---
+    table_opcode[0x18] = &cpu::JR_d8;     // JR n
+    table_opcode[0x20] = &cpu::JR_cc_d8;  // JR NZ, n
+    table_opcode[0x28] = &cpu::JR_cc_d8;  // JR Z, n
+    table_opcode[0x30] = &cpu::JR_cc_d8;  // JR NC, n
+    table_opcode[0x38] = &cpu::JR_cc_d8;  // JR C, n
+    // --- RETI ---
+    table_opcode[0xD9] = &cpu::RETI;
+    // --- LDI (Load and Increment) ---
+    table_opcode[0x22] = &cpu::LDI_HL_A;
+    table_opcode[0x22] = &cpu::LDI_HL_A;
+
+}
+// --- FLAGS (Getters) ---
+uint8_t cpu::getZ() const { return (r8[F] >> 7) & 1; } 
+uint8_t cpu::getN() const { return (r8[F] >> 6) & 1; }
+uint8_t cpu::getH() const { return (r8[F] >> 5) & 1; }
+uint8_t cpu::getC() const { return (r8[F] >> 4) & 1; }
+
+// --- FLAGS (Setters) ---
+void cpu::setZ(bool on) { 
+    if (on) r8[F] |= (1 << 7); 
+    else    r8[F] &= ~(1 << 7); 
+    maskF();
+}
+void cpu::setN(bool on) { 
+    if (on) r8[F] |= (1 << 6); 
+    else    r8[F] &= ~(1 << 6);
+    maskF(); 
+}
+void cpu::setH(bool on) { 
+    if (on) r8[F] |= (1 << 5); 
+    else    r8[F] &= ~(1 << 5); 
+    maskF();
+}
+void cpu::setC(bool on) { 
+    if (on) r8[F] |= (1 << 4); 
+    else    r8[F] &= ~(1 << 4); 
+    maskF();
+}
+
+// --- Registros 16-bits (Getters/Setters) ---
+uint16_t cpu::getAF() const { 
+    return (r8[A] << 8) | (r8[F] & 0xF0); 
+}
+void cpu::setAF(uint16_t val) { 
+    r8[A] = val >> 8; 
+    r8[F] = val & 0xF0; 
+}
+
+uint16_t cpu::getBC() const { return (r8[B] << 8) | r8[C]; }
+void cpu::setBC(const uint16_t val) {
+    r8[B] = val >> 8;
+    r8[C] = val & 0xFF;
+}
+
+uint16_t cpu::getDE() const { return (r8[D] << 8) | r8[E]; }
+void cpu::setDE(const uint16_t val) {
+    r8[D] = val >> 8;
+    r8[E] = val & 0xFF;
+}
+
+uint16_t cpu::getHL() const { return (r8[H] << 8) | r8[L]; }
+void cpu::setHL(const uint16_t val) {
+    r8[H] = val >> 8;
+    r8[L] = val & 0xFF;
 }
 
 // --- Gestión del Stack ---
@@ -643,57 +785,386 @@ int cpu::ADD_A_r8(uint8_t opcode) {
     r8[A] = (uint8_t)result;
     return (srcIndex == 6) ? 8 : 4;
 }
-// --- FLAGS (Getters) ---
-uint8_t cpu::getZ() const { return (r8[F] >> 7) & 1; } 
-uint8_t cpu::getN() const { return (r8[F] >> 6) & 1; }
-uint8_t cpu::getH() const { return (r8[F] >> 5) & 1; }
-uint8_t cpu::getC() const { return (r8[F] >> 4) & 1; }
+int cpu::LD_SP_d16(uint8_t opcode) {
+    (void)opcode;
+    SP = readImmediateWord();
+    // std::cout << "LD SP, " << std::hex << SP << "\n";
+    return 12;
+}
+int cpu::LD_A_DE(uint8_t opcode) {
+    (void)opcode;
+    r8[A] = memory.readMemory(getDE());
+    return 8;
+}
+int cpu::ADD_HL_r16(uint8_t opcode) {
+    int regIndex = (opcode >> 4) & 0x03;
+    uint16_t val = 0;
+    
+    switch(regIndex) {
+        case 0: val = getBC(); break;
+        case 1: val = getDE(); break;
+        case 2: val = getHL(); break;
+        case 3: val = SP; break;
+    }
 
-// --- FLAGS (Setters) ---
-void cpu::setZ(bool on) { 
-    if (on) r8[F] |= (1 << 7); 
-    else    r8[F] &= ~(1 << 7); 
-    maskF();
+    uint16_t hl = getHL();
+    uint32_t result = hl + val;
+    
+    setHL((uint16_t)result);
+    
+    setN(false);
+    // Half Carry 16-bit: (bits 0-11) + (bits 0-11) > 0xFFF
+    setH((hl & 0xFFF) + (val & 0xFFF) > 0xFFF);
+    // Carry: Si desborda 16 bits
+    setC(result > 0xFFFF);
+    
+    return 8;
 }
-void cpu::setN(bool on) { 
-    if (on) r8[F] |= (1 << 6); 
-    else    r8[F] &= ~(1 << 6);
-    maskF(); 
+int cpu::CP_d8(uint8_t opcode) {
+    (void)opcode;
+    uint8_t n = readImmediateByte();
+    uint8_t a = r8[A];
+    
+    setZ(a == n);
+    setN(true);
+    setH((a & 0x0F) < (n & 0x0F)); // Préstamo del bit 4
+    setC(a < n);                   // Préstamo total (A es menor que n)
+    
+    return 8;
 }
-void cpu::setH(bool on) { 
-    if (on) r8[F] |= (1 << 5); 
-    else    r8[F] &= ~(1 << 5); 
-    maskF();
-}
-void cpu::setC(bool on) { 
-    if (on) r8[F] |= (1 << 4); 
-    else    r8[F] &= ~(1 << 4); 
-    maskF();
+int cpu::SUB_r8(uint8_t opcode) {
+    int srcIndex = opcode & 0x07;
+    static const R8 hardwareToYourEnum[] = {B, C, D, E, H, L, H, A};
+    
+    uint8_t val;
+    int cycles = 4;
+
+    if (srcIndex == 6) { // [HL]
+        val = memory.readMemory(getHL());
+        cycles = 8;
+    } else {
+        val = r8[hardwareToYourEnum[srcIndex]];
+    }
+
+    uint8_t a = r8[A];
+    int result = a - val;
+    
+    r8[A] = (uint8_t)result;
+    
+    setZ(r8[A] == 0);
+    setN(true);
+    setH((a & 0x0F) < (val & 0x0F));
+    setC(a < val);
+    
+    return cycles;
 }
 
-// --- Registros 16-bits (Getters/Setters) ---
-uint16_t cpu::getAF() const { 
-    return (r8[A] << 8) | (r8[F] & 0xF0); 
+int cpu::PREFIX_CB(uint8_t opcode) {
+    (void)opcode;
+    // 1. LEER el siguiente byte (el verdadero opcode CB)
+    uint8_t cb_op = readImmediateByte();
+    
+    // Decodificar operandos
+    int regIndex = cb_op & 0x07; // Últimos 3 bits dicen el registro (B,C,D,E,H,L,HL,A)
+    int bit = (cb_op >> 3) & 0x07; // Bits 3-5 dicen qué bit operar (0-7)
+    int type = (cb_op >> 6) & 0x03; // Bits 6-7 dicen el tipo (Rotate, Bit, Res, Set)
+
+    static const R8 map[] = {B, C, D, E, H, L, H, A}; // Nota: índice 6 es HL
+    uint8_t val;
+    int cycles = 8; // Ciclos base para registros
+
+    // Leer valor
+    if (regIndex == 6) { // [HL]
+        val = memory.readMemory(getHL());
+        cycles = (type == 1) ? 12 : 16; // BIT toma 12, otros 16 con [HL]
+    } else {
+        val = r8[map[regIndex]];
+    }
+
+    // --- EJECUTAR OPERACIÓN ---
+    
+    // TIPO 1: BIT (0x40 - 0x7F) - Testear si un bit es 0 o 1
+    if (type == 1) { // Rango 0x40 - 0x7F
+        bool isZero = (val & (1 << bit)) == 0;
+        setZ(isZero);
+        setN(false);
+        setH(true);
+        // Carry no cambia
+        return cycles;
+    }
+    
+    // SI NO ES "BIT", AÚN NO LO IMPLEMENTAMOS (Saldrá error en logs si se necesita)
+    // Pero Tetris usa mayormente BIT al inicio.
+    std::cout << "CB Opcode no implementado: " << std::hex << (int)cb_op << "\n";
+    return 8;
 }
-void cpu::setAF(uint16_t val) { 
-    r8[A] = val >> 8; 
-    r8[F] = val & 0xF0; 
+int cpu::PUSH_r16(uint8_t opcode) {
+    int reg = (opcode >> 4) & 0x03; // 00=BC, 01=DE, 10=HL, 11=AF
+    uint16_t val = 0;
+    
+    switch(reg) {
+        case 0: val = getBC(); break;
+        case 1: val = getDE(); break;
+        case 2: val = getHL(); break;
+        case 3: val = getAF(); break;
+    }
+    
+    push(val); // Tu función push ya debería restar SP y escribir
+    return 16;
 }
 
-uint16_t cpu::getBC() const { return (r8[B] << 8) | r8[C]; }
-void cpu::setBC(const uint16_t val) {
-    r8[B] = val >> 8;
-    r8[C] = val & 0xFF;
+int cpu::POP_r16(uint8_t opcode) {
+    int reg = (opcode >> 4) & 0x03;
+    uint16_t val = pop(); // Tu función pop ya debería leer y sumar SP
+    
+    switch(reg) {
+        case 0: setBC(val); break;
+        case 1: setDE(val); break;
+        case 2: setHL(val); break;
+        case 3: 
+            // IMPORTANTE: Limpiar los 4 bits bajos de F
+            setAF(val & 0xFFF0); 
+            break;
+    }
+    return 12;
+}
+int cpu::LD_a16_SP(uint8_t opcode) {
+    (void)opcode;
+    uint16_t addr = readImmediateWord();
+    
+    // Game Boy es Little Endian: primero low, luego high
+    memory.writeMemory(addr, SP & 0xFF);
+    memory.writeMemory(addr + 1, SP >> 8);
+    
+    return 20;
+}
+int cpu::ADC_A_r8(uint8_t opcode) {
+    int src = opcode & 0x07;
+    static const R8 map[] = {B, C, D, E, H, L, H, A};
+    uint8_t val = (src == 6) ? memory.readMemory(getHL()) : r8[map[src]];
+
+    int carry = getC() ? 1 : 0;
+    int result = r8[A] + val + carry;
+
+    setZ((result & 0xFF) == 0);
+    setN(false);
+    // Half Carry: check nibble overflow
+    setH(((r8[A] & 0x0F) + (val & 0x0F) + carry) > 0x0F);
+    setC(result > 0xFF);
+
+    r8[A] = (uint8_t)result;
+    return (src == 6) ? 8 : 4;
 }
 
-uint16_t cpu::getDE() const { return (r8[D] << 8) | r8[E]; }
-void cpu::setDE(const uint16_t val) {
-    r8[D] = val >> 8;
-    r8[E] = val & 0xFF;
+int cpu::SBC_A_r8(uint8_t opcode) {
+    int src = opcode & 0x07;
+    static const R8 map[] = {B, C, D, E, H, L, H, A};
+    uint8_t val = (src == 6) ? memory.readMemory(getHL()) : r8[map[src]];
+
+    int carry = getC() ? 1 : 0;
+    int result = r8[A] - val - carry;
+
+    setZ((result & 0xFF) == 0);
+    setN(true);
+    // Half Carry: check nibble borrow
+    setH(((r8[A] & 0x0F) - (val & 0x0F) - carry) < 0);
+    setC(result < 0);
+
+    r8[A] = (uint8_t)result;
+    return (src == 6) ? 8 : 4;
 }
 
-uint16_t cpu::getHL() const { return (r8[H] << 8) | r8[L]; }
-void cpu::setHL(const uint16_t val) {
-    r8[H] = val >> 8;
-    r8[L] = val & 0xFF;
+int cpu::SBC_A_d8(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = readImmediateByte();
+    int carry = getC() ? 1 : 0;
+    int result = r8[A] - val - carry;
+
+    setZ((result & 0xFF) == 0);
+    setN(true);
+    setH(((r8[A] & 0x0F) - (val & 0x0F) - carry) < 0);
+    setC(result < 0);
+
+    r8[A] = (uint8_t)result;
+    return 8;
+}
+int cpu::AND_r8(uint8_t opcode) {
+    int srcIndex = opcode & 0x07;
+    static const R8 map[] = {B, C, D, E, H, L, H, A};
+    
+    uint8_t val;
+    int cycles = 4;
+
+    if (srcIndex == 6) { // [HL]
+        val = memory.readMemory(getHL());
+        cycles = 8;
+    } else {
+        val = r8[map[srcIndex]];
+    }
+
+    // Operación AND
+    r8[A] &= val;
+
+    // Banderas
+    setZ(r8[A] == 0);
+    setN(false);
+    setH(true); // ¡IMPORTANTE! En Game Boy, AND pone H a 1.
+    setC(false);
+
+    return cycles;
+}
+int cpu::RET_cc(uint8_t opcode) {
+    // Bits 3-4 indican la condición: 0=NZ, 1=Z, 2=NC, 3=C
+    // Opcode: 11 cc 000
+    int condition = (opcode >> 3) & 0x03;
+    bool doReturn = false;
+
+    switch(condition) {
+        case 0: doReturn = !getZ(); break; // NZ (No Zero)
+        case 1: doReturn = getZ();  break; // Z (Zero)
+        case 2: doReturn = !getC(); break; // NC (No Carry)
+        case 3: doReturn = getC();  break; // C (Carry)
+    }
+
+    if (doReturn) {
+        PC = pop(); // Sacar dirección de retorno del Stack
+        // std::cout << "RET cc Taken to " << std::hex << PC << "\n";
+        return 20; // 5 ciclos si se cumple
+    }
+
+    // Si no se cumple, no hacemos nada
+    return 8; // 2 ciclos si no se cumple
+}
+int cpu::INC_r8(uint8_t opcode) {
+    int index = (opcode >> 3) & 0x07; // Bits 3-5 dicen el registro
+    static const R8 map[] = {B, C, D, E, H, L, H, A};
+    
+    uint8_t val;
+    int cycles = 4;
+
+    // Obtener valor actual
+    if (index == 6) { // [HL]
+        val = memory.readMemory(getHL());
+        cycles = 12;
+    } else {
+        val = r8[map[index]];
+    }
+
+    uint8_t result = val + 1;
+
+    // Guardar valor
+    if (index == 6) {
+        memory.writeMemory(getHL(), result);
+    } else {
+        r8[map[index]] = result;
+    }
+
+    // Banderas
+    setZ(result == 0);
+    setN(false);
+    // Half Carry: Si pasamos de 0x0F a 0x10 (bits bajos 1111 -> 0000)
+    setH((val & 0x0F) == 0x0F);
+    // Carry NO se toca en INC
+
+    return cycles;
+}
+int cpu::LD_C_A(uint8_t opcode) {
+    (void)opcode;
+    // Dirección base de IO (0xFF00) + Registro C
+    uint16_t addr = 0xFF00 | r8[C];
+    
+    memory.writeMemory(addr, r8[A]);
+    
+    // std::cout << "LD [FF" << std::hex << (int)r8[C] << "], A\n";
+    return 8;
+}
+int cpu::LD_A_a16(uint8_t opcode) {
+    (void)opcode;
+    uint16_t addr = readImmediateWord();
+    r8[A] = memory.readMemory(addr);
+    return 16;
+}
+int cpu::ADD_A_d8(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = readImmediateByte();
+    uint16_t result = r8[A] + val;
+
+    setZ((result & 0xFF) == 0);
+    setN(false);
+    setH(((r8[A] & 0x0F) + (val & 0x0F)) > 0x0F);
+    setC(result > 0xFF);
+
+    r8[A] = (uint8_t)result;
+    return 8;
+}
+int cpu::SCF(uint8_t opcode) {
+    (void)opcode;
+    setN(false);
+    setH(false);
+    setC(true);
+    return 4;
+}
+int cpu::JR_d8(uint8_t opcode) {
+    (void)opcode;
+    // Leemos un byte con SIGNO (int8_t).
+    // Si es 0xFE (-2), el PC retrocede 2 pasos.
+    int8_t offset = (int8_t)readImmediateByte();
+    PC += offset;
+    return 12;
+}
+
+int cpu::JR_cc_d8(uint8_t opcode) {
+    int8_t offset = (int8_t)readImmediateByte();
+    
+    // Decodificar condición (Bits 3-4): 0=NZ, 1=Z, 2=NC, 3=C
+    int condition = (opcode >> 3) & 0x03;
+    bool jump = false;
+
+    switch(condition) {
+        case 0: jump = !getZ(); break; // NZ
+        case 1: jump = getZ();  break; // Z
+        case 2: jump = !getC(); break; // NC
+        case 3: jump = getC();  break; // C
+    }
+
+    if (jump) {
+        PC += offset;
+        return 12; // 3 ciclos de máquina si salta
+    }
+    
+    return 8; // 2 ciclos si no salta
+}
+int cpu::RETI(uint8_t opcode) {
+    (void)opcode;
+    
+    // 1. POP PC (Recuperar dirección de retorno de la Pila)
+    // Leemos byte bajo
+    uint8_t lo = memory.readMemory(SP);
+    SP++;
+    
+    // Leemos byte alto
+    uint8_t hi = memory.readMemory(SP);
+    SP++;
+    
+    // Combinamos para formar el PC
+    PC = (hi << 8) | lo;
+
+    // 2. Habilitar Interrupciones inmediatamente
+    IME = true; 
+
+    return 16; // Tarda 16 ciclos
+}
+int cpu::LDI_HL_A(uint8_t opcode) {
+    (void)opcode; // Evitar warning de variable no usada
+
+    // 1. Obtenemos la dirección de memoria desde HL
+    uint16_t addr = getHL();
+
+    // 2. Escribimos el contenido del registro A en esa dirección
+    memory.writeMemory(addr, r8[A]);
+
+    // 3. Incrementamos HL (HL = HL + 1)
+    setHL(addr + 1);
+
+    return 8; // 8 ciclos
 }
