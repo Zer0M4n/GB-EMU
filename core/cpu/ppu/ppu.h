@@ -1,33 +1,29 @@
 #ifndef PPU_H
 #define PPU_H
 #pragma once
-
-#include <array>
+#include <vector>
 #include <cstdint>
 #include "mmu/mmu.h"
 
-class ppu
-{
-    private:
-        mmu& memory;
-        // --- Control de Tiempos ---
-        // La PPU tiene 4 modos (HBlank, VBlank, OAM, Transfer)
-        // scanline_counter cuenta los ciclos dentro de una línea
-        int scanline_counter; 
+class ppu {
+public:
+    ppu(mmu& mmu_ref);
+    void step(int cycles);
 
-        // --- Paleta ---
-        // Guardamos los 4 colores "Matrix" aquí para acceso rápido
-        std::array<uint32_t, 4> palette;
-
-        // --- Helpers Internos ---
-        // Funciones que implementaremos luego para dibujar
-        void draw_scanline();
-        void update_stat_register();
-    public:
-        ppu(mmu& mmu_ref);
-        void step(int cycles);
-        std::array<uint32_t, 160 *144> gfx;
+    // Buffer de píxeles: 160 de ancho x 144 de alto
+    // Usamos uint32_t para formato RGBA o ARGB directo (0xFFRRGGBB)
+    std::vector<uint32_t> gfx; 
     
+    // Bandera para saber si el frame terminó y se puede pintar en pantalla
+    bool frame_complete;
+
+private:
+    mmu& memory;
+    int scanline_counter;
+    uint32_t palette[4];
+
+    void update_stat_register();
+    void draw_scanline();
 };
 
 #endif 

@@ -55,7 +55,7 @@
     <script>
         // Configuración del objeto Module para Emscripten
         var Module = {
-            // Vinculamos el canvas al módulo (útil para inputs futuros)
+            // Vinculamos el canvas al módulo
             canvas: (function() { return document.getElementById('lcd'); })(),
 
             // Se ejecuta cuando el WASM está descargado y listo
@@ -65,27 +65,34 @@
             }
         };
 
-        // Esta función será llamada desde C++ (emc_main.cpp) en cada frame
+        // --- FUNCIÓN DE DIBUJADO (Llamada desde C++) ---
         function drawCanvas() {
-            // 1. Obtener la dirección de memoria del buffer de video
-            // Nota: _get_video_buffer es el nombre exportado desde C++
-            const ptr = Module._get_video_buffer();
-            if (ptr === 0) return;
+            // 1. Obtener funciones exportadas de C++ (Verifica que Module exista)
+            if (!Module || !Module._get_video_buffer) return;
 
-            // 2. Crear una "vista" de JS que apunta a esa memoria en C++
+            const bufferPointer = Module._get_video_buffer();
+            
+            // Si el puntero es 0 (null), el emulador no está listo
+            if (bufferPointer === 0) return;
+
+            // 2. Crear un array de JS que apunte a la memoria de WASM
             // 160 ancho * 144 alto * 4 bytes (RGBA) = 92160 bytes
-            // Usamos HEAPU8 que es la memoria completa del WASM vista como bytes
-            const canvasArray = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, 92160);
+            const data = new Uint8ClampedArray(Module.HEAPU8.buffer, bufferPointer, 92160);
 
-            // 3. Crear una imagen de Canvas
-            const imageData = new ImageData(canvasArray, 160, 144);
+            // 3. Obtener el Canvas correcto
+            // ¡AQUÍ ESTABA EL ERROR!: Cambiado 'screen' por 'lcd' para coincidir con el HTML
+            const canvas = document.getElementById('lcd'); 
+            
+            if (!canvas) {
+                console.error("No se encuentra el canvas con id='lcd'");
+                return;
+            }
 
-            // 4. Pintarla en el contexto 2D
-            const canvas = document.getElementById('lcd');
             const ctx = canvas.getContext('2d');
             
-            // putImageData vuelca los píxeles crudos en la pantalla
-            ctx.putImageData(imageData, 0, 0);
+            // 4. Crear objeto ImageData y pintar
+            const imgData = new ImageData(data, 160, 144);
+            ctx.putImageData(imgData, 0, 0);
         }
     </script>
 
