@@ -1,9 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
 project(GB-EMU)
 
-# Estándar C++17
+# Forzamos C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Seguridad: Si intentas compilar esto con g++ normal, dará error y te avisará
+if(NOT EMSCRIPTEN)
+    message(FATAL_ERROR "Este proyecto ahora es SOLO WEB. Usa 'emcmake cmake ..")
+endif()
 
 # 1. Rutas de cabeceras (.h)
 include_directories(
@@ -16,44 +21,34 @@ include_directories(
     core/cartridge/IMBC
 )
 
-# 2. Archivos fuente del NÚCLEO (Compartidos entre Web y Desktop)
+# 2. Archivos fuente
 set(CORE_SOURCES
     core/cpu/cpu.cpp
-    core/cpu/ppu/ppu.cpp
     core/cpu/mmu/mmu.cpp
+    core/cpu/ppu/ppu.cpp
     core/cartridge/cartridge.cpp
     core/cartridge/IMBC/type_cartridge/RomOnly.cpp
     core/cartridge/IMBC/type_cartridge/MBC1.cpp
 )
 
-# 3. Lógica de Detección (Desktop vs Web)
-if(EMSCRIPTEN)
-    # --- CONFIGURACIÓN PARA WEB (WASM) ---
-    message(STATUS "Compilando para WebAssembly (Emscripten)...")
+# 3. Configuración del Ejecutable
+message(STATUS "Configurando build para WebAssembly...")
 
-    # Usamos emc_main.cpp como punto de entrada
-    add_executable(gb-emu emc_main.cpp ${CORE_SOURCES})
+add_executable(gb-emu emc_main.cpp ${CORE_SOURCES})
 
-    # Configuración de salida (.html)
-    set_target_properties(gb-emu PROPERTIES SUFFIX ".html")
-    
-    # Definimos la ruta absoluta a la carpeta de roms para evitar errores
-    set(ROMS_PATH "${CMAKE_SOURCE_DIR}/roms")
+# Generar un .html en lugar de un .js suelto
+set_target_properties(gb-emu PROPERTIES SUFFIX ".html")
 
-    # Flags de enlace (Linker flags)
-    # CORRECCIÓN: Usamos "SHELL:" para agrupar el flag y su valor como un solo argumento.
-    # Esto evita que CMake o Emscripten confundan "NO_EXIT_RUNTIME=0" con un nombre de archivo.
-    target_link_options(gb-emu PRIVATE
-        "SHELL:--preload-file ${ROMS_PATH}@/roms" 
-        "SHELL:-s ALLOW_MEMORY_GROWTH=1"     
-        "SHELL:-s NO_EXIT_RUNTIME=0"
-    )
-
-else()
-    # --- CONFIGURACIÓN PARA DESKTOP (LINUX) ---
-    message(STATUS "Compilando para Desktop (Nativo)...")
-
-    # Usamos emc_main.cpp (el main híbrido)
-    add_executable(gb-emu emc_main.cpp ${CORE_SOURCES})
-
-endif()
+# 4. Flags de Emscripten (Linker)
+target_link_options(gb-emu PRIVATE
+        "SHELL:-s USE_SDL=0"
+        "SHELL:-s ALLOW_MEMORY_GROWTH=1"
+        "SHELL:-s NO_EXIT_RUNTIME=1"
+        "SHELL:-s EXPORTED_FUNCTIONS=['_main','_get_video_buffer']"
+        # --- AQUÍ ESTÁ EL CAMBIO ---
+        # Agregamos 'HEAPU8' para que JS pueda leer el buffer de video
+        "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8']" 
+        
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/roms@/roms"
+        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/src/index.html"
+)

@@ -1,13 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GB-EMU</title>
+    <title>GameBoy Emulator - WebAssembly</title>
+    <style>
+        body {
+            background-color: #202020;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .gb-case {
+            background-color: #c0c0c0;
+            padding: 20px;
+            border-radius: 10px 10px 40px 10px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+        }
+        .screen-border {
+            background-color: #505050;
+            padding: 20px 40px;
+            border-radius: 10px 10px 30px 10px;
+            margin-bottom: 20px;
+        }
+        canvas {
+            background-color: #9bbc0f; /* Color base pantalla apagada */
+            width: 320px;  /* Escalado 2x visualmente */
+            height: 288px;
+            image-rendering: pixelated; /* Para que se vea retro y nítido */
+            border: 2px solid #333;
+        }
+        .controls {
+            text-align: center;
+            font-size: 12px;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <canvas>
-        
-    </canvas>
+
+    <div class="gb-case">
+        <div class="screen-border">
+            <canvas id="lcd" width="160" height="144"></canvas>
+        </div>
+        <div class="controls">
+            <p>CARGANDO WASM...</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuración del objeto Module para Emscripten
+        var Module = {
+            // Vinculamos el canvas al módulo (útil para inputs futuros)
+            canvas: (function() { return document.getElementById('lcd'); })(),
+
+            // Se ejecuta cuando el WASM está descargado y listo
+            onRuntimeInitialized: function() {
+                console.log("WASM Cargado y listo!");
+                document.querySelector('.controls p').innerText = "EMULADOR CORRIENDO";
+            }
+        };
+
+        // Esta función será llamada desde C++ (emc_main.cpp) en cada frame
+        function drawCanvas() {
+            // 1. Obtener la dirección de memoria del buffer de video
+            // Nota: _get_video_buffer es el nombre exportado desde C++
+            const ptr = Module._get_video_buffer();
+            if (ptr === 0) return;
+
+            // 2. Crear una "vista" de JS que apunta a esa memoria en C++
+            // 160 ancho * 144 alto * 4 bytes (RGBA) = 92160 bytes
+            // Usamos HEAPU8 que es la memoria completa del WASM vista como bytes
+            const canvasArray = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, 92160);
+
+            // 3. Crear una imagen de Canvas
+            const imageData = new ImageData(canvasArray, 160, 144);
+
+            // 4. Pintarla en el contexto 2D
+            const canvas = document.getElementById('lcd');
+            const ctx = canvas.getContext('2d');
+            
+            // putImageData vuelca los píxeles crudos en la pantalla
+            ctx.putImageData(imageData, 0, 0);
+        }
+    </script>
+
+    {{{ SCRIPT }}}
+    
 </body>
 </html>

@@ -89,7 +89,7 @@ void mmu::writeMemory(uint16_t address, uint8_t value)
         DMA(value);
         return;
     }
-    if (address = 0xFF0F)
+    if (address == 0xFF0F)
     {
         IF = value;
         return;
