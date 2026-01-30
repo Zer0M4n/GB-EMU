@@ -13,7 +13,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o.d"
   "CMakeFiles/gb-emu.dir/emc_main.cpp.o"
   "CMakeFiles/gb-emu.dir/emc_main.cpp.o.d"
-  "gb-emu"
+  "gb-emu.html"
   "gb-emu.pdb"
 )
 

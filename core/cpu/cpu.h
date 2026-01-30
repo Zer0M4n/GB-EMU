@@ -95,4 +95,13 @@ private:
     int JP(uint8_t opcode);
 
     int LD_r8_r8(uint8_t opcode);
+    int LD_r8_d8(uint8_t opcode);
+    // ALU (Aritmética/Lógica)
+    int XOR_A(uint8_t opcode);
+
+    // Cargas de 16 bits (Cubre LD BC,d16; LD DE,d16; LD HL,d16; LD SP,d16)
+    int LD_r16_d16(uint8_t opcode);
+
+    // Cargas especiales de memoria (LD (HL-), A y LD (HL+), A)
+    int LDD_HL_A(uint8_t opcode); // 0x32
 };

@@ -17,12 +17,25 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
 
     // Mapear instrucciones implementadas
     table_opcode[0x00] = &cpu::NOP;
+    table_opcode[0x06] = &cpu::LD_r8_d8; // LD B, d8
+    table_opcode[0x0E] = &cpu::LD_r8_d8; // LD C, d8  <-- ESTE ES EL QUE TE FALTA
+    table_opcode[0x16] = &cpu::LD_r8_d8; // LD D, d8
+    table_opcode[0x1E] = &cpu::LD_r8_d8; // LD E, d8
+    table_opcode[0x26] = &cpu::LD_r8_d8; // LD H, d8
+    table_opcode[0x2E] = &cpu::LD_r8_d8; // LD L, d8
+    table_opcode[0x36] = &cpu::LD_r8_d8; // LD [HL], d8
+    table_opcode[0x3E] = &cpu::LD_r8_d8; // LD A, d8
     table_opcode[0x10] = &cpu::STOP;
+
+    table_opcode[0x21] = &cpu::LD_r16_d16; // LD HL, d16
+    table_opcode[0x32] = &cpu::LDD_HL_A;   // LD (HL-), A
+    table_opcode[0xAF] = &cpu::XOR_A;      // XOR A
+
     table_opcode[0x27] = &cpu::DAA;
-    table_opcode[0x76] = &cpu::HALT; // ¡Nuevo!
+    table_opcode[0x76] = &cpu::HALT;
     table_opcode[0xC3] = &cpu::JP;
-    table_opcode[0xF3] = &cpu::DI;   // ¡Nuevo!
-    table_opcode[0xFB] = &cpu::EI;   // ¡Nuevo!
+    table_opcode[0xF3] = &cpu::DI;
+    table_opcode[0xFB] = &cpu::EI;
 
     for (int i = 0x40; i <= 0x7F; i++) {
         table_opcode[i] = &cpu::LD_r8_r8;
@@ -276,7 +289,76 @@ int cpu::LD_r8_r8(uint8_t opcode) {
         return 4; // Operación interna rápida
     }
 }
+int cpu::XOR_A(uint8_t opcode) {
+    (void)opcode;
+    
+    // Operación: A = A XOR A (El resultado siempre es 0)
+    r8[A] ^= r8[A];
 
+    // Banderas:
+    // Z (Zero) = 1 (Porque el resultado es 0)
+    // N (Resta) = 0
+    // H (Half Carry) = 0
+    // C (Carry) = 0
+    setZ(true);
+    setN(false);
+    setH(false);
+    setC(false);
+
+    std::cout << "XOR A\n"; 
+    return 4; // Ciclos
+}
+int cpu::LD_r16_d16(uint8_t opcode) {
+    // Patrón de bits: 00 rr 0001
+    // rr: 00=BC, 01=DE, 10=HL, 11=SP
+    uint8_t reg_index = (opcode >> 4) & 0x03;
+
+    // Leemos el valor de 16 bits inmediato (Little Endian)
+    uint16_t value = readImmediateWord();
+
+    switch (reg_index) {
+        case 0: setBC(value); break; // 0x01
+        case 1: setDE(value); break; // 0x11
+        case 2: setHL(value); break; // 0x21 (Tu caso actual)
+        case 3: SP = value;   break; // 0x31
+    }
+
+     std::cout << "LD r16, d16 val=" << std::hex << value << "\n";
+    return 12; // Ciclos
+}
+int cpu::LDD_HL_A(uint8_t opcode) {
+    (void)opcode;
+    
+    // 1. Escribir A en la dirección (HL)
+    uint16_t addr = getHL();
+    memory.writeMemory(addr, r8[A]);
+
+    // 2. Decrementar HL
+    setHL(addr - 1);
+
+     std::cout << "LD (HL-), A\n";
+    return 8; // Ciclos
+}
+int cpu::LD_r8_d8(uint8_t opcode) {
+    // 1. Leer el valor que sigue al opcode (el d8)
+    uint8_t value = readImmediateByte();
+
+    // 2. Identificar el registro destino usando los bits 3, 4 y 5
+    int regBits = (opcode >> 3) & 0x07;
+
+    // Mapa de hardware: 0=B, 1=C, 2=D, 3=E, 4=H, 5=L, 6=[HL], 7=A
+    static const R8 hardwareToYourEnum[] = {B, C, D, E, H, L, H, A}; 
+
+    if (regBits == 6) { // Caso especial: LD [HL], d8
+        memory.writeMemory(getHL(), value);
+         std::cout << "LD [HL], " << (int)value << "\n";
+        return 12; // Escribir en memoria es más lento
+    } else {
+        r8[hardwareToYourEnum[regBits]] = value;
+        std::cout << "LD " << (int)regBits << ", " << (int)value << "\n";
+        return 8; 
+    }
+}
 // --- FLAGS (Getters) ---
 uint8_t cpu::getZ() const { return (r8[F] >> 7) & 1; } 
 uint8_t cpu::getN() const { return (r8[F] >> 6) & 1; }

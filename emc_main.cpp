@@ -1,68 +1,79 @@
 #include <iostream>
 #include <string>
+#include <emscripten.h>
+
 #include "core/cpu/mmu/mmu.h"
 #include "core/cpu/cpu.h"
+#include "core/cpu/ppu/ppu.h" // <--- Incluir PPU
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
-
-// Variables globales para el contexto Web
+// Punteros globales
 cpu* global_cpu = nullptr;
-int debug_steps = 0; // Contador de pasos para detener el bucle
+ppu* global_ppu = nullptr; // <--- Puntero PPU
+mmu* global_mmu = nullptr;
 
-// Esta función se llama 60 veces por segundo (aprox)
-void main_loop() {
-    if (global_cpu) {
-        // Ejecutamos 1 instrucción
-        global_cpu->step();
-        
-        // Aumentamos contador
-        debug_steps++;
-
-        // --- FRENO DE EMERGENCIA PARA DEBUG ---
-        // Si llegamos a 50 pasos, detenemos el emulador web
-        if (debug_steps >= 50) {
-            std::cout << "--- Límite de prueba alcanzado (50 pasos). Deteniendo loop. ---\n";
-            #ifdef __EMSCRIPTEN__
-                emscripten_cancel_main_loop(); // <--- ESTO DETIENE EL BUCLE INFINITO
-            #endif
+// --- EXPORTAR BUFFER A JS ---
+// Esta función devuelve la dirección de memoria donde empiezan los píxeles
+extern "C" {
+    uint8_t* get_video_buffer() {
+        if (global_ppu) {
+            // Reinterpretamos el array de uint32_t como puntero a bytes puros
+            return reinterpret_cast<uint8_t*>(global_ppu->gfx.data());
         }
+        return nullptr;
     }
 }
 
-int main(int argc, char **argv) {
-    std::cout << "--- Iniciando Emulador Game Boy (Web/Desktop) ---" << "\n";
+// Bucle principal (se ejecuta ~60 veces por segundo)
+void main_loop() {
+    if (!global_cpu || !global_ppu) return;
 
-    std::string romPath = "roms/tetris.gb"; 
+    // La Game Boy corre a 4,194,304 Hz.
+    // A 60 FPS, eso son aprox 70224 ciclos por frame.
+    const int CYCLES_PER_FRAME = 70224;
+    int cycles_this_frame = 0;
 
-    if (argc > 1) {
-        romPath = argv[1];
-    } else {
-        std::cout << "Info: Cargando ROM por defecto: " << romPath << "\n";
+    // Ejecutamos instrucciones hasta completar el tiempo de un frame
+    while (cycles_this_frame < CYCLES_PER_FRAME) {
+        
+        // 1. La CPU avanza
+        int cycles = global_cpu->step();
+        
+        // 2. La PPU avanza la misma cantidad de tiempo
+        global_ppu->step(cycles);
+
+        // 3. Sumamos al contador del frame
+        cycles_this_frame += cycles;
     }
 
+    // --- AVISAR A JS QUE DIBUJE ---
+    // Llamamos a una función JavaScript llamada 'drawCanvas' que definiremos en el HTML
+    EM_ASM({
+        drawCanvas();
+    });
+}
+
+int main(int argc, char **argv) {
+    
+    std::cout << "--- Game Boy Emulator Booting WASM ---" << "\n";
+
+    std::cout << "--- Game Boy Emulator Booting ---" << "\n";
+
+    std::string romPath = "roms/tetris.gb"; // Asegúrate que la ROM exista
+
     try {
-        static mmu memoryBus(romPath);
-        static cpu processor(memoryBus);
+        // Inicializamos los componentes en orden
+        // Usamos 'new' para que vivan en el Heap y no se borren al salir del main
+        global_mmu = new mmu(romPath);
+        global_ppu = new ppu(*global_mmu); // PPU necesita referencia a MMU
+        global_cpu = new cpu(*global_mmu); // CPU necesita referencia a MMU (y pronto a PPU para interrupciones)
         
-        global_cpu = &processor;
+        std::cout << "Hardware inicializado correctamente.\n";
+
+        // Iniciamos el bucle infinito del navegador
+        emscripten_set_main_loop(main_loop, 0, 1);
         
-        std::cout << "Sistema listo. CPU arrancando...\n";
-
-        #ifdef __EMSCRIPTEN__
-            // Iniciamos el bucle web
-            emscripten_set_main_loop(main_loop, 0, 1);
-        #else
-            // Bucle Desktop
-            for(int i = 0; i < 50; i++) {
-                processor.step();
-            }
-        #endif
-
     } catch (const std::exception& e) {
-        std::cerr << "Error Fatal: " << e.what() << "\n";
-        return -1;
+        std::cout << "Error fatal: " << e.what() << "\n";
     }
 
     return 0;

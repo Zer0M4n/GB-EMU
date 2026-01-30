@@ -7,6 +7,7 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
+  "/home/developer/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
   "/home/developer/projects/GB-EMU/CMakeLists.txt"
   "CMakeFiles/3.25.1/CMakeCCompiler.cmake"
   "CMakeFiles/3.25.1/CMakeCXXCompiler.cmake"
@@ -20,14 +21,10 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake-3.25/Modules/CMakeSystemSpecificInformation.cmake"
   "/usr/share/cmake-3.25/Modules/CMakeSystemSpecificInitialize.cmake"
   "/usr/share/cmake-3.25/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
-  "/usr/share/cmake-3.25/Modules/Compiler/GNU-C.cmake"
-  "/usr/share/cmake-3.25/Modules/Compiler/GNU-CXX.cmake"
+  "/usr/share/cmake-3.25/Modules/Compiler/Clang-C.cmake"
+  "/usr/share/cmake-3.25/Modules/Compiler/Clang-CXX.cmake"
+  "/usr/share/cmake-3.25/Modules/Compiler/Clang.cmake"
   "/usr/share/cmake-3.25/Modules/Compiler/GNU.cmake"
-  "/usr/share/cmake-3.25/Modules/Platform/Linux-GNU-C.cmake"
-  "/usr/share/cmake-3.25/Modules/Platform/Linux-GNU-CXX.cmake"
-  "/usr/share/cmake-3.25/Modules/Platform/Linux-GNU.cmake"
-  "/usr/share/cmake-3.25/Modules/Platform/Linux.cmake"
-  "/usr/share/cmake-3.25/Modules/Platform/UnixPaths.cmake"
   )
 
 # The corresponding makefile is:

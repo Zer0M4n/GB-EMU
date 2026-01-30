@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/gb_emu.dir/main.cpp.o -o gb_emu 
