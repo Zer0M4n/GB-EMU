@@ -104,4 +104,41 @@ private:
 
     // Cargas especiales de memoria (LD (HL-), A y LD (HL+), A)
     int LDD_HL_A(uint8_t opcode); // 0x32
+
+    // Aritmética 8 bits
+    int DEC_r8(uint8_t opcode); // 0x05, 0x0D, etc.
+
+    // Saltos Relativos
+    int JR_cc_r8(uint8_t opcode); // 0x20 (JR NZ), 0x28 (JR Z), 0x30 (JR NC), 0x38 (JR C)
+    int JR_r8(uint8_t opcode);    // 0x18 (Salto incondicional)
+
+    // Especiales
+    int LD_SP_HL(uint8_t opcode); // 0xF9
+
+    // --- NUEVAS EN PRIVATE ---
+    // High RAM (Acceso rápido a 0xFFxx)
+    int LDH_n_A(uint8_t opcode); // 0xE0: Escribir en IO
+    int LDH_A_n(uint8_t opcode); // 0xF0: Leer de IO
+    
+    // Rotaciones (Posible causa del 0x0F si es real)
+    int RRCA(uint8_t opcode);    // 0x0F
+
+    int LD_a16_A(uint8_t opcode); // 0xEA
+    int CALL(uint8_t opcode);    // 0xCD
+    int JP_cc_a16(uint8_t opcode); // 0xCA (JP Z), 0xC2 (JP NZ), etc.
+    int OR_r8(uint8_t opcode);   // 0xB6 (OR [HL]) y otros OR
+
+    // --- CONTROL DE FLUJO ---
+    int RET(uint8_t opcode);     // 0xC9 (Retorno de subrutina)
+
+    // --- ARITMÉTICA 8 BITS ---
+    int ADD_A_r8(uint8_t opcode);// 0x80 - 0x87 (Suma)
+
+    // --- ARITMÉTICA 16 BITS ---
+    int INC_r16(uint8_t opcode); // 0x03, 0x13, 0x23 (Incrementar par de registros)
+    int DEC_r16(uint8_t opcode); // 0x0B, 0x1B, 0x2B (Decrementar par de registros)
+
+    // --- CARGAS ESPECIALES ---
+    int LDI_A_HL(uint8_t opcode);// 0x2A (LD A, [HL+]) Carga y aumenta HL
+    int LD_DE_A(uint8_t opcode); // 0x12 (LD [DE], A)
 };
