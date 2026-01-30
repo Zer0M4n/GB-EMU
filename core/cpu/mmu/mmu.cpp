@@ -4,13 +4,13 @@
 // --- Constructor ---
 mmu::mmu(const std::string& romPath) : cart(romPath) 
 {
-    // Inicializar memorias a 0
     VRAM.fill(0);
     WRAM.fill(0);
     HRAM.fill(0);
     IO.fill(0);
     OAM.fill(0);
     IE = 0;
+    IF = 0; // Asegúrate de inicializar IF también
     std::cout << "MMU Inicializada. Cartucho conectado: " << romPath << "\n";
 }
 
@@ -24,7 +24,7 @@ uint16_t mmu::offSet(uint16_t address, uint16_t base)
 void mmu::DMA(uint8_t value) 
 {
     uint16_t base = value << 8;
-    for (size_t i = 0; i < OAM.size(); i++) // 'size_t' para evitar warning
+    for (size_t i = 0; i < OAM.size(); i++) 
     {
         OAM[i] = readMemory(base + static_cast<uint16_t>(i));
     }
@@ -33,17 +33,11 @@ void mmu::DMA(uint8_t value)
 // --- Lectura de Memoria ---
 uint8_t mmu::readMemory(uint16_t address) 
 {   
-    if (address == 0xFF0F)
-    {
-        return IF;
-    }
+    // Interrupciones
+    if (address == 0xFF0F) return IF;
+    if (address == 0xFFFF) return IE;
     
-
-    if (address == 0xFFFF) {
-        return IE;
-    }
-    
-    // Cartucho (ROM)
+    // ROM (Cartucho)
     if (address <= 0x7FFF) {   
         return cart.readCartridge(address);
     }
@@ -51,7 +45,7 @@ uint8_t mmu::readMemory(uint16_t address)
     else if (address >= 0x8000 && address <= 0x9FFF) {
         return VRAM[offSet(address, 0x8000)];
     }
-    // Cartucho (RAM externa)
+    // RAM Externa (Cartucho)
     else if (address >= 0xA000 && address <= 0xBFFF) {
         return cart.readCartridge(address);
     }
@@ -67,68 +61,77 @@ uint8_t mmu::readMemory(uint16_t address)
     else if (address >= 0xFE00 && address <= 0xFE9F) {
         return OAM[offSet(address, 0xFE00)];
     }
-    // I/O Registers
-    else if (address >= 0xFF00 && address <= 0xFF46) { // Nota: El rango de IO es mayor, pero seguimos tu logica
+    // Zona Prohibida (lectura devuelve basura o 0xFF)
+    else if (address >= 0xFEA0 && address <= 0xFEFF) {
+        return 0xFF;
+    }
+    // I/O Registers (CORREGIDO: De 0xFF00 a 0xFF7F para incluir Audio, PPU, etc.)
+    else if (address >= 0xFF00 && address <= 0xFF7F) {
         return IO[offSet(address, 0xFF00)];
     }
     // HRAM
     else if (address >= 0xFF80 && address <= 0xFFFE) {
         return HRAM[offSet(address, 0xFF80)];
     }
-    else {
-         std::cout << "Memory Read Error: Address not mapped " << std::hex << address << "\n";
-        return 0xFF; // Retornamos 0xFF en bus abierto (mejor que NULL)
-    }
+    
+    std::cout << "Memory Read Error: Address not mapped " << std::hex << address << "\n";
+    return 0xFF;
 }
 
 // --- Escritura de Memoria ---
 void mmu::writeMemory(uint16_t address, uint8_t value) 
 {
-    // Registro DMA
-    if (address == 0xFF46) {
-        DMA(value);
-        return;
-    }
-    if (address == 0xFF0F)
-    {
-        IF = value;
-        return;
-    }
-    // Interrupt Enable
-    if (address == 0xFFFF) {
-        IE = value;
-        return;
+    // Interrupciones y DMA (Interceptar antes)
+    if (address == 0xFF46) { DMA(value); return; }
+    if (address == 0xFF0F) { IF = value; return; }
+    if (address == 0xFFFF) { IE = value; return; }
+
+    // Zona Prohibida (Ignorar)
+    if (address >= 0xFEA0 && address <= 0xFEFF) {
+        return; 
     }
 
-    // Cartucho (ROM - Banking)
+    // ROM (Banking en el cartucho)
     if (address <= 0x7FFF) {
         cart.writeCartridge(address, value);
+        return; // IMPORTANTE: Return para que no siga bajando
     }
     // VRAM
     else if (address >= 0x8000 && address <= 0x9FFF) {
         VRAM[offSet(address, 0x8000)] = value;
+        return;
     }
-    // Cartucho (RAM)
+    // RAM Externa
     else if (address >= 0xA000 && address <= 0xBFFF) {
         cart.writeCartridge(address, value);
+        return;
     }
     // WRAM
     else if (address >= 0xC000 && address <= 0xDFFF) {
         WRAM[offSet(address, 0xC000)] = value;
+        return;
+    }
+    // ECHO RAM (Escribir en WRAM correspondiente)
+    else if (address >= 0xE000 && address <= 0xFDFF) {
+        WRAM[offSet(address, 0xE000)] = value;
+        return;
     }
     // OAM
     else if (address >= 0xFE00 && address <= 0xFE9F) {
         OAM[offSet(address, 0xFE00)] = value;
+        return;
     }
-    // I/O Registers
-    else if (address >= 0xFF00 && address < 0xFF80) { // Ajustado para cubrir IO
+    // I/O Registers (AQUI ENTRA EL 0xFF41 STAT)
+    else if (address >= 0xFF00 && address <= 0xFF7F) {
         IO[offSet(address, 0xFF00)] = value;
+        return;
     }
     // HRAM
     else if (address >= 0xFF80 && address <= 0xFFFE) {
         HRAM[offSet(address, 0xFF80)] = value;
+        return;
     }
-    else {
-         std::cout << "Memory Write Error: Address not mapped\n";
-    }
+    
+    // Si llega aquí, es un error real
+    std::cout << "Memory WRITE Error: Address not mapped " << std::hex << address << "\n";
 }

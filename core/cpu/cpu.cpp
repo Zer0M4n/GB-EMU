@@ -3,43 +3,106 @@
 // --- Constructor ---
 cpu::cpu(mmu& mmu_ref) : memory(mmu_ref) 
 {
+    // 1. Estado Inicial
     IME = false;
     isStopped = false;
     isHalted = false;
-    PC = 0x100;   // Punto de entrada estándar
-    SP = 0xFFFE;  // Final de la HRAM
-    
-    // Inicializar registros a 0
+    PC = 0x100;
+    SP = 0xFFFE;
     r8.fill(0);
 
-    // Inicializar tabla de opcodes con nullptr
+    // 2. Inicialización de la tabla
     table_opcode.fill(nullptr);
 
-    // Mapear instrucciones implementadas
-    table_opcode[0x00] = &cpu::NOP;
+    // --- GRUPO: CARGAS DE 8 BITS (LD r8, r8) ---
+    // Mapeamos el bloque 0x40 - 0x7F (Nota: la función maneja el caso 0x76 internamente)
+    for (int i = 0x40; i <= 0x7F; i++) {
+        table_opcode[i] = &cpu::LD_r8_r8;
+    }
+
+    // --- GRUPO: CARGAS DE 8 BITS (LD r8, d8) ---
     table_opcode[0x06] = &cpu::LD_r8_d8; // LD B, d8
-    table_opcode[0x0E] = &cpu::LD_r8_d8; // LD C, d8  <-- ESTE ES EL QUE TE FALTA
+    table_opcode[0x0E] = &cpu::LD_r8_d8; // LD C, d8
     table_opcode[0x16] = &cpu::LD_r8_d8; // LD D, d8
     table_opcode[0x1E] = &cpu::LD_r8_d8; // LD E, d8
     table_opcode[0x26] = &cpu::LD_r8_d8; // LD H, d8
     table_opcode[0x2E] = &cpu::LD_r8_d8; // LD L, d8
     table_opcode[0x36] = &cpu::LD_r8_d8; // LD [HL], d8
     table_opcode[0x3E] = &cpu::LD_r8_d8; // LD A, d8
-    table_opcode[0x10] = &cpu::STOP;
 
+    // --- GRUPO: CARGAS DE 16 BITS ---
     table_opcode[0x21] = &cpu::LD_r16_d16; // LD HL, d16
-    table_opcode[0x32] = &cpu::LDD_HL_A;   // LD (HL-), A
+    table_opcode[0xF9] = &cpu::LD_SP_HL;   // LD SP, HL
+    table_opcode[0x32] = &cpu::LDD_HL_A;    // LD (HL-), A (Carga y decrementa)
+
+    // --- GRUPO: ARITMÉTICA Y LÓGICA ---
     table_opcode[0xAF] = &cpu::XOR_A;      // XOR A
+    table_opcode[0x05] = &cpu::DEC_r8;     // DEC B
+    table_opcode[0x0D] = &cpu::DEC_r8;     // DEC C
+    table_opcode[0x15] = &cpu::DEC_r8;     // DEC D
+    table_opcode[0x1D] = &cpu::DEC_r8;     // DEC E
+    table_opcode[0x3D] = &cpu::DEC_r8;     // DEC A
+    table_opcode[0x27] = &cpu::DAA;        // Ajuste decimal
+    
 
-    table_opcode[0x27] = &cpu::DAA;
+    // --- GRUPO: SALTOS (JUMPS & BRANCHES) ---
+    table_opcode[0xC3] = &cpu::JP;         // JP d16 (Absoluto)
+    table_opcode[0x18] = &cpu::JR_r8;      // JR r8 (Relativo)
+    table_opcode[0x20] = &cpu::JR_cc_r8;   // JR NZ, r8
+    table_opcode[0x28] = &cpu::JR_cc_r8;   // JR Z, r8
+    // ... en el constructor ...
+    
+    // --- GRUPO: HARDWARE I/O (High RAM) ---
+    table_opcode[0xE0] = &cpu::LDH_n_A; // LDH [a8], A
+    table_opcode[0xF0] = &cpu::LDH_A_n; // LDH A, [a8]
+
+    // --- GRUPO: ROTACIONES ---
+    table_opcode[0x0F] = &cpu::RRCA;    // RRCA
+
+    // --- GRUPO: CONTROL DE HARDWARE ---
+    table_opcode[0x00] = &cpu::NOP;
+    table_opcode[0x10] = &cpu::STOP;
     table_opcode[0x76] = &cpu::HALT;
-    table_opcode[0xC3] = &cpu::JP;
-    table_opcode[0xF3] = &cpu::DI;
-    table_opcode[0xFB] = &cpu::EI;
+    table_opcode[0xF3] = &cpu::DI;         // Disable Interrupts
+    table_opcode[0xFB] = &cpu::EI;         // Enable Interrupts
+    // Control de Flujo
+    table_opcode[0xCD] = &cpu::CALL;      // CALL a16
+    table_opcode[0xCA] = &cpu::JP_cc_a16; // JP Z, a16
+    
+    // Lógica
+    table_opcode[0xB6] = &cpu::OR_r8;     // OR [HL]
 
-    for (int i = 0x40; i <= 0x7F; i++) {
-        table_opcode[i] = &cpu::LD_r8_r8;
-    }
+    // --- GRUPO: CARGAS DIRECTAS ---   
+    table_opcode[0xEA] = &cpu::LD_a16_A;
+
+    // ... En tu constructor cpu::cpu ...
+
+    // REUTILIZACIÓN: Cargas de 16 bits (LD r16, d16)
+    // Ya tenías la 0x21, ahora mapeamos las hermanas:
+    table_opcode[0x01] = &cpu::LD_r16_d16; // LD BC, d16
+    table_opcode[0x11] = &cpu::LD_r16_d16; // LD DE, d16
+    
+    // REUTILIZACIÓN: Saltos Relativos (JR cc, r8)
+    // Ya tenías 0x20 y 0x28, ahora mapeamos Carry/NoCarry
+    table_opcode[0x30] = &cpu::JR_cc_r8;   // JR NC, r8
+    table_opcode[0x38] = &cpu::JR_cc_r8;   // JR C, r8  <-- EL QUE PEDÍA EL LOG
+
+    // NUEVAS: Aritmética 16 bits
+    table_opcode[0x0B] = &cpu::DEC_r16;    // DEC BC    <-- EL QUE PEDÍA EL LOG
+    table_opcode[0x13] = &cpu::INC_r16;    // INC DE    <-- EL QUE PEDÍA EL LOG
+    table_opcode[0x23] = &cpu::INC_r16;    // INC HL
+
+    // NUEVAS: Memoria y Copia
+    table_opcode[0x2A] = &cpu::LDI_A_HL;   // LD A, [HL+] (Carga y avanza)
+    table_opcode[0x12] = &cpu::LD_DE_A;    // LD [DE], A
+
+    // NUEVAS: Retorno
+    table_opcode[0xC9] = &cpu::RET;        // RET       <-- CRÍTICO
+
+    // NUEVAS: Aritmética 8 bits
+    table_opcode[0x80] = &cpu::ADD_A_r8;   // ADD A, B
+    table_opcode[0xB1] = &cpu::OR_r8;      // OR C
+
 }
 
 // --- Gestión del Stack ---
@@ -358,6 +421,227 @@ int cpu::LD_r8_d8(uint8_t opcode) {
         std::cout << "LD " << (int)regBits << ", " << (int)value << "\n";
         return 8; 
     }
+}
+int cpu::DEC_r8(uint8_t opcode) {
+    int regBits = (opcode >> 3) & 0x07;
+    static const R8 hardwareToYourEnum[] = {B, C, D, E, H, L, H, A}; 
+    R8 target = hardwareToYourEnum[regBits];
+
+    uint8_t prevValue = r8[target];
+    r8[target]--;
+
+    // Banderas
+    setZ(r8[target] == 0);
+    setN(true); // Siempre true en decrementos
+    // Half Carry: se activa si hubo préstamo del bit 4 (0x0F -> 0x10)
+    setH((prevValue & 0x0F) == 0); 
+    
+    return (regBits == 6) ? 12 : 4; // Si es [HL] tarda más
+}
+int cpu::JR_cc_r8(uint8_t opcode) {
+    // Leer el desplazamiento (signed!)
+    int8_t offset = (int8_t)readImmediateByte(); 
+    
+    // Determinar la condición
+    int condition = (opcode >> 3) & 0x03;
+    bool jump = false;
+
+    switch(condition) {
+        case 0: jump = (getZ() == 0); break; // NZ
+        case 1: jump = (getZ() == 1); break; // Z
+        case 2: jump = (getC() == 0); break; // NC
+        case 3: jump = (getC() == 1); break; // C
+    }
+
+    if (jump) {
+        PC += offset;
+        return 12; // Saltando tarda más
+    }
+    return 8;
+}
+
+int cpu::JR_r8(uint8_t opcode) {
+    int8_t offset = (int8_t)readImmediateByte();
+    PC += offset;
+    return 12;
+}
+int cpu::LD_SP_HL(uint8_t opcode) {
+    (void)opcode;
+    SP = getHL();
+    return 8;
+}
+
+
+int cpu::LDH_n_A(uint8_t opcode) {
+    (void)opcode;
+    // Lee el offset (ej: 0x40)
+    uint8_t offset = readImmediateByte();
+    
+    // Escribe A en 0xFF00 + offset
+    memory.writeMemory(0xFF00 | offset, r8[A]);
+    
+     std::cout << "LDH [FF" << std::hex << (int)offset << "], A\n";
+    return 12;
+}
+
+int cpu::LDH_A_n(uint8_t opcode) {
+    (void)opcode;
+    uint8_t offset = readImmediateByte();
+    
+    // Lee de 0xFF00 + offset y guarda en A
+    r8[A] = memory.readMemory(0xFF00 | offset);
+    
+    return 12;
+}
+int cpu::RRCA(uint8_t opcode) {
+    (void)opcode;
+    uint8_t bit0 = r8[A] & 0x01;
+    
+    // Rotar A a la derecha
+    r8[A] = (r8[A] >> 1) | (bit0 << 7);
+    
+    // Banderas:
+    // Z se pone a 0 en esta instrucción específica (aunque el resultado sea 0)
+    setZ(false); 
+    setN(false);
+    setH(false);
+    setC(bit0 == 1);
+    
+    return 4;
+}
+int cpu::LD_a16_A(uint8_t opcode) {
+    (void)opcode;
+    // 1. Leer la dirección de destino (2 bytes)
+    uint16_t addr = readImmediateWord();
+    
+    // 2. Escribir A en esa dirección
+    memory.writeMemory(addr, r8[A]);
+    
+    // std::cout << "LD [" << std::hex << addr << "], A\n";
+    return 16; // 4 ciclos de reloj (16 ticks)
+}
+int cpu::CALL(uint8_t opcode) {
+    (void)opcode;
+    // 1. Leer la dirección de la subrutina (destino)
+    uint16_t target = readImmediateWord();
+    
+    // 2. Empujar el PC actual (que ya apunta a la instrucción SIGUIENTE) al Stack
+    push(PC);
+    
+    // 3. Saltar
+    PC = target;
+    
+    // std::cout << "CALL " << std::hex << target << "\n";
+    return 24; // Toma 6 ciclos (24 ticks)
+}
+int cpu::JP_cc_a16(uint8_t opcode) {
+    uint16_t target = readImmediateWord();
+    
+    // Bits 3-4 definen la condición: 0=NZ, 1=Z, 2=NC, 3=C
+    // 0xCA es Z (condition 1). 0xC2 es NZ (condition 0).
+    int condition = (opcode >> 3) & 0x03;
+    bool jump = false;
+
+    switch(condition) {
+        case 0: jump = !getZ(); break; // NZ
+        case 1: jump = getZ();  break; // Z
+        case 2: jump = !getC(); break; // NC
+        case 3: jump = getC();  break; // C
+    }
+
+    if (jump) {
+        PC = target;
+        return 16;
+    }
+    return 12;
+}
+int cpu::OR_r8(uint8_t opcode) {
+    // Determinar registro fuente
+    int srcIndex = opcode & 0x07;
+    static const R8 hardwareToYourEnum[] = {B, C, D, E, H, L, H, A};
+    
+    uint8_t val;
+    int cycles = 4;
+
+    if (srcIndex == 6) { // [HL]
+        val = memory.readMemory(getHL());
+        cycles = 8;
+    } else {
+        val = r8[hardwareToYourEnum[srcIndex]];
+    }
+
+    // Operación OR
+    r8[A] |= val;
+
+    // Banderas
+    setZ(r8[A] == 0);
+    setN(false);
+    setH(false);
+    setC(false);
+
+    return cycles;
+}
+int cpu::RET(uint8_t opcode) {
+    (void)opcode;
+    PC = pop(); // Recuperar dirección de retorno
+    // std::cout << "RET to " << std::hex << PC << "\n";
+    return 16;
+}
+// Opcode 0x2A: Carga A desde [HL] y luego incrementa HL
+int cpu::LDI_A_HL(uint8_t opcode) {
+    (void)opcode;
+    uint16_t hl = getHL();
+    r8[A] = memory.readMemory(hl);
+    setHL(hl + 1); // Incremento post-operación
+    return 8;
+}
+
+// Opcode 0x12: Guarda A en la dirección apuntada por DE
+int cpu::LD_DE_A(uint8_t opcode) {
+    (void)opcode;
+    memory.writeMemory(getDE(), r8[A]);
+    return 8;
+}
+int cpu::INC_r16(uint8_t opcode) {
+    // Bits 4-5: 00=BC, 01=DE, 10=HL, 11=SP
+    int reg = (opcode >> 4) & 0x03;
+    switch(reg) {
+        case 0: setBC(getBC() + 1); break;
+        case 1: setDE(getDE() + 1); break;
+        case 2: setHL(getHL() + 1); break;
+        case 3: SP++; break;
+    }
+    return 8;
+}
+
+int cpu::DEC_r16(uint8_t opcode) {
+    int reg = (opcode >> 4) & 0x03;
+    switch(reg) {
+        case 0: setBC(getBC() - 1); break;
+        case 1: setDE(getDE() - 1); break;
+        case 2: setHL(getHL() - 1); break;
+        case 3: SP--; break;
+    }
+    return 8;
+}
+int cpu::ADD_A_r8(uint8_t opcode) {
+    int srcIndex = opcode & 0x07;
+    static const R8 hardwareToYourEnum[] = {B, C, D, E, H, L, H, A};
+    
+    uint8_t val = (srcIndex == 6) ? memory.readMemory(getHL()) : r8[hardwareToYourEnum[srcIndex]];
+    
+    uint16_t result = r8[A] + val;
+    
+    // Banderas
+    setZ((result & 0xFF) == 0);
+    setN(false);
+    // Half Carry: Si la suma de los 4 bits bajos supera 15
+    setH(((r8[A] & 0x0F) + (val & 0x0F)) > 0x0F);
+    // Carry: Si el resultado es mayor a 255
+    setC(result > 0xFF);
+    
+    r8[A] = (uint8_t)result;
+    return (srcIndex == 6) ? 8 : 4;
 }
 // --- FLAGS (Getters) ---
 uint8_t cpu::getZ() const { return (r8[F] >> 7) & 1; } 
