@@ -70,9 +70,7 @@ void main_loop() {
 int main(int argc, char **argv) {
     std::cout << "--- Game Boy Emulator Booting WASM ---" << "\n";
 
-    // Nota: En WASM, el archivo debe estar precargado en el sistema de archivos virtual
-    // Usa el flag de emscripten: --preload-file roms/tetris.gb
-    std::string romPath = "roms/tetris.gb"; 
+std::string romPath = "/roms/tetris.gb";
 
     try {
         global_mmu = new mmu(romPath);
