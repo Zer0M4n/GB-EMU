@@ -45,10 +45,11 @@ target_link_options(gb-emu PRIVATE
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
         "SHELL:-s NO_EXIT_RUNTIME=1"
         "SHELL:-s EXPORTED_FUNCTIONS=['_main','_get_video_buffer']"
-        # --- AQUÍ ESTÁ EL CAMBIO ---
-        # Agregamos 'HEAPU8' para que JS pueda leer el buffer de video
         "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8']" 
         
-        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/roms@/roms"
+        # --- AQUÍ ESTÁ EL CAMBIO ---
+        # Sintaxis: Ruta_en_tu_PC @ Ruta_virtual_en_el_navegador
+        "SHELL:--preload-file /home/developer/projects/roms_backup@/roms"
+        
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/src/index.html"
 )
