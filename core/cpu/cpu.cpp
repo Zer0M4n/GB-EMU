@@ -10,6 +10,7 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     PC = 0x100;
     SP = 0xFFFE;
     r8.fill(0);
+    
 
     // 2. Inicialización de la tabla
     table_opcode.fill(nullptr);
