@@ -30,10 +30,9 @@ void mmu::DMA(uint8_t value)
     }
 }
 
-// --- Lectura de Memoria ---
 uint8_t mmu::readMemory(uint16_t address) 
 {   
-    // Interrupciones
+    // Interrupciones (Registro IF e IE)
     if (address == 0xFF0F) return IF;
     if (address == 0xFFFF) return IE;
     
@@ -49,7 +48,7 @@ uint8_t mmu::readMemory(uint16_t address)
     else if (address >= 0xA000 && address <= 0xBFFF) {
         return cart.readCartridge(address);
     }
-    // WRAM
+    // WRAM (Work RAM)
     else if (address >= 0xC000 && address <= 0xDFFF) {
         return WRAM[offSet(address, 0xC000)];
     }
@@ -57,19 +56,33 @@ uint8_t mmu::readMemory(uint16_t address)
     else if (address >= 0xE000 && address <= 0xFDFF) {
         return WRAM[offSet(address, 0xE000)];
     }
-    // OAM
+    // OAM (Object Attribute Memory)
     else if (address >= 0xFE00 && address <= 0xFE9F) {
         return OAM[offSet(address, 0xFE00)];
     }
-    // Zona Prohibida (lectura devuelve basura o 0xFF)
+    // Zona Prohibida (Unusable)
     else if (address >= 0xFEA0 && address <= 0xFEFF) {
         return 0xFF;
     }
-    // I/O Registers (CORREGIDO: De 0xFF00 a 0xFF7F para incluir Audio, PPU, etc.)
-    else if (address >= 0xFF00 && address <= 0xFF7F) {
-        return IO[offSet(address, 0xFF00)];
+    
+    // --- I/O Registers (0xFF00 - 0xFF7F) ---
+   else if (address >= 0xFF00 && address <= 0xFF7F) {
+    
+    if (address == 0xFF00) {
+        // Obtenemos lo que el juego escribió (bits 4 y 5 seleccionan el grupo)
+        uint8_t select = IO[0x00] & 0x30; 
+        
+        // Retornamos: 
+        // 0xC0 (bits 6 y 7 siempre en 1) 
+        // | select (mantenemos la selección del juego)
+        // | 0x0F (todos los botones en 1 = NO presionados)
+        return 0xC0 | select | 0x0F;
     }
-    // HRAM
+
+    return IO[offSet(address, 0xFF00)];
+}
+    
+    // HRAM (High RAM)
     else if (address >= 0xFF80 && address <= 0xFFFE) {
         return HRAM[offSet(address, 0xFF80)];
     }
