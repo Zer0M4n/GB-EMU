@@ -187,4 +187,7 @@ private:
     int RETI(uint8_t opcode); // 0xD9 Return from Interrupt
     // --- LOAD INCREMENT/DECREMENT ---
     int LDI_HL_A(uint8_t opcode); // 0x22: LD (HL+), A
+    int CPL(uint8_t opcode);    // 0x2F
+    int AND_d8(uint8_t opcode); // 0xE6
+
 };

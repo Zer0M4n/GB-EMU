@@ -1,84 +1,196 @@
-# **GB-EMU 🎮**
+# GB-EMU (WebAssembly Edition) 🎮
 
-Un emulador de Game Boy (DMG) escrito desde cero en C++17.  
-Diseñado con una arquitectura modular para funcionar nativamente en Desktop (Linux/macOS) y en la Web (WebAssembly).
+A **Game Boy (DMG)** emulator written from scratch in **C++17**, specifically compiled for the Web using **Emscripten (WebAssembly - WASM)**.
 
-## **📂 Estructura del Proyecto**
+> ⚠️ **WORK IN PROGRESS**: This project is under active development. It is incomplete and intended for **educational and testing purposes only**.
 
-* core/: Lógica del emulador (CPU, MMU, Cartridge, Mappers).  
-* roms/: Carpeta contenedora de los juegos .gb.  
-* emc\_main.cpp: Punto de entrada híbrido (compatible con Web y Desktop).  
-* CMakeLists.txt: Sistema de construcción automatizado.
+---
 
-## **🚀 Preparación (Importante)**
+## 📂 Project Structure
 
-Antes de compilar, asegúrate de crear la carpeta de roms y añadir un juego (ej. tetris.gb):
+```text
+GB-EMU/
+├── core/               # Emulator logic (CPU, MMU, Cartridge, Mappers)
+├── emc_main.cpp        # Main entry point for the Web version
+├── CMakeLists.txt      # Build configuration
+├── build.sh            # Automated build helper script
+└── roms/               # (Not included) User-provided ROM files
+```
 
-mkdir \-p roms  
-\# Copia tu archivo .gb dentro de la carpeta roms/ y asegúrate de que se llame tetris.gb para la prueba por defecto
+> 📌 **Note:** This repository does **NOT** include ROM files. You must provide your own.
 
-## **💻 Opción A: Compilar para Desktop (Linux)**
+---
 
-Usa esta opción para desarrollo y depuración en tu máquina local.
+## ⚙️ Configuration (CRITICAL STEP)
 
-### **Requisitos**
+Because this project runs inside a browser sandbox, ROMs must be **manually injected into Emscripten’s virtual file system at build time**.
 
-* CMake  
-* Compilador C++ (g++ o clang)  
-* Make
+---
 
-### **Instrucciones**
+### 🧱 Step 1: Prepare your ROM
 
-\# 1\. Crear carpeta de build  
-mkdir \-p build && cd build
+1. Create a folder named `roms` in the project root (if it doesn’t exist).
+2. Place your Game Boy ROM file inside it.
 
-\# 2\. Configurar y Compilar  
-cmake ..  
-make \-j16
+Example:
 
-\# 3\. Ejecuta  
-\# Uso: ./gb-emu \<ruta\_al\_rom\>  
-\# Si no pasas argumentos, buscará roms/tetris.gb por defecto  
-./gb-emu ../roms/tetris.gb
+```text
+roms/
+└── your_game.gb
+```
 
-## **🌐 Opción B: Compilar para Web (WASM)**
+---
 
-Usa esta opción para ejecutar el emulador en un navegador web.
+### 🗺️ Step 2: Modify `CMakeLists.txt` (Virtual Path Mapping)
 
-### **Requisitos**
+You must tell Emscripten:
 
-* Emscripten SDK (emsdk) activado en tu terminal.
+* Where the ROMs are located on your real machine
+* Where they should appear inside the browser
 
-### **Instrucciones**
+Open `CMakeLists.txt` and locate the `target_link_options` section. Modify the preload line:
 
-\# 1\. Crear carpeta de build para web (limpia)  
-rm \-rf build\_web  
-mkdir \-p build\_web && cd build\_web
+```cmake
+"SHELL:--preload-file /YOUR/REAL/PATH/TO/roms@/roms"
+```
 
-\# 2\. Configurar con Emscripten  
-\# (El CMakeLists.txt detectará automáticamente el entorno EMSCRIPTEN)  
+#### Explanation:
+
+* **Left side (before `@`)** → Absolute path on your computer
+  Example:
+
+  ```text
+  /home/user/GB-EMU/roms
+  ```
+
+* **Right side (after `@`)** → Virtual path inside the browser
+  👉 **Keep this as** `/roms`
+
+---
+
+### 🎮 Step 3: Modify `emc_main.cpp` (ROM Loading)
+
+Update the ROM path so it matches the filename inside the virtual file system:
+
+```cpp
+// Change "your_game.gb" to the actual ROM filename
+std::string romPath = "roms/your_game.gb";
+```
+
+---
+
+## 🚀 Build Instructions
+
+### 🔧 Requirements
+
+* **Emscripten SDK (emsdk)** installed and activated in your terminal.
+
+---
+
+### ✅ Option A: Automated Build (Recommended)
+
+The project includes a helper script that:
+
+* Cleans previous builds
+* Configures CMake with Emscripten
+* Compiles the project
+* Optionally launches a local web server
+
+```bash
+# 1. Give execution permissions (only once)
+chmod +x build.sh
+
+# 2. Run the script
+./build.sh
+```
+
+At the end of the process, the script will ask whether you want to start the web server automatically.
+
+---
+
+### 🛠️ Option B: Manual Compilation
+
+If you prefer running each step manually:
+
+```bash
+# 1. Create a clean build directory
+rm -rf build_web
+mkdir -p build_web && cd build_web
+
+# 2. Configure with Emscripten
 emcmake cmake ..
 
-\# 3\. Compilar  
-emmake make
+# 3. Compile
+emmake make -j$(nproc)
+```
 
-\# 4\. Probar en servidor local  
-python3 \-m http.server
+---
 
-Nota: Abre tu navegador en http://localhost:8000/gb-emu.html.  
-La carpeta roms/ se precarga automáticamente en el sistema de archivos virtual del navegador.
+## ▶️ Running the Emulator
 
-## **🧩 Estado del Proyecto**
+⚠️ **Do NOT open the generated HTML file directly**. You must use a local web server due to WASM/CORS security restrictions.
 
-* \[x\] Carga de ROMs (.gb)  
-* \[x\] Soporte MBC1 (Manejo de bancos de memoria)  
-* \[x\] Ciclo de CPU Básico (Fetch/Decode/Execute)  
-* \[x\] Compatibilidad WebAssembly (WASM)  
-* \[ \] Implementación completa de instrucciones (Opcodes)  
-* \[ \] PPU (Unidad de procesamiento de píxeles)  
-* \[ \] Manejo de inputs y timers
+---
 
-## **🐞 Debugging**
+### 🔹 Via Script
 
-Actualmente, el main tiene un limitador de seguridad de 50 pasos para evitar congelar el navegador durante el desarrollo inicial.  
-Para quitarlo o aumentarlo, edita \`emc\_
+If you used `./build.sh`, simply type:
+
+```text
+s + Enter
+```
+
+when prompted.
+
+---
+
+### 🔹 Manual
+
+#### Using `emrun` (Recommended)
+
+```bash
+emrun --no_browser --port 8888 gb-emu.html
+```
+
+#### Using Python
+
+```bash
+python3 -m http.server 8888
+```
+
+---
+
+### 🌐 Access
+
+Open your browser at:
+
+```text
+http://localhost:8888/gb-emu.html
+```
+
+---
+
+## 🧩 Project Status
+
+* [x] ROM loading via Virtual File System
+* [x] Basic emulator architecture
+* [x] WebAssembly compilation pipeline
+* [ ] Complete CPU instruction set
+* [ ] PPU (Graphics & Rendering) — *In progress*
+* [ ] Timers & Interrupts
+* [ ] Joypad input handling
+
+---
+
+## 📚 Project Goals
+
+This project aims to:
+
+* Learn **Game Boy (DMG) architecture**
+* Explore **low-level emulation concepts**
+* Experiment with **C++ + WebAssembly**
+* Build a full emulator **from scratch**, without external emulation libraries
+
+
+
+💡 *Issues, pull requests, and feedback are welcome.*
