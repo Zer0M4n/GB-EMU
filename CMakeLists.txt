@@ -43,13 +43,10 @@ set_target_properties(gb-emu PROPERTIES SUFFIX ".html")
 target_link_options(gb-emu PRIVATE
         "SHELL:-s USE_SDL=0"
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
-        "SHELL:-s NO_EXIT_RUNTIME=1"
+        #"SHELL:-s NO_EXIT_RUNTIME=1"
         "SHELL:-s EXPORTED_FUNCTIONS=['_main','_get_video_buffer']"
         "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8']" 
-        
-        # --- AQUÍ ESTÁ EL CAMBIO ---
-        # Sintaxis: Ruta_en_tu_PC @ Ruta_virtual_en_el_navegador
+        "SHELL:--emrun"
         "SHELL:--preload-file /home/developer/projects/roms_backup@/roms"
-        
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/src/index.html"
 )

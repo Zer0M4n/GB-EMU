@@ -192,6 +192,9 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     table_opcode[0x22] = &cpu::LDI_HL_A;
     table_opcode[0x22] = &cpu::LDI_HL_A;
 
+    table_opcode[0x2F] = &cpu::CPL;
+    table_opcode[0xE6] = &cpu::AND_d8;
+
 }
 // --- FLAGS (Getters) ---
 uint8_t cpu::getZ() const { return (r8[F] >> 7) & 1; } 
@@ -407,7 +410,7 @@ int cpu::DAA(uint8_t opcode)
     setZ(r8[A] == 0);
     setH(false);
     setC(carry);
-    std::cout <<"DAA " << "\n";
+    //std::cout <<"DAA " << "\n";
 
     // NOTA: No hacemos PC++ aquí, fetch() ya lo hizo.
     return 4; 
@@ -419,20 +422,20 @@ int cpu::STOP(uint8_t opcode)
     // STOP es 0x10 0x00, saltamos el byte extra
     PC++; 
     isStopped = true;
-    std::cout <<"stop " << "\n";
+    //std::cout <<"stop " << "\n";
     return 4;
 }
 
 int cpu::HALT(uint8_t opcode) {
     (void)opcode;
     isHalted = true;
-    std::cout <<"halt " << "\n";
+    //std::cout <<"halt " << "\n";
     return 4; 
 }
 
 int cpu::NOP(uint8_t opcode) {
     (void)opcode;
-    std::cout <<"nop " << "\n";
+    //std::cout <<"nop " << "\n";
     return 4;
 }
 
@@ -440,21 +443,21 @@ int cpu::JP(uint8_t opcode) {
     (void)opcode;
     uint16_t targetAddress = readImmediateWord(); 
     PC = targetAddress;
-    std::cout <<"jump " << "\n";
+    //std::cout <<"jump " << "\n";
     return 16;
 }
 
 int cpu::DI(uint8_t opcode) {
     (void)opcode;
     IME = false;
-    std::cout <<"di " << "\n";
+    //std::cout <<"di " << "\n";
     return 4;
 }
 
 int cpu::EI(uint8_t opcode) {
     (void)opcode;
     IME = true;
-    std::cout <<"ei " << "\n";
+    //std::cout <<"ei " << "\n";
     return 4;
 }
 //LOAD INTRUCTIONS
@@ -478,7 +481,7 @@ int cpu::LD_r8_r8(uint8_t opcode) {
         uint16_t address = getHL();
         uint8_t value = r8[hardwareToYourEnum[srcBits]];
         memory.writeMemory(address, value);
-            std::cout <<"LD [HL], r8 " << "\n";
+            //std::cout <<"LD [HL], r8 " << "\n";
 
         return 8; // Escribir en memoria toma más tiempo
     } 
@@ -486,11 +489,11 @@ int cpu::LD_r8_r8(uint8_t opcode) {
         uint16_t address = getHL();
         uint8_t value = memory.readMemory(address);
         r8[hardwareToYourEnum[destBits]] = value;
-         std::cout <<"LD r8, [HL] " << "\n";
+         //std::cout <<"LD r8, [HL] " << "\n";
         return 8; // Leer de memoria toma más tiempo
     } 
     else { // LD r8, r8 (Registro a Registro)
-         std::cout <<"LD r8, r8 " << "\n";
+         //std::cout <<"LD r8, r8 " << "\n";
         r8[hardwareToYourEnum[destBits]] = r8[hardwareToYourEnum[srcBits]];
         return 4; // Operación interna rápida
     }
@@ -511,7 +514,7 @@ int cpu::XOR_A(uint8_t opcode) {
     setH(false);
     setC(false);
 
-    std::cout << "XOR A\n"; 
+    //std::cout << "XOR A\n"; 
     return 4; // Ciclos
 }
 int cpu::LD_r16_d16(uint8_t opcode) {
@@ -529,7 +532,7 @@ int cpu::LD_r16_d16(uint8_t opcode) {
         case 3: SP = value;   break; // 0x31
     }
 
-     std::cout << "LD r16, d16 val=" << std::hex << value << "\n";
+    //std::cout << "LD r16, d16 val=" << std::hex << value << "\n";
     return 12; // Ciclos
 }
 int cpu::LDD_HL_A(uint8_t opcode) {
@@ -542,7 +545,7 @@ int cpu::LDD_HL_A(uint8_t opcode) {
     // 2. Decrementar HL
     setHL(addr - 1);
 
-     std::cout << "LD (HL-), A\n";
+    //std::cout << "LD (HL-), A\n";
     return 8; // Ciclos
 }
 int cpu::LD_r8_d8(uint8_t opcode) {
@@ -557,11 +560,11 @@ int cpu::LD_r8_d8(uint8_t opcode) {
 
     if (regBits == 6) { // Caso especial: LD [HL], d8
         memory.writeMemory(getHL(), value);
-         std::cout << "LD [HL], " << (int)value << "\n";
+        //std::cout << "LD [HL], " << (int)value << "\n";
         return 12; // Escribir en memoria es más lento
     } else {
         r8[hardwareToYourEnum[regBits]] = value;
-        std::cout << "LD " << (int)regBits << ", " << (int)value << "\n";
+        //std::cout << "LD " << (int)regBits << ", " << (int)value << "\n";
         return 8; 
     }
 }
@@ -623,7 +626,7 @@ int cpu::LDH_n_A(uint8_t opcode) {
     // Escribe A en 0xFF00 + offset
     memory.writeMemory(0xFF00 | offset, r8[A]);
     
-     std::cout << "LDH [FF" << std::hex << (int)offset << "], A\n";
+    //std::cout << "LDH [FF" << std::hex << (int)offset << "], A\n";
     return 12;
 }
 
@@ -896,7 +899,7 @@ int cpu::PREFIX_CB(uint8_t opcode) {
     
     // SI NO ES "BIT", AÚN NO LO IMPLEMENTAMOS (Saldrá error en logs si se necesita)
     // Pero Tetris usa mayormente BIT al inicio.
-    std::cout << "CB Opcode no implementado: " << std::hex << (int)cb_op << "\n";
+    //std::cout << "CB Opcode no implementado: " << std::hex << (int)cb_op << "\n";
     return 8;
 }
 int cpu::PUSH_r16(uint8_t opcode) {
@@ -1167,5 +1170,32 @@ int cpu::LDI_HL_A(uint8_t opcode) {
     // 3. Incrementamos HL (HL = HL + 1)
     setHL(addr + 1);
 
+    return 8; // 8 ciclos
+}
+// Opcode 0x2F: CPL (Complemento a uno de A)
+// Invierte todos los bits de A (A = ~A)
+int cpu::CPL(uint8_t opcode) {
+    (void)opcode;
+    r8[A] = ~r8[A];
+    
+    setN(true);  // N siempre 1
+    setH(true);  // H siempre 1
+    
+    return 4; // 4 ciclos
+}
+
+// Opcode 0xE6: AND d8 (AND inmediato)
+// A = A & valor_inmediato
+int cpu::AND_d8(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = readImmediateByte(); // Lee el dato d8
+    
+    r8[A] &= val;
+    
+    setZ(r8[A] == 0);
+    setN(false);
+    setH(true);  // ¡OJO! AND siempre pone Half Carry a 1 en GB
+    setC(false);
+    
     return 8; // 8 ciclos
 }
