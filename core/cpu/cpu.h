@@ -189,5 +189,26 @@ private:
     int LDI_HL_A(uint8_t opcode); // 0x22: LD (HL+), A
     int CPL(uint8_t opcode);    // 0x2F
     int AND_d8(uint8_t opcode); // 0xE6
+    // --- LÓGICA XOR ---
+    int XOR_r8(uint8_t opcode);    // 0xA8 - 0xAF
 
+    // --- ARITMÉTICA CON CARRY (ADC Inmediato) ---
+    int ADC_A_d8(uint8_t opcode);  // 0xCE
+    // Rotación del Acumulador
+    int RLCA(uint8_t opcode); // 0x07
+
+    // Restart (Llamada a vector de interrupción)
+    int RST(uint8_t opcode);  // 0xC7, 0xCF, ..., 0xEF, ...
+    int JP_HL(uint8_t opcode);    // 0xE9
+    int RLA(uint8_t opcode); // 0x17
+    int RRA(uint8_t opcode); // 0x1F
+    int CCF(uint8_t opcode);    // 0x3F
+    int XOR_d8(uint8_t opcode); // 0xEE
+    int OR_d8(uint8_t opcode);  // 0xF6
+    int CP_r8(uint8_t opcode);     // 0xB8 - 0xBF (Incluye 0xBC)
+    int SUB_A_d8(uint8_t opcode);  // 0xD6
+    int LDD_A_HL(uint8_t opcode);  // 0x3A
+    int LD_A_BC(uint8_t opcode);   // 0x0A
+    int LD_BC_A(uint8_t opcode);   // 0x02
+    int LD_A_C(uint8_t opcode);
 };

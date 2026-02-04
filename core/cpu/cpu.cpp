@@ -1,6 +1,7 @@
 #include "cpu.h"
 
 // --- Constructor ---
+// --- Constructor ---
 cpu::cpu(mmu& mmu_ref) : memory(mmu_ref) 
 {
     // 1. Estado Inicial
@@ -10,18 +11,20 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     PC = 0x100;
     SP = 0xFFFE;
     r8.fill(0);
-    
 
-    // 2. Inicialización de la tabla
+    // 2. Inicialización de la tabla (Limpiar todo a nullptr)
     table_opcode.fill(nullptr);
 
-    // --- GRUPO: CARGAS DE 8 BITS (LD r8, r8) ---
-    // Mapeamos el bloque 0x40 - 0x7F (Nota: la función maneja el caso 0x76 internamente)
+    // =============================================================
+    // GRUPO: CARGAS DE 8 BITS (LD)
+    // =============================================================
+    
+    // LD r8, r8 (0x40 - 0x7F)
     for (int i = 0x40; i <= 0x7F; i++) {
         table_opcode[i] = &cpu::LD_r8_r8;
     }
 
-    // --- GRUPO: CARGAS DE 8 BITS (LD r8, d8) ---
+    // LD r8, d8 (Inmediatos)
     table_opcode[0x06] = &cpu::LD_r8_d8; // LD B, d8
     table_opcode[0x0E] = &cpu::LD_r8_d8; // LD C, d8
     table_opcode[0x16] = &cpu::LD_r8_d8; // LD D, d8
@@ -31,170 +34,247 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     table_opcode[0x36] = &cpu::LD_r8_d8; // LD [HL], d8
     table_opcode[0x3E] = &cpu::LD_r8_d8; // LD A, d8
 
-    // --- GRUPO: CARGAS DE 16 BITS ---
-    table_opcode[0x21] = &cpu::LD_r16_d16; // LD HL, d16
-    table_opcode[0xF9] = &cpu::LD_SP_HL;   // LD SP, HL
-    table_opcode[0x32] = &cpu::LDD_HL_A;    // LD (HL-), A (Carga y decrementa)
+    // LD Especiales y Memoria
+    table_opcode[0x0A] = &cpu::LD_A_BC;  // LD A, [BC]
+    table_opcode[0x1A] = &cpu::LD_A_DE;  // LD A, [DE]
+    table_opcode[0xFA] = &cpu::LD_A_a16; // LD A, [a16]
+    table_opcode[0x02] = &cpu::LD_BC_A;  // LD [BC], A
+    table_opcode[0x12] = &cpu::LD_DE_A;  // LD [DE], A
+    table_opcode[0xEA] = &cpu::LD_a16_A; // LD [a16], A
+    table_opcode[0xE0] = &cpu::LDH_n_A;  // LDH [a8], A
+    table_opcode[0xF0] = &cpu::LDH_A_n;  // LDH A, [a8]
+    table_opcode[0xE2] = &cpu::LD_C_A;   // LD [C], A
+    // Esta es la lectura de High RAM usando C como offset
+    table_opcode[0xF2] = &cpu::LD_A_C; // LD A, [C]  (Opcode 0xF2)
+    // (Nota: LD A, [C] sería 0xF2, pero no es crítico ahora)
 
-    // --- GRUPO: ARITMÉTICA Y LÓGICA ---
-    table_opcode[0xAF] = &cpu::XOR_A;      // XOR A
-    table_opcode[0x05] = &cpu::DEC_r8;     // DEC B
-    table_opcode[0x0D] = &cpu::DEC_r8;     // DEC C
-    table_opcode[0x15] = &cpu::DEC_r8;     // DEC D
-    table_opcode[0x1D] = &cpu::DEC_r8;     // DEC E
-    table_opcode[0x3D] = &cpu::DEC_r8;     // DEC A
-    table_opcode[0x27] = &cpu::DAA;        // Ajuste decimal
-    
+    // LDI / LDD (Incremento/Decremento HL)
+    table_opcode[0x22] = &cpu::LDI_HL_A; // LD [HL+], A
+    table_opcode[0x2A] = &cpu::LDI_A_HL; // LD A, [HL+]
+    table_opcode[0x32] = &cpu::LDD_HL_A; // LD [HL-], A
+    table_opcode[0x3A] = &cpu::LDD_A_HL; // LD A, [HL-]
 
-    // --- GRUPO: SALTOS (JUMPS & BRANCHES) ---
-    table_opcode[0xC3] = &cpu::JP;         // JP d16 (Absoluto)
-    table_opcode[0x18] = &cpu::JR_r8;      // JR r8 (Relativo)
-    table_opcode[0x20] = &cpu::JR_cc_r8;   // JR NZ, r8
-    table_opcode[0x28] = &cpu::JR_cc_r8;   // JR Z, r8
-    // ... en el constructor ...
-    
-    // --- GRUPO: HARDWARE I/O (High RAM) ---
-    table_opcode[0xE0] = &cpu::LDH_n_A; // LDH [a8], A
-    table_opcode[0xF0] = &cpu::LDH_A_n; // LDH A, [a8]
+    // =============================================================
+    // GRUPO: 16 BITS (LD, INC, DEC, ADD)
+    // =============================================================
 
-    // --- GRUPO: ROTACIONES ---
-    table_opcode[0x0F] = &cpu::RRCA;    // RRCA
-
-    // --- GRUPO: CONTROL DE HARDWARE ---
-    table_opcode[0x00] = &cpu::NOP;
-    table_opcode[0x10] = &cpu::STOP;
-    table_opcode[0x76] = &cpu::HALT;
-    table_opcode[0xF3] = &cpu::DI;         // Disable Interrupts
-    table_opcode[0xFB] = &cpu::EI;         // Enable Interrupts
-    // Control de Flujo
-    table_opcode[0xCD] = &cpu::CALL;      // CALL a16
-    table_opcode[0xCA] = &cpu::JP_cc_a16; // JP Z, a16
-    
-    // Lógica
-    table_opcode[0xB6] = &cpu::OR_r8;     // OR [HL]
-
-    // --- GRUPO: CARGAS DIRECTAS ---   
-    table_opcode[0xEA] = &cpu::LD_a16_A;
-
-    // ... En tu constructor cpu::cpu ...
-
-    // REUTILIZACIÓN: Cargas de 16 bits (LD r16, d16)
-    // Ya tenías la 0x21, ahora mapeamos las hermanas:
+    // LD r16, d16
     table_opcode[0x01] = &cpu::LD_r16_d16; // LD BC, d16
     table_opcode[0x11] = &cpu::LD_r16_d16; // LD DE, d16
-    
-    // REUTILIZACIÓN: Saltos Relativos (JR cc, r8)
-    // Ya tenías 0x20 y 0x28, ahora mapeamos Carry/NoCarry
-    table_opcode[0x30] = &cpu::JR_cc_r8;   // JR NC, r8
-    table_opcode[0x38] = &cpu::JR_cc_r8;   // JR C, r8  <-- EL QUE PEDÍA EL LOG
+    table_opcode[0x21] = &cpu::LD_r16_d16; // LD HL, d16
+    table_opcode[0x31] = &cpu::LD_SP_d16;  // LD SP, d16
 
-    // NUEVAS: Aritmética 16 bits
-    table_opcode[0x0B] = &cpu::DEC_r16;    // DEC BC    <-- EL QUE PEDÍA EL LOG
-    table_opcode[0x13] = &cpu::INC_r16;    // INC DE    <-- EL QUE PEDÍA EL LOG
-    table_opcode[0x23] = &cpu::INC_r16;    // INC HL
-
-    // NUEVAS: Memoria y Copia
-    table_opcode[0x2A] = &cpu::LDI_A_HL;   // LD A, [HL+] (Carga y avanza)
-    table_opcode[0x12] = &cpu::LD_DE_A;    // LD [DE], A
-
-    // NUEVAS: Retorno
-    table_opcode[0xC9] = &cpu::RET;        // RET       <-- CRÍTICO
-
-    // NUEVAS: Aritmética 8 bits
-    table_opcode[0x80] = &cpu::ADD_A_r8;   // ADD A, B
-    table_opcode[0xB1] = &cpu::OR_r8;      // OR C
-
-    // --- GRUPO: STACK & MEMORIA ---
-    table_opcode[0x31] = &cpu::LD_SP_d16;  // LD SP, d16  <-- MUY IMPORTANTE
-    table_opcode[0x1A] = &cpu::LD_A_DE;    // LD A, [DE]
-
-    // --- GRUPO: ARITMÉTICA 16 BITS (ADD HL, ss) ---
-    table_opcode[0x09] = &cpu::ADD_HL_r16; // ADD HL, BC
-    table_opcode[0x19] = &cpu::ADD_HL_r16; // ADD HL, DE  <-- EL QUE TE FALTA
-    table_opcode[0x29] = &cpu::ADD_HL_r16; // ADD HL, HL
-    table_opcode[0x39] = &cpu::ADD_HL_r16; // ADD HL, SP
-
-    // --- GRUPO: COMPARACIONES ---
-    table_opcode[0xFE] = &cpu::CP_d8;      // CP d8       <-- CRÍTICO PARA LOGICA
-
-    // --- GRUPO: RESTA (SUB r8) ---
-    // Mapeamos todo el bloque 0x90-0x97
-    table_opcode[0x90] = &cpu::SUB_r8; // SUB B
-    table_opcode[0x91] = &cpu::SUB_r8; // SUB C
-    table_opcode[0x92] = &cpu::SUB_r8; // SUB D
-    table_opcode[0x93] = &cpu::SUB_r8; // SUB E
-    table_opcode[0x94] = &cpu::SUB_r8; // SUB H       <-- EL QUE TE FALTA
-    table_opcode[0x95] = &cpu::SUB_r8; // SUB L
-    table_opcode[0x96] = &cpu::SUB_r8; // SUB [HL]
-    table_opcode[0x97] = &cpu::SUB_r8; // SUB A
-
-    // --- GRUPO: STACK OPS ---
+    // Stack (PUSH/POP)
     table_opcode[0xC5] = &cpu::PUSH_r16; // PUSH BC
     table_opcode[0xD5] = &cpu::PUSH_r16; // PUSH DE
-    table_opcode[0xE5] = &cpu::PUSH_r16; // PUSH HL <-- EL QUE PIDE EL LOG
-    table_opcode[0xF5] = &cpu::PUSH_r16; // PUSH AF <-- EL QUE PIDE EL LOG
-    
+    table_opcode[0xE5] = &cpu::PUSH_r16; // PUSH HL
+    table_opcode[0xF5] = &cpu::PUSH_r16; // PUSH AF
     table_opcode[0xC1] = &cpu::POP_r16;  // POP BC
     table_opcode[0xD1] = &cpu::POP_r16;  // POP DE
     table_opcode[0xE1] = &cpu::POP_r16;  // POP HL
-    table_opcode[0xF1] = &cpu::POP_r16;  // POP AF <-- EL QUE PIDE EL LOG
+    table_opcode[0xF1] = &cpu::POP_r16;  // POP AF
+    
+    // LD SP
+    table_opcode[0xF9] = &cpu::LD_SP_HL;  // LD SP, HL
+    table_opcode[0x08] = &cpu::LD_a16_SP; // LD [a16], SP
 
-    table_opcode[0x08] = &cpu::LD_a16_SP; // LD [a16], SP <-- EL QUE PIDE EL LOG
+    // INC r16 (Incrementos de 16 bits)
+    table_opcode[0x03] = &cpu::INC_r16; // INC BC
+    table_opcode[0x13] = &cpu::INC_r16; // INC DE
+    table_opcode[0x23] = &cpu::INC_r16; // INC HL
+    table_opcode[0x33] = &cpu::INC_r16; // INC SP
 
-    // --- GRUPO: PREFIJO CB ---
-    table_opcode[0xCB] = &cpu::PREFIX_CB; // <-- EL JEFE FINAL
+    // DEC r16 (Decrementos de 16 bits)
+    table_opcode[0x0B] = &cpu::DEC_r16; // DEC BC
+    table_opcode[0x1B] = &cpu::DEC_r16; // DEC DE
+    table_opcode[0x2B] = &cpu::DEC_r16; // DEC HL
+    table_opcode[0x3B] = &cpu::DEC_r16; // DEC SP
 
-    // --- GRUPO: MATH CON CARRY ---
-    table_opcode[0x89] = &cpu::ADC_A_r8;  // ADC A, C
-    table_opcode[0x99] = &cpu::SBC_A_r8;  // SBC A, C
-    table_opcode[0xDE] = &cpu::SBC_A_d8;  // SBC A, d8
+    // ADD HL, r16
+    table_opcode[0x09] = &cpu::ADD_HL_r16; // ADD HL, BC
+    table_opcode[0x19] = &cpu::ADD_HL_r16; // ADD HL, DE
+    table_opcode[0x29] = &cpu::ADD_HL_r16; // ADD HL, HL
+    table_opcode[0x39] = &cpu::ADD_HL_r16; // ADD HL, SP
 
-    // --- GRUPO: AND (Lógica Y) ---
-    table_opcode[0xA0] = &cpu::AND_r8; // AND B
-    table_opcode[0xA1] = &cpu::AND_r8; // AND C
-    table_opcode[0xA2] = &cpu::AND_r8; // AND D
-    table_opcode[0xA3] = &cpu::AND_r8; // AND E
-    table_opcode[0xA4] = &cpu::AND_r8; // AND H
-    table_opcode[0xA5] = &cpu::AND_r8; // AND L
-    table_opcode[0xA6] = &cpu::AND_r8; // AND [HL]
-    table_opcode[0xA7] = &cpu::AND_r8; // AND A  <-- EL QUE PIDE EL LOG
+    // =============================================================
+    // GRUPO: ARITMÉTICA Y LÓGICA 8 BITS (ALU)
+    // =============================================================
 
-    // --- GRUPO: RET CONDICIONAL ---
-    table_opcode[0xC0] = &cpu::RET_cc; // RET NZ
-    table_opcode[0xC8] = &cpu::RET_cc; // RET Z  <-- EL QUE PIDE EL LOG
-    table_opcode[0xD0] = &cpu::RET_cc; // RET NC
-    table_opcode[0xD8] = &cpu::RET_cc; // RET C
-    // --- GRUPO: INC r8 (Incrementar registro 8 bits) ---
+    // INC r8
     table_opcode[0x04] = &cpu::INC_r8; // INC B
-    table_opcode[0x0C] = &cpu::INC_r8; // INC C  <-- EL QUE PIDE EL LOG
+    table_opcode[0x0C] = &cpu::INC_r8; // INC C
     table_opcode[0x14] = &cpu::INC_r8; // INC D
-    table_opcode[0x1C] = &cpu::INC_r8; // INC E  <-- EL QUE PIDE EL LOG
-    table_opcode[0x24] = &cpu::INC_r8; // INC H  <-- EL QUE PIDE EL LOG
+    table_opcode[0x1C] = &cpu::INC_r8; // INC E
+    table_opcode[0x24] = &cpu::INC_r8; // INC H
     table_opcode[0x2C] = &cpu::INC_r8; // INC L
     table_opcode[0x34] = &cpu::INC_r8; // INC [HL]
     table_opcode[0x3C] = &cpu::INC_r8; // INC A
 
-    // --- Cargas y Lógica Variada ---
-    table_opcode[0xE2] = &cpu::LD_C_A;   // LD [C], A (I/O Write) <-- MUY IMPORTANTE
-    table_opcode[0xFA] = &cpu::LD_A_a16; // LD A, [a16]
-    table_opcode[0xC6] = &cpu::ADD_A_d8; // ADD A, d8
-    table_opcode[0x37] = &cpu::SCF;      // SCF
+    // DEC r8
+    table_opcode[0x05] = &cpu::DEC_r8; // DEC B
+    table_opcode[0x0D] = &cpu::DEC_r8; // DEC C
+    table_opcode[0x15] = &cpu::DEC_r8; // DEC D
+    table_opcode[0x1D] = &cpu::DEC_r8; // DEC E
+    table_opcode[0x25] = &cpu::DEC_r8; // DEC H
+    table_opcode[0x2D] = &cpu::DEC_r8; // DEC L
+    table_opcode[0x35] = &cpu::DEC_r8; // DEC [HL]
+    table_opcode[0x3D] = &cpu::DEC_r8; // DEC A
 
-    // --- GRUPO: JUMP RELATIVE (JR) ---
-    table_opcode[0x18] = &cpu::JR_d8;     // JR n
-    table_opcode[0x20] = &cpu::JR_cc_d8;  // JR NZ, n
-    table_opcode[0x28] = &cpu::JR_cc_d8;  // JR Z, n
-    table_opcode[0x30] = &cpu::JR_cc_d8;  // JR NC, n
-    table_opcode[0x38] = &cpu::JR_cc_d8;  // JR C, n
-    // --- RETI ---
+    // ADD A, r8 (0x80 - 0x87) ---> AQUÍ ESTÁ EL 0x87 QUE FALTABA
+    table_opcode[0x80] = &cpu::ADD_A_r8;
+    table_opcode[0x81] = &cpu::ADD_A_r8;
+    table_opcode[0x82] = &cpu::ADD_A_r8;
+    table_opcode[0x83] = &cpu::ADD_A_r8;
+    table_opcode[0x84] = &cpu::ADD_A_r8;
+    table_opcode[0x85] = &cpu::ADD_A_r8;
+    table_opcode[0x86] = &cpu::ADD_A_r8;
+    table_opcode[0x87] = &cpu::ADD_A_r8; // ADD A, A
+
+    // ADC A, r8 (0x88 - 0x8F) ---> FALTABAN ALGUNOS
+    table_opcode[0x88] = &cpu::ADC_A_r8;
+    table_opcode[0x89] = &cpu::ADC_A_r8;
+    table_opcode[0x8A] = &cpu::ADC_A_r8;
+    table_opcode[0x8B] = &cpu::ADC_A_r8;
+    table_opcode[0x8C] = &cpu::ADC_A_r8; // ADC A, H
+    table_opcode[0x8D] = &cpu::ADC_A_r8;
+    table_opcode[0x8E] = &cpu::ADC_A_r8;
+    table_opcode[0x8F] = &cpu::ADC_A_r8;
+
+    // SUB r8 (0x90 - 0x97)
+    table_opcode[0x90] = &cpu::SUB_r8;
+    table_opcode[0x91] = &cpu::SUB_r8;
+    table_opcode[0x92] = &cpu::SUB_r8;
+    table_opcode[0x93] = &cpu::SUB_r8;
+    table_opcode[0x94] = &cpu::SUB_r8; // SUB H
+    table_opcode[0x95] = &cpu::SUB_r8;
+    table_opcode[0x96] = &cpu::SUB_r8;
+    table_opcode[0x97] = &cpu::SUB_r8;
+
+    // SBC A, r8 (0x98 - 0x9F)
+    table_opcode[0x98] = &cpu::SBC_A_r8;
+    table_opcode[0x99] = &cpu::SBC_A_r8;
+    table_opcode[0x9A] = &cpu::SBC_A_r8;
+    table_opcode[0x9B] = &cpu::SBC_A_r8;
+    table_opcode[0x9C] = &cpu::SBC_A_r8;
+    table_opcode[0x9D] = &cpu::SBC_A_r8;
+    table_opcode[0x9E] = &cpu::SBC_A_r8;
+    table_opcode[0x9F] = &cpu::SBC_A_r8;
+
+    // AND r8 (0xA0 - 0xA7)
+    table_opcode[0xA0] = &cpu::AND_r8;
+    table_opcode[0xA1] = &cpu::AND_r8;
+    table_opcode[0xA2] = &cpu::AND_r8;
+    table_opcode[0xA3] = &cpu::AND_r8;
+    table_opcode[0xA4] = &cpu::AND_r8;
+    table_opcode[0xA5] = &cpu::AND_r8;
+    table_opcode[0xA6] = &cpu::AND_r8;
+    table_opcode[0xA7] = &cpu::AND_r8;
+
+    // XOR r8 (0xA8 - 0xAF) ---> AQUÍ ESTABAN FALTANDO
+    table_opcode[0xA8] = &cpu::XOR_r8;
+    table_opcode[0xA9] = &cpu::XOR_r8; // XOR C
+    table_opcode[0xAA] = &cpu::XOR_r8;
+    table_opcode[0xAB] = &cpu::XOR_r8;
+    table_opcode[0xAC] = &cpu::XOR_r8;
+    table_opcode[0xAD] = &cpu::XOR_r8;
+    table_opcode[0xAE] = &cpu::XOR_r8; // XOR [HL]
+    table_opcode[0xAF] = &cpu::XOR_r8; // XOR A
+
+    // OR r8 (0xB0 - 0xB7)
+    table_opcode[0xB0] = &cpu::OR_r8;  // OR B
+    table_opcode[0xB1] = &cpu::OR_r8;  // OR C
+    table_opcode[0xB2] = &cpu::OR_r8;
+    table_opcode[0xB3] = &cpu::OR_r8;
+    table_opcode[0xB4] = &cpu::OR_r8;
+    table_opcode[0xB5] = &cpu::OR_r8;
+    table_opcode[0xB6] = &cpu::OR_r8;  // OR [HL]
+    table_opcode[0xB7] = &cpu::OR_r8;  // OR A
+
+    // CP r8 (0xB8 - 0xBF)
+    table_opcode[0xB8] = &cpu::CP_r8;
+    table_opcode[0xB9] = &cpu::CP_r8;
+    table_opcode[0xBA] = &cpu::CP_r8;
+    table_opcode[0xBB] = &cpu::CP_r8;
+    table_opcode[0xBC] = &cpu::CP_r8;
+    table_opcode[0xBD] = &cpu::CP_r8;
+    table_opcode[0xBE] = &cpu::CP_r8;
+    table_opcode[0xBF] = &cpu::CP_r8;
+
+    // ALU Inmediatos (d8)
+    table_opcode[0xC6] = &cpu::ADD_A_d8;
+    table_opcode[0xCE] = &cpu::ADC_A_d8; // ADC A, d8 (Faltaba)
+    table_opcode[0xD6] = &cpu::SUB_A_d8;
+    table_opcode[0xDE] = &cpu::SBC_A_d8;
+    table_opcode[0xE6] = &cpu::AND_d8;   // AND d8 (Faltaba)
+    table_opcode[0xEE] = &cpu::XOR_d8;
+    table_opcode[0xF6] = &cpu::OR_d8;
+    table_opcode[0xFE] = &cpu::CP_d8;
+
+    // Misc ALU
+    table_opcode[0x27] = &cpu::DAA;
+    table_opcode[0x2F] = &cpu::CPL; // CPL (Faltaba)
+    table_opcode[0x3F] = &cpu::CCF; // CCF (Faltaba)
+    table_opcode[0x37] = &cpu::SCF;
+
+    // Rotaciones Standard (No CB)
+    table_opcode[0x07] = &cpu::RLCA; // RLCA (Faltaba)
+    table_opcode[0x0F] = &cpu::RRCA;
+    table_opcode[0x17] = &cpu::RLA;
+    table_opcode[0x1F] = &cpu::RRA;
+
+    // =============================================================
+    // GRUPO: CONTROL DE FLUJO (JUMPS, CALLS, RST)
+    // =============================================================
+
+    // Jumps
+    table_opcode[0xC3] = &cpu::JP;       // JP a16
+    table_opcode[0xE9] = &cpu::JP_HL;    // JP HL ---> CRÍTICO PARA EL CRASH (0xE9)
+    table_opcode[0x18] = &cpu::JR_d8;    // JR r8
+
+    // Jumps Condicionales
+    table_opcode[0x20] = &cpu::JR_cc_d8; // JR NZ
+    table_opcode[0x28] = &cpu::JR_cc_d8; // JR Z
+    table_opcode[0x30] = &cpu::JR_cc_d8; // JR NC
+    table_opcode[0x38] = &cpu::JR_cc_d8; // JR C
+    table_opcode[0xC2] = &cpu::JP_cc_a16; // JP NZ
+    table_opcode[0xCA] = &cpu::JP_cc_a16; // JP Z
+    table_opcode[0xD2] = &cpu::JP_cc_a16; // JP NC
+    table_opcode[0xDA] = &cpu::JP_cc_a16; // JP C
+
+    // Calls
+    table_opcode[0xCD] = &cpu::CALL;
+    // (CALL CC opcionalmente va en C4, CC, D4, DC si los implementas)
+
+    // Returns
+    table_opcode[0xC9] = &cpu::RET;
     table_opcode[0xD9] = &cpu::RETI;
-    // --- LDI (Load and Increment) ---
-    table_opcode[0x22] = &cpu::LDI_HL_A;
-    table_opcode[0x22] = &cpu::LDI_HL_A;
+    table_opcode[0xC0] = &cpu::RET_cc; // RET NZ
+    table_opcode[0xC8] = &cpu::RET_cc; // RET Z
+    table_opcode[0xD0] = &cpu::RET_cc; // RET NC
+    table_opcode[0xD8] = &cpu::RET_cc; // RET C
 
-    table_opcode[0x2F] = &cpu::CPL;
-    table_opcode[0xE6] = &cpu::AND_d8;
+    // RST (Restarts) ---> FALTABAN VARIOS
+    table_opcode[0xC7] = &cpu::RST;
+    table_opcode[0xCF] = &cpu::RST;
+    table_opcode[0xD7] = &cpu::RST;
+    table_opcode[0xDF] = &cpu::RST;
+    table_opcode[0xE7] = &cpu::RST;
+    table_opcode[0xEF] = &cpu::RST; // RST 28H
+    table_opcode[0xF7] = &cpu::RST;
+    table_opcode[0xFF] = &cpu::RST; // RST 38H
 
+    // =============================================================
+    // GRUPO: CONTROL HARDWARE Y PREFIJOS
+    // =============================================================
+
+    table_opcode[0x00] = &cpu::NOP;
+    table_opcode[0x10] = &cpu::STOP;
+    table_opcode[0x76] = &cpu::HALT;
+    table_opcode[0xF3] = &cpu::DI;
+    table_opcode[0xFB] = &cpu::EI;
+    
+    // Prefijo CB
+    table_opcode[0xCB] = &cpu::PREFIX_CB; 
 }
 // --- FLAGS (Getters) ---
 uint8_t cpu::getZ() const { return (r8[F] >> 7) & 1; } 
@@ -865,42 +945,115 @@ int cpu::SUB_r8(uint8_t opcode) {
 
 int cpu::PREFIX_CB(uint8_t opcode) {
     (void)opcode;
-    // 1. LEER el siguiente byte (el verdadero opcode CB)
+    // 1. LEER el verdadero opcode CB
     uint8_t cb_op = readImmediateByte();
     
-    // Decodificar operandos
-    int regIndex = cb_op & 0x07; // Últimos 3 bits dicen el registro (B,C,D,E,H,L,HL,A)
-    int bit = (cb_op >> 3) & 0x07; // Bits 3-5 dicen qué bit operar (0-7)
-    int type = (cb_op >> 6) & 0x03; // Bits 6-7 dicen el tipo (Rotate, Bit, Res, Set)
+    // Decodificar
+    int regIndex = cb_op & 0x07;       // 0-7: Registro afectado
+    int op = (cb_op >> 3) & 0x07;      // 0-7: Bit (o sub-operación en rotaciones)
+    int type = (cb_op >> 6) & 0x03;    // 0-3: Grupo (Rot, Bit, Res, Set)
 
-    static const R8 map[] = {B, C, D, E, H, L, H, A}; // Nota: índice 6 es HL
+    static const R8 map[] = {B, C, D, E, H, L, H, A}; 
     uint8_t val;
-    int cycles = 8; // Ciclos base para registros
+    int cycles;
 
-    // Leer valor
+    // 2. LEER VALOR
     if (regIndex == 6) { // [HL]
         val = memory.readMemory(getHL());
-        cycles = (type == 1) ? 12 : 16; // BIT toma 12, otros 16 con [HL]
+        // Ciclos base: BIT=12, Rot/Set/Res=16
+        cycles = (type == 1) ? 12 : 16; 
     } else {
         val = r8[map[regIndex]];
+        // Ciclos base: BIT=8, Rot/Set/Res=8
+        cycles = 8;
     }
 
-    // --- EJECUTAR OPERACIÓN ---
-    
-    // TIPO 1: BIT (0x40 - 0x7F) - Testear si un bit es 0 o 1
-    if (type == 1) { // Rango 0x40 - 0x7F
-        bool isZero = (val & (1 << bit)) == 0;
-        setZ(isZero);
-        setN(false);
-        setH(true);
-        // Carry no cambia
-        return cycles;
+    // 3. EJECUTAR OPERACIÓN
+    switch (type) {
+        // --- TYPE 0: ROTACIONES Y SHIFTS (0x00 - 0x3F) ---
+        // Aquí 'op' decide qué rotación es (RLC, RRC, RL, RR, SLA, SRA, SWAP, SRL)
+        case 0: {
+            bool C_flag = getC(); // Carry actual
+            bool newCarry = false;
+            
+            switch (op) {
+                case 0: // RLC (Rotate Left Circular) - Bit 7 va al Carry y al Bit 0
+                    newCarry = (val & 0x80) != 0;
+                    val = (val << 1) | (newCarry ? 1 : 0);
+                    break;
+                case 1: // RRC (Rotate Right Circular) - Bit 0 va al Carry y al Bit 7
+                    newCarry = (val & 0x01) != 0;
+                    val = (val >> 1) | (newCarry ? 0x80 : 0);
+                    break;
+                case 2: // RL (Rotate Left thru Carry) - Carry viejo al Bit 0
+                    newCarry = (val & 0x80) != 0;
+                    val = (val << 1) | (C_flag ? 1 : 0);
+                    break;
+                case 3: // RR (Rotate Right thru Carry) - Carry viejo al Bit 7
+                    newCarry = (val & 0x01) != 0;
+                    val = (val >> 1) | (C_flag ? 0x80 : 0);
+                    break;
+                case 4: // SLA (Shift Left Arithmetic) - Bit 0 se vuelve 0
+                    newCarry = (val & 0x80) != 0;
+                    val = val << 1;
+                    break;
+                case 5: // SRA (Shift Right Arithmetic) - Bit 7 se mantiene (Signo)
+                    newCarry = (val & 0x01) != 0;
+                    val = (val >> 1) | (val & 0x80);
+                    break;
+                case 6: // SWAP (Intercambiar Nibbles)
+                    {
+                        uint8_t low = val & 0x0F;
+                        uint8_t high = val & 0xF0;
+                        val = (low << 4) | (high >> 4);
+                        newCarry = false; // SWAP limpia Carry
+                    }
+                    break;
+                case 7: // SRL (Shift Right Logical) - Bit 7 se vuelve 0
+                    newCarry = (val & 0x01) != 0;
+                    val = val >> 1;
+                    break;
+            }
+
+            // Banderas comunes para Rotaciones/Shifts CB
+            setZ(val == 0);
+            setN(false);
+            setH(false);
+            setC(newCarry);
+            break; 
+        }
+
+        // --- TYPE 1: BIT TEST (0x40 - 0x7F) ---
+        // (Tu implementación estaba bien, solo la integro aquí)
+        case 1: {
+            bool isZero = (val & (1 << op)) == 0;
+            setZ(isZero);
+            setN(false);
+            setH(true);
+            // C no cambia
+            return cycles; // RETORNAMOS AQUÍ (BIT no escribe en memoria)
+        }
+
+        // --- TYPE 2: RES (Reset Bit) (0x80 - 0xBF) ---
+        case 2:
+            val &= ~(1 << op);
+            break;
+
+        // --- TYPE 3: SET (Set Bit) (0xC0 - 0xFF) ---
+        case 3:
+            val |= (1 << op);
+            break;
     }
-    
-    // SI NO ES "BIT", AÚN NO LO IMPLEMENTAMOS (Saldrá error en logs si se necesita)
-    // Pero Tetris usa mayormente BIT al inicio.
-    //std::cout << "CB Opcode no implementado: " << std::hex << (int)cb_op << "\n";
-    return 8;
+
+    // 4. ESCRIBIR RESULTADO (Write Back)
+    // Esto faltaba en tu código. BIT no llega aquí, pero el resto sí.
+    if (regIndex == 6) { // [HL]
+        memory.writeMemory(getHL(), val);
+    } else {
+        r8[map[regIndex]] = val;
+    }
+
+    return cycles;
 }
 int cpu::PUSH_r16(uint8_t opcode) {
     int reg = (opcode >> 4) & 0x03; // 00=BC, 01=DE, 10=HL, 11=AF
@@ -1196,6 +1349,296 @@ int cpu::AND_d8(uint8_t opcode) {
     setN(false);
     setH(true);  // ¡OJO! AND siempre pone Half Carry a 1 en GB
     setC(false);
+    
+    return 8; // 8 ciclos
+}
+// --- IMPLEMENTACIÓN XOR (0xA8 - 0xAF) ---
+int cpu::XOR_r8(uint8_t opcode) {
+    int srcIndex = opcode & 0x07; // Bits 0-2 indican la fuente
+    static const R8 map[] = {B, C, D, E, H, L, H, A};
+    
+    uint8_t val;
+    int cycles = 4;
+
+    if (srcIndex == 6) { // [HL]
+        val = memory.readMemory(getHL());
+        cycles = 8;
+    } else {
+        val = r8[map[srcIndex]];
+    }
+
+    // Operación XOR: A = A ^ val
+    r8[A] ^= val;
+
+    // Flags: Z si es cero, todo lo demás en false
+    setZ(r8[A] == 0);
+    setN(false);
+    setH(false);
+    setC(false);
+
+    return cycles;
+}
+
+// --- IMPLEMENTACIÓN ADC Inmediato (0xCE) ---
+int cpu::ADC_A_d8(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = readImmediateByte(); // Leemos el dato d8
+    
+    int carry = getC() ? 1 : 0;
+    int result = r8[A] + val + carry;
+
+    // Flags
+    setZ((result & 0xFF) == 0);
+    setN(false);
+    // Half Carry: (Bits bajos de A) + (Bits bajos de Val) + Carry > 15
+    setH(((r8[A] & 0x0F) + (val & 0x0F) + carry) > 0x0F);
+    // Carry: Resultado mayor a 255
+    setC(result > 0xFF);
+
+    r8[A] = (uint8_t)result;
+    return 8;
+}
+// Rotate Left Circular Accumulator
+// Rota A hacia la izquierda. El bit 7 pasa al Carry Y al bit 0.
+int cpu::RLCA(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = r8[A];
+    
+    // Obtenemos el bit más significativo (Bit 7)
+    bool carry = (val & 0x80) != 0;
+
+    // Rotamos: Desplazamos a la izquierda 1 y metemos el carry en el bit 0
+    r8[A] = (val << 1) | (carry ? 1 : 0);
+
+    // --- BANDERAS ---
+    setZ(false); // IMPORTANTE: RLCA siempre pone Zero en false en la GB
+    setN(false);
+    setH(false);
+    setC(carry); // El Carry toma el valor del bit que "salió" (el antiguo bit 7)
+
+    return 4; // 4 ciclos
+}
+// Restart
+// Funciona como un CALL a una dirección fija (0x00, 0x08, 0x10, ..., 0x38)
+int cpu::RST(uint8_t opcode) {
+    // La dirección destino está codificada en los bits 3, 4 y 5 del opcode.
+    // Ejemplo: 0xEF (1110 1111) AND 0x38 (0011 1000) = 0x28
+    uint16_t target = opcode & 0x38;
+
+    // 1. Hacemos PUSH del PC actual al Stack
+    // (Guardamos la dirección de retorno)
+    push(PC); 
+
+    // 2. Saltamos a la dirección destino
+    PC = target;
+
+    return 16; // 16 ciclos
+}
+int cpu::JP_HL(uint8_t opcode) {
+    (void)opcode;
+    
+    // Simplemente cargamos el valor de HL en el Program Counter
+    PC = getHL();
+
+    return 4; // 4 ciclos
+}
+// Opcode 0x17: RLA (Rotate Left Accumulator through Carry)
+// Rota el registro A a la izquierda A TRAVÉS del Carry.
+// [C] <- [7][6][5][4][3][2][1][0] <- [C antiguo]
+int cpu::RLA(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = r8[A];
+    
+    // 1. Capturamos el Carry actual para meterlo en el bit 0
+    bool oldCarry = getC();
+    
+    // 2. Capturamos el bit 7 actual para que sea el nuevo Carry
+    bool newCarry = (val & 0x80) != 0;
+
+    // 3. Rotación: Desplazar izquierda + meter Carry viejo en bit 0
+    r8[A] = (val << 1) | (oldCarry ? 1 : 0);
+
+    // 4. Banderas
+    setZ(false); // ¡CRÍTICO! En RLA (0x17) Z siempre es 0.
+    setN(false);
+    setH(false);
+    setC(newCarry);
+
+    return 4; // 4 ciclos
+}
+
+// Opcode 0x1F: RRA (Rotate Right Accumulator through Carry)
+// Rota el registro A a la derecha A TRAVÉS del Carry.
+// [C antiguo] -> [7][6][5][4][3][2][1][0] -> [C]
+int cpu::RRA(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = r8[A];
+
+    // 1. Capturamos el Carry actual para meterlo en el bit 7
+    bool oldCarry = getC();
+
+    // 2. Capturamos el bit 0 actual para que sea el nuevo Carry
+    bool newCarry = (val & 0x01) != 0;
+
+    // 3. Rotación: Desplazar derecha + meter Carry viejo en bit 7
+    r8[A] = (val >> 1) | (oldCarry ? 0x80 : 0);
+
+    // 4. Banderas
+    setZ(false); // ¡CRÍTICO! En RRA (0x1F) Z siempre es 0.
+    setN(false);
+    setH(false);
+    setC(newCarry);
+
+    return 4; // 4 ciclos
+}
+// Opcode 0x3F: CCF (Complement Carry Flag)
+// Invierte el valor de la bandera Carry (C = !C)
+int cpu::CCF(uint8_t opcode) {
+    (void)opcode;
+    
+    // Banderas afectadas:
+    setN(false);   // Reset N
+    setH(false);   // Reset H
+    setC(!getC()); // Invertir C
+    
+    // Z no se ve afectada
+    
+    return 4; // 4 ciclos
+}
+
+// Opcode 0xEE: XOR d8 (Exclusive OR Immediate)
+// A = A ^ valor_inmediato
+int cpu::XOR_d8(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = readImmediateByte(); // Leer el dato d8
+    
+    r8[A] ^= val;
+    
+    // Banderas:
+    setZ(r8[A] == 0);
+    setN(false);
+    setH(false);
+    setC(false);
+    
+    return 8; // 8 ciclos
+}
+
+// Opcode 0xF6: OR d8 (Logical OR Immediate)
+// A = A | valor_inmediato
+int cpu::OR_d8(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = readImmediateByte(); // Leer el dato d8
+    
+    r8[A] |= val;
+    
+    // Banderas:
+    setZ(r8[A] == 0);
+    setN(false);
+    setH(false);
+    setC(false);
+    
+    return 8; // 8 ciclos
+}
+// Opcode 0xB8 - 0xBF: CP r8 (Compare A with r8)
+// Flags: Z (si iguales), N=1, H (si borrow en bit 4), C (si A < val)
+int cpu::CP_r8(uint8_t opcode) {
+    int index = opcode & 0x07; // Bits 0-2 indican el registro fuente
+    static const R8 map[] = {B, C, D, E, H, L, H, A};
+    
+    uint8_t val;
+    int cycles = 4;
+
+    // 1. Obtener valor a comparar
+    if (index == 6) { // [HL]
+        val = memory.readMemory(getHL());
+        cycles = 8;
+    } else {
+        val = r8[map[index]];
+    }
+
+    uint8_t a = r8[A];
+
+    // 2. Comparación (Lógica de resta pero sin guardar resultado)
+    setZ(a == val);
+    setN(true); // CP siempre es una "resta"
+    
+    // Half Carry: Si hay préstamo del bit 4
+    setH((a & 0x0F) < (val & 0x0F));
+    
+    // Carry: Si A es menor que val (Préstamo total)
+    setC(a < val);
+
+    return cycles;
+}
+// Opcode 0x0A: LD A, [BC]
+// Carga en el registro A el valor almacenado en la dirección de memoria apuntada por BC.
+int cpu::LD_A_BC(uint8_t opcode) {
+    (void)opcode;
+
+    // 1. Obtener la dirección de memoria desde el par de registros BC
+    uint16_t addr = getBC();
+
+    // 2. Leer el valor de esa dirección y guardarlo en A
+    r8[A] = memory.readMemory(addr);
+
+    return 8; // 8 ciclos
+}
+// Opcode 0xD6: SUB A, d8 (Subtract Immediate)
+// A = A - d8
+int cpu::SUB_A_d8(uint8_t opcode) {
+    (void)opcode;
+    uint8_t val = readImmediateByte(); // Leer d8
+    uint8_t a = r8[A];
+
+    int result = a - val;
+
+    // Banderas
+    setZ((result & 0xFF) == 0);
+    setN(true); // Resta
+    setH((a & 0x0F) < (val & 0x0F)); // Half Carry (Borrow)
+    setC(a < val); // Carry (Borrow)
+
+    // Guardar resultado
+    r8[A] = (uint8_t)result;
+
+    return 8; // 8 ciclos
+}
+// Opcode 0x3A: LDD A, [HL] (Load A from HL and Dec HL)
+// También conocido como LD A, [HL-]
+int cpu::LDD_A_HL(uint8_t opcode) {
+    (void)opcode;
+    
+    uint16_t hl = getHL();
+    
+    // 1. Cargar valor
+    r8[A] = memory.readMemory(hl);
+    
+    // 2. Decrementar HL
+    setHL(hl - 1);
+
+    return 8; // 8 ciclos
+}
+// Opcode 0x02: LD [BC], A
+// Guarda el contenido de A en la dirección de memoria apuntada por BC.
+int cpu::LD_BC_A(uint8_t opcode) {
+    (void)opcode;
+    
+    // 1. Obtener la dirección destino desde BC
+    uint16_t addr = getBC();
+    
+    // 2. Escribir el valor de A en esa dirección
+    memory.writeMemory(addr, r8[A]);
+    
+    return 8; // 8 ciclos
+}
+// Opcode 0xF2: LD A, [C]
+// Lee de la dirección 0xFF00 + registro C
+int cpu::LD_A_C(uint8_t opcode) {
+    (void)opcode;
+    // La dirección es High RAM (0xFF00) + el valor de C
+    uint16_t addr = 0xFF00 | r8[C]; 
+    
+    r8[A] = memory.readMemory(addr);
     
     return 8; // 8 ciclos
 }
