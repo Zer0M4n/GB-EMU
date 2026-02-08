@@ -471,19 +471,44 @@ int cpu::step()
     }
 
     // 3. Fetch (Traer instrucción)
+    uint16_t pc_before = PC;
     uint8_t opcode = fetch();
 
+    // DEBUG: Imprimir estado de CPU antes de ejecutar
+    uint8_t if_reg = memory.readMemory(0xFF0F);
+    uint8_t ie_reg = memory.readMemory(0xFFFF);
+    /*std::cout << "[CPU] PC=0x" << std::hex << pc_before 
+              << " OP=0x" << (int)opcode
+              << " IME=" << std::dec << (IME ? 1 : 0)
+              << " IME_sched=" << (IME_scheduled ? 1 : 0)
+              << " IF=0x" << std::hex << (int)if_reg
+              << " IE=0x" << (int)ie_reg
+              << " A=" << (int)r8[A] << " F=" << (int)r8[F]
+              << " SP=0x" << SP << std::dec << "\n";*/
+
     // 4. Decode & Execute
+    int cycles = 4;
+    
     if (table_opcode[opcode] != nullptr)
     {
-        return (this->*table_opcode[opcode])(opcode);
+        cycles = (this->*table_opcode[opcode])(opcode);
     } 
     else
     {
         std::cout << "Opcode no implementado: 0x" << std::hex << (int)opcode 
                   << " at PC=0x" << (PC-1) << "\n";
-        return 4; // Retornar al menos 4 ciclos para evitar loops infinitos
+        cycles = 4; // Retornar al menos 4 ciclos para evitar loops infinitos
     }
+    
+    // 5. DESPUÉS de ejecutar la instrucción: Activar IME si estaba programado
+    // EI habilita interrupciones DESPUÉS de la siguiente instrucción
+    if (IME_scheduled) {
+        IME = true;
+        IME_scheduled = false;
+        std::cout << "[CPU] IME activado tras instrucción en PC=0x" << std::hex << pc_before << std::dec << "\n";
+    }
+    
+    return cycles;
 }
 
 // --- Helpers de Lectura ---

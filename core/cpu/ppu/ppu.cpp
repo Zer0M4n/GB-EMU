@@ -35,19 +35,19 @@ ppu::ppu(mmu& mmu_ref) : memory(mmu_ref), debug_enabled(false), last_line_logged
 // ENABLE DEBUG - ACTIVAR/DESACTIVAR DEBUGGER
 // ============================================================
 void ppu::enable_debug(bool enable) {
-    debug_enabled = enable;
-    if (debug_enabled) {
-        std::cout << "[PPU DEBUG] Debugger activado\n";
-    } else {
-        std::cout << "[PPU DEBUG] Debugger desactivado\n";
-    }
+    // debug_enabled = enable;
+    // if (debug_enabled) {
+    //     std::cout << "[PPU DEBUG] Debugger activado\n";
+    // } else {
+    //     std::cout << "[PPU DEBUG] Debugger desactivado\n";
+    // }
 }
 
 // ============================================================
 // DEBUG SCANLINE REPORT - REPORTE DETALLADO DE LA SCANLINE
 // ============================================================
 void ppu::debug_scanline_report(const char* event) {
-    if (!debug_enabled) return;
+    /*if (!debug_enabled) return;
     
     uint8_t lcdc = memory.readMemory(0xFF40);
     uint8_t stat = memory.readMemory(0xFF41);
@@ -85,21 +85,21 @@ void ppu::debug_scanline_report(const char* event) {
                   << " | BGP=0x" << std::hex << std::setfill('0') << std::setw(2) << (int)bgp << "\n";
         
         last_line_logged = ly;
-    }
+    }*/
 }
 
 // ============================================================
 // DEBUG MODE CHANGE - REPORTE CUANDO CAMBIA DE MODO
 // ============================================================
 void ppu::debug_mode_change(uint8_t old_mode, uint8_t new_mode) {
-    if (!debug_enabled || old_mode == new_mode) return;
+    // if (!debug_enabled || old_mode == new_mode) return;
     
-    const char* mode_names[] = {"HBlank", "VBlank", "OAM Scan", "Drawing"};
-    uint8_t ly = memory.readMemory(0xFF44);
+    // const char* mode_names[] = {"HBlank", "VBlank", "OAM Scan", "Drawing"};
+    // uint8_t ly = memory.readMemory(0xFF44);
     
-    std::cout << "[PPU DEBUG] Cambio de modo en LY=" << std::dec << (int)ly 
-              << ": " << mode_names[old_mode] << " → " << mode_names[new_mode]
-              << " (dot " << scanline_dots << ")\n";
+    // std::cout << "[PPU DEBUG] Cambio de modo en LY=" << std::dec << (int)ly 
+    //           << ": " << mode_names[old_mode] << " → " << mode_names[new_mode]
+    //           << " (dot " << scanline_dots << ")\n";
 }
 
 // ============================================================
@@ -139,10 +139,10 @@ void ppu::step_one_dot() {
     scanline_dots++;
     
     // DEBUG: Mostrar cerca del threshold problemático
-    if (debug_enabled && scanline_dots >= 250 && scanline_dots <= 255) {
-        std::cout << "[PPU DEBUG] THRESHOLD CHECK: LY=" << std::dec << (int)current_line 
-                  << " dot=" << scanline_dots << " current_mode=" << (int)current_mode << "\n";
-    }
+    // if (debug_enabled && scanline_dots >= 250 && scanline_dots <= 255) {
+    //     std::cout << "[PPU DEBUG] THRESHOLD CHECK: LY=" << std::dec << (int)current_line 
+    //               << " dot=" << scanline_dots << " current_mode=" << (int)current_mode << "\n";
+    // }
     
     // Determinar modo basado en la línea actual y dots
     uint8_t prev_mode = current_mode;
@@ -208,14 +208,14 @@ void ppu::step_one_dot() {
 
                 frame_complete = true;
                 debug_scanline_report("→ VBlank iniciado (Frame completo)");
-
+/*
                 if (debug_enabled) {
                     std::cout << "[PPU DEBUG] VBlank IRQ solicitada | IF: 0x"
                               << std::hex << std::setfill('0') << std::setw(2) << (int)if_old
                               << " → 0x" << std::setw(2) << (int)if_new
                               << " | IE=0x" << std::setw(2) << (int)ie_reg
                               << std::dec << "\n";
-                }
+                }*/
             }
             
             // Verificar interrupción STAT para VBlank
@@ -237,8 +237,8 @@ void ppu::step_one_dot() {
         
         // Debug: reportar fin de línea
         if (debug_enabled) {
-            std::cout << "[PPU DEBUG] Fin de scanline: LY=" << std::dec << (int)old_line 
-                      << " → " << (int)current_line;
+            /*std::cout << "[PPU DEBUG] Fin de scanline: LY=" << std::dec << (int)old_line 
+                      << " → " << (int)current_line;*/
             
             // Alerta si llegamos a VBlank
             if (current_line == 144) {
@@ -355,12 +355,12 @@ void ppu::update_stat_interrupt() {
 
         if (debug_enabled) {
             uint8_t ie_reg = memory.readMemory(0xFFFF);
-            std::cout << "[PPU DEBUG] Interrupción STAT solicitada: " << interrupt_reason 
+            /*std::cout << "[PPU DEBUG] Interrupción STAT solicitada: " << interrupt_reason 
                       << " (LY=" << std::dec << (int)ly << ")\n";
             std::cout << "[PPU DEBUG] STAT IRQ | IF: 0x" << std::hex << std::setfill('0') << std::setw(2)
                       << (int)if_old << " → 0x" << std::setw(2) << (int)if_new
                       << " | IE=0x" << std::setw(2) << (int)ie_reg
-                      << std::dec << "\n";
+                      << std::dec << "\n";*/
         }
     }
     

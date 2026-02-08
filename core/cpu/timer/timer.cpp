@@ -21,12 +21,12 @@ void timer::reset() {
 // ENABLE DEBUG - ACTIVAR/DESACTIVAR DEBUGGER
 // ============================================================
 void timer::enable_debug(bool enable) {
-    debug_enabled = enable;
-    if (debug_enabled) {
-        std::cout << "[TIMER DEBUG] Debugger activado\n";
-    } else {
-        std::cout << "[TIMER DEBUG] Debugger desactivado\n";
-    }
+    // debug_enabled = enable;
+    // if (debug_enabled) {
+    //     std::cout << "[TIMER DEBUG] Debugger activado\n";
+    // } else {
+    //     std::cout << "[TIMER DEBUG] Debugger desactivado\n";
+    // }
 }
 
 // ============================================================
@@ -61,7 +61,7 @@ void timer::debug_timer_state(const char* event) {
         }
         
         // Estado del timer
-        std::cout << "DIV=0x" << std::hex << std::setfill('0') << std::setw(2) << (int)div
+        /*std::cout << "DIV=0x" << std::hex << std::setfill('0') << std::setw(2) << (int)div
                   << " | TIMA=0x" << std::setw(2) << (int)tima
                   << " | TMA=0x" << std::setw(2) << (int)tma
                   << " | TAC=0x" << std::setw(2) << (int)tac
@@ -74,7 +74,7 @@ void timer::debug_timer_state(const char* event) {
         std::cout << "         Timer Enable: " << (timer_enable ? "ON" : "OFF")
                   << " | Frequency: " << frequency_names[freq_select]
                   << " | Internal Counter: DIV=" << div_counter
-                  << " | TIMA_cnt=" << tima_counter << "\n";
+                  << " | TIMA_cnt=" << tima_counter << "\n";*/
         
         last_tima_logged = tima;
         last_tac_logged = tac;
@@ -92,12 +92,12 @@ void timer::debug_interrupt_state(const char* event) {
     uint8_t ie_reg = memory.readMemory(0xFFFF);
     uint8_t tac = memory.readMemory(0xFF07);
 
-    std::cout << "[TIMER DEBUG] IRQ STATE";
-    if (event) std::cout << " | " << event;
-    std::cout << " | IF=0x" << std::hex << std::setfill('0') << std::setw(2) << (int)if_reg
-              << " | IE=0x" << std::setw(2) << (int)ie_reg
-              << " | TAC=0x" << std::setw(2) << (int)tac
-              << std::dec << "\n";
+    // std::cout << "[TIMER DEBUG] IRQ STATE";
+    // if (event) std::cout << " | " << event;
+    // std::cout << " | IF=0x" << std::hex << std::setfill('0') << std::setw(2) << (int)if_reg
+    //           << " | IE=0x" << std::setw(2) << (int)ie_reg
+    //           << " | TAC=0x" << std::setw(2) << (int)tac
+    //           << std::dec << "\n";
 }
 
 // ============================================================
@@ -116,8 +116,8 @@ void timer::step(int cycles) {
 
         if (debug_enabled) {
             uint8_t div_new = div_reg;
-            std::cout << "[TIMER DEBUG] DIV incrementado: 0x" << std::hex << std::setfill('0') 
-                      << std::setw(2) << (int)div_old << " → 0x" << std::setw(2) << (int)div_new << "\n";
+            // std::cout << "[TIMER DEBUG] DIV incrementado: 0x" << std::hex << std::setfill('0') 
+            //           << std::setw(2) << (int)div_old << " → 0x" << std::setw(2) << (int)div_new << "\n";
             div_old = div_new;
         }
     }
@@ -146,12 +146,12 @@ void timer::step(int cycles) {
                 memory.IO[0x0F] = if_new;
 
                 if (debug_enabled) {
-                    std::cout << "[TIMER DEBUG] *** TIMER OVERFLOW *** TIMA: 0xFF → TMA (0x" 
+                    /*std::cout << "[TIMER DEBUG] *** TIMER OVERFLOW *** TIMA: 0xFF → TMA (0x" 
                               << std::setfill('0') << std::setw(2) << (int)memory.IO[0x06] << ")\n";
                     std::cout << "[TIMER DEBUG] Interrupción de Timer solicitada (IF bit 2)\n";
                     std::cout << "[TIMER DEBUG] IF: 0x" << std::hex << std::setw(2) << (int)if_old
                               << " → 0x" << std::setw(2) << (int)if_new << std::dec << "\n";
-                    debug_interrupt_state("Timer IRQ requested");
+                    debug_interrupt_state("Timer IRQ requested");*/
                 }
 
                 debug_timer_state("→ OVERFLOW");
