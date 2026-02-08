@@ -11,6 +11,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o.d"
   "CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o"
   "CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o.d"
+  "CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o"
+  "CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o.d"
   "CMakeFiles/gb-emu.dir/emc_main.cpp.o"
   "CMakeFiles/gb-emu.dir/emc_main.cpp.o.d"
   "gb-emu.html"

@@ -659,4 +659,6 @@ CMakeFiles/gb-emu.dir/emc_main.cpp.o: \
   /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.h \
   /home/developer/projects/GB-EMU/core/cartridge/cartridge.h \
   /home/developer/projects/GB-EMU/core/cpu/cpu.h \
-  /home/developer/projects/GB-EMU/core/cpu/ppu/ppu.h
+  /home/developer/projects/GB-EMU/core/cpu/ppu/ppu.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iomanip \
+  /home/developer/projects/GB-EMU/core/cpu/timer/timer.h

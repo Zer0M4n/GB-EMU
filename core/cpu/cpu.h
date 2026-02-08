@@ -29,6 +29,8 @@ private:
     
     // Interrupt Master Enable
     bool IME; 
+        bool IME_scheduled;  // <-- NUEVA: Para el delay de EI
+
     
     // Estados de bajo consumo
     bool isHalted;
@@ -74,8 +76,8 @@ private:
     void maskF();                    // Asegura que los bits bajos de F sean 0
     
     // Gestión de Interrupciones
-    void handleInterrupts();         // Revisa y gestiona interrupciones pendientes
-    void executeInterrupt(int bit);  // Realiza el salto al vector de interrupción
+    int handleInterrupts();         // Revisa y gestiona interrupciones pendientes
+    int executeInterrupt(int bit);  // Realiza el salto al vector de interrupción
 
     // --- SISTEMA DE INSTRUCCIONES ---
     using Instruction = int(cpu::*)(uint8_t); // Puntero a función miembro

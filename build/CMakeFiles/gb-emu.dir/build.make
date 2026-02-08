@@ -129,11 +129,26 @@ CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.s"
 	/home/developer/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/ppu/ppu.cpp -o CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.s
 
+CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o: CMakeFiles/gb-emu.dir/flags.make
+CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o: CMakeFiles/gb-emu.dir/includes_CXX.rsp
+CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o: /home/developer/projects/GB-EMU/core/cpu/timer/timer.cpp
+CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o: CMakeFiles/gb-emu.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o"
+	/home/developer/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o -MF CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o.d -o CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o -c /home/developer/projects/GB-EMU/core/cpu/timer/timer.cpp
+
+CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.i"
+	/home/developer/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/developer/projects/GB-EMU/core/cpu/timer/timer.cpp > CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.i
+
+CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.s"
+	/home/developer/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/developer/projects/GB-EMU/core/cpu/timer/timer.cpp -o CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.s
+
 CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: CMakeFiles/gb-emu.dir/flags.make
 CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: CMakeFiles/gb-emu.dir/includes_CXX.rsp
 CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp
 CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: CMakeFiles/gb-emu.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o"
 	/home/developer/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o -MF CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o.d -o CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp
 
 CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.i: cmake_force
@@ -148,7 +163,7 @@ CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o: CMakeFil
 CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o: CMakeFiles/gb-emu.dir/includes_CXX.rsp
 CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o: /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.cpp
 CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o: CMakeFiles/gb-emu.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o"
 	/home/developer/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o -MF CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o.d -o CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.cpp
 
 CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.i: cmake_force
@@ -163,7 +178,7 @@ CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o: CMakeFiles/
 CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o: CMakeFiles/gb-emu.dir/includes_CXX.rsp
 CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o: /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC1.cpp
 CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o: CMakeFiles/gb-emu.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o"
 	/home/developer/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o -MF CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o.d -o CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o -c /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC1.cpp
 
 CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.i: cmake_force
@@ -180,6 +195,7 @@ gb__emu_OBJECTS = \
 "CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.o" \
 "CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o" \
 "CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o" \
+"CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o" \
 "CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o" \
 "CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o" \
 "CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o"
@@ -191,13 +207,14 @@ gb-emu.html: CMakeFiles/gb-emu.dir/emc_main.cpp.o
 gb-emu.html: CMakeFiles/gb-emu.dir/core/cpu/cpu.cpp.o
 gb-emu.html: CMakeFiles/gb-emu.dir/core/cpu/mmu/mmu.cpp.o
 gb-emu.html: CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o
+gb-emu.html: CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o
 gb-emu.html: CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o
 gb-emu.html: CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o
 gb-emu.html: CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o
 gb-emu.html: CMakeFiles/gb-emu.dir/build.make
 gb-emu.html: CMakeFiles/gb-emu.dir/objects1
 gb-emu.html: CMakeFiles/gb-emu.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable gb-emu.html"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/developer/projects/GB-EMU/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable gb-emu.html"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/gb-emu.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -273,6 +273,30 @@ core/cpu/ppu/ppu.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.s
 .PHONY : core/cpu/ppu/ppu.cpp.s
 
+core/cpu/timer/timer.o: core/cpu/timer/timer.cpp.o
+.PHONY : core/cpu/timer/timer.o
+
+# target to build an object file
+core/cpu/timer/timer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.o
+.PHONY : core/cpu/timer/timer.cpp.o
+
+core/cpu/timer/timer.i: core/cpu/timer/timer.cpp.i
+.PHONY : core/cpu/timer/timer.i
+
+# target to preprocess a source file
+core/cpu/timer/timer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.i
+.PHONY : core/cpu/timer/timer.cpp.i
+
+core/cpu/timer/timer.s: core/cpu/timer/timer.cpp.s
+.PHONY : core/cpu/timer/timer.s
+
+# target to generate assembly for a file
+core/cpu/timer/timer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cpu/timer/timer.cpp.s
+.PHONY : core/cpu/timer/timer.cpp.s
+
 emc_main.o: emc_main.cpp.o
 .PHONY : emc_main.o
 
@@ -324,6 +348,9 @@ help:
 	@echo "... core/cpu/ppu/ppu.o"
 	@echo "... core/cpu/ppu/ppu.i"
 	@echo "... core/cpu/ppu/ppu.s"
+	@echo "... core/cpu/timer/timer.o"
+	@echo "... core/cpu/timer/timer.i"
+	@echo "... core/cpu/timer/timer.s"
 	@echo "... emc_main.o"
 	@echo "... emc_main.i"
 	@echo "... emc_main.s"

@@ -1,3 +1,7 @@
+// ============================================================
+// MMU.H - ACTUALIZADO CON SOPORTE PARA JOYPAD
+// ============================================================
+
 #pragma once
 
 #include <array>
@@ -5,20 +9,25 @@
 #include <string>
 #include <vector>
 
-// Ajusta este include si tu carpeta cartridge está en otro nivel, 
-// pero según tu CMake, esto debería funcionar:
 #include "cartridge/cartridge.h"
 
-class ppu;
+class ppu; // Forward declaration
+
 class mmu
 {
     friend class ppu;
+    
 public:
     // Constructor explícito que recibe la ruta
     explicit mmu(const std::string& romPath);
 
     uint8_t readMemory(uint16_t address);
     void writeMemory(uint16_t address, uint8_t value);
+    
+    // ============================================================
+    // NUEVA: Función para establecer estado de botones
+    // ============================================================
+    void setButton(int button_id, bool pressed);
 
 private:
     // Instancia del cartucho
@@ -32,9 +41,28 @@ private:
     std::array<uint8_t, 0x00A0> OAM;  // Object Attribute Memory
 
     uint8_t IE; // Interrupt Enable (0xFFFF)
-    uint8_t IF; // Interrupt flag (0xFFFF)
+    uint8_t IF; // Interrupt Flag (0xFF0F)
+    
+    // ============================================================
+    // NUEVAS: Variables para el estado de los botones
+    // ============================================================
+    bool button_right = false;
+    bool button_left = false;
+    bool button_up = false;
+    bool button_down = false;
+    bool button_a = false;
+    bool button_b = false;
+    bool button_select = false;
+    bool button_start = false;
     
     // Funciones auxiliares privadas
     uint16_t offSet(uint16_t address, uint16_t base);
     void DMA(uint8_t value);
 };
+
+// ============================================================
+// NOTAS:
+// ============================================================
+// 1. Añadida función setButton() para actualizar estado de botones
+// 2. Añadidas variables privadas para almacenar estado de cada botón
+// 3. Estas variables se usan en readMemory() cuando se lee 0xFF00
