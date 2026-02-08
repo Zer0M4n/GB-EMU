@@ -8,6 +8,8 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     IME = false;
     isStopped = false;
     isHalted = false;
+    IME_scheduled = false;
+
     PC = 0x100;
     SP = 0xFFFE;
     r8.fill(0);
@@ -362,46 +364,67 @@ void cpu::requestInterrupt(int bit) {
     memory.writeMemory(0xFF0F, if_reg);
 }
 
-void cpu::executeInterrupt(int bit) {
-    // 1. Limpiar el bit de la interrupción en IF (0xFF0F)
+int cpu::executeInterrupt(int bit) {
+    // TIMING PRECISO: Servir una interrupción toma EXACTAMENTE 5 M-cycles
+    
+    // 1. Deshabilitar interrupciones globales INMEDIATAMENTE
+    IME = false;
+    
+    // 2. Wait states (2 M-cycles)
+    // (Estos ciclos están incluidos en el retorno)
+    
+    // 3. Guardar el PC actual en el Stack (2 M-cycles)
+    push(PC);
+    
+    // 4. Saltar al vector correspondiente (1 M-cycle)
+    // Vectores: 0x40 (VBlank), 0x48 (LCD), 0x50 (Timer), 0x58 (Serial), 0x60 (Joypad)
+    PC = 0x0040 + (bit * 8);
+    
+    // 5. Limpiar el bit de la interrupción en IF (0xFF0F)
     uint8_t if_reg = memory.readMemory(0xFF0F);
     if_reg &= ~(1 << bit);
     memory.writeMemory(0xFF0F, if_reg);
-
-    // 2. Deshabilitar interrupciones globales
-    IME = false;
-
-    // 3. Guardar el PC actual en el Stack
-    push(PC);
-
-    // 4. Saltar al vector correspondiente
-    // Vectores: 0x40 (Vblank), 0x48 (LCD), 0x50 (Timer), 0x58 (Serial), 0x60 (Joypad)
-    PC = 0x0040 + (bit * 8);
+    
+    // RETORNAR: 5 M-cycles (20 T-cycles)
+    // 2 (wait) + 2 (push) + 1 (jump) = 5 M-cycles
+    return 20; // 20 T-cycles = 5 M-cycles
 }
 
-void cpu::handleInterrupts() {
+int cpu::handleInterrupts() {
     uint8_t if_reg = memory.readMemory(0xFF0F);
     uint8_t ie_reg = memory.readMemory(0xFFFF);
 
     // Interrupciones pendientes = Solicitadas (IF) AND Habilitadas (IE)
-    uint8_t pending = if_reg & ie_reg;
+    uint8_t pending = if_reg & ie_reg & 0x1F; // Solo bits 0-4 son válidos
 
     if (pending > 0) {
-        // Despertar a la CPU si estaba dormida
-        isHalted = false;
-        isStopped = false;
+        // IMPORTANTE: Despertar a la CPU si estaba dormida
+        // Esto ocurre INCLUSO si IME está deshabilitado
+        if (isHalted) {
+            isHalted = false;
+            // HALT bug: Si IME=0 y hay interrupciones pendientes,
+            // el PC no se incrementa después de HALT
+            // (esto es un bug del hardware real)
+            // Implementación simplificada: solo salimos de HALT
+        }
+        
+        if (isStopped) {
+            isStopped = false;
+        }
 
-        // Si el IME está activo, ejecutamos la interrupción
+        // Si el IME está activo, SERVIR la interrupción
         if (IME) {
-            // Buscamos la interrupción con mayor prioridad (bit más bajo)
+            // Buscar la interrupción con mayor prioridad (bit más bajo)
+            // Prioridad: VBlank (0) > LCD (1) > Timer (2) > Serial (3) > Joypad (4)
             for (int i = 0; i < 5; i++) {
                 if ((pending >> i) & 1) {
-                    executeInterrupt(i);
-                    break; // Solo atendemos una interrupción por ciclo
+                    return executeInterrupt(i); // Retorna los ciclos consumidos
                 }
             }
         }
     }
+    
+    return 0; // No se sirvió ninguna interrupción
 }
 
 // --- Helper de Seguridad para Flags ---
@@ -414,12 +437,17 @@ void cpu::maskF()
 // --- Ciclo Principal (Step) ---
 int cpu::step()
 {
-    // 1. Revisar interrupciones antes de ejecutar nada
-    handleInterrupts();
+    // 1. PRIMERO: Revisar y servir interrupciones
+    int interrupt_cycles = handleInterrupts();
+    
+    if (interrupt_cycles > 0) {
+        // Se sirvió una interrupción, retornar los ciclos consumidos
+        return interrupt_cycles;
+    }
 
-    // 2. Si la CPU está parada, no ejecutamos instrucciones
+    // 2. Si la CPU está en HALT o STOP, solo consumir ciclos
     if (isHalted || isStopped) {
-        return 4; // Consumimos ciclos mientras esperamos
+        return 4; // Consumir 4 ciclos (1 M-cycle) mientras esperamos
     }
 
     // 3. Fetch (Traer instrucción)
@@ -432,8 +460,9 @@ int cpu::step()
     } 
     else
     {
-        std::cout << "Opcode no implementado: 0x" << std::hex << (int)opcode << "\n";
-        return 0;
+        std::cout << "Opcode no implementado: 0x" << std::hex << (int)opcode 
+                  << " at PC=0x" << (PC-1) << "\n";
+        return 4; // Retornar al menos 4 ciclos para evitar loops infinitos
     }
 }
 
@@ -506,11 +535,28 @@ int cpu::STOP(uint8_t opcode)
     return 4;
 }
 
-int cpu::HALT(uint8_t opcode) {
+int cpu::HALT(uint8_t opcode)
+{
     (void)opcode;
+    
     isHalted = true;
-    //std::cout <<"halt " << "\n";
-    return 4; 
+    
+    // HALT bug del hardware real:
+    // Si IME=0 y hay interrupciones pendientes,
+    // el PC no se incrementa después de HALT
+    uint8_t if_reg = memory.readMemory(0xFF0F);
+    uint8_t ie_reg = memory.readMemory(0xFFFF);
+    uint8_t pending = if_reg & ie_reg & 0x1F;
+    
+    if (!IME && pending > 0) {
+        // HALT bug: salir inmediatamente de HALT
+        // pero el PC no se incrementará en la siguiente instrucción
+        isHalted = false;
+        // En una implementación más precisa, aquí se marcaría
+        // que la siguiente instrucción se ejecuta dos veces
+    }
+    
+    return 4;
 }
 
 int cpu::NOP(uint8_t opcode) {
@@ -527,17 +573,22 @@ int cpu::JP(uint8_t opcode) {
     return 16;
 }
 
-int cpu::DI(uint8_t opcode) {
+int cpu::DI(uint8_t opcode)
+{
     (void)opcode;
     IME = false;
-    //std::cout <<"di " << "\n";
+    IME_scheduled = false; // Cancelar cualquier EI pendiente
     return 4;
 }
 
-int cpu::EI(uint8_t opcode) {
+int cpu::EI(uint8_t opcode)
+{
     (void)opcode;
-    IME = true;
-    //std::cout <<"ei " << "\n";
+    
+    // IMPORTANTE: EI NO habilita interrupciones inmediatamente
+    // Se habilitan DESPUÉS de la siguiente instrucción
+    IME_scheduled = true;
+    
     return 4;
 }
 //LOAD INTRUCTIONS
@@ -1294,23 +1345,16 @@ int cpu::JR_cc_d8(uint8_t opcode) {
 int cpu::RETI(uint8_t opcode) {
     (void)opcode;
     
-    // 1. POP PC (Recuperar dirección de retorno de la Pila)
-    // Leemos byte bajo
-    uint8_t lo = memory.readMemory(SP);
-    SP++;
+    // 1. Pop PC del stack (como RET normal)
+    PC = pop();
     
-    // Leemos byte alto
-    uint8_t hi = memory.readMemory(SP);
-    SP++;
+    // 2. Habilitar interrupciones INMEDIATAMENTE (sin delay)
+    IME = true;
+    IME_scheduled = false;
     
-    // Combinamos para formar el PC
-    PC = (hi << 8) | lo;
-
-    // 2. Habilitar Interrupciones inmediatamente
-    IME = true; 
-
-    return 16; // Tarda 16 ciclos
+    return 16; // 16 ciclos
 }
+
 int cpu::LDI_HL_A(uint8_t opcode) {
     (void)opcode; // Evitar warning de variable no usada
 

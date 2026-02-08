@@ -17,6 +17,7 @@ include_directories(
     core/cpu
     core/cpu/ppu
     core/cpu/mmu
+    core/cpu/timer
     core/cartridge
     core/cartridge/IMBC
 )
@@ -26,6 +27,7 @@ set(CORE_SOURCES
     core/cpu/cpu.cpp
     core/cpu/mmu/mmu.cpp
     core/cpu/ppu/ppu.cpp
+    core/cpu/timer/timer.cpp
     core/cartridge/cartridge.cpp
     core/cartridge/IMBC/type_cartridge/RomOnly.cpp
     core/cartridge/IMBC/type_cartridge/MBC1.cpp
@@ -43,10 +45,10 @@ set_target_properties(gb-emu PROPERTIES SUFFIX ".html")
 target_link_options(gb-emu PRIVATE
         "SHELL:-s USE_SDL=0"
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
-        #"SHELL:-s NO_EXIT_RUNTIME=1"
+        "SHELL:-s NO_EXIT_RUNTIME=1"
         "SHELL:-s EXPORTED_FUNCTIONS=['_main','_get_video_buffer']"
         "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8']" 
-        "SHELL:--emrun"
+        #"SHELL:--emrun"
         "SHELL:--preload-file /home/developer/projects/roms_backup@/roms"
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/src/index.html"
 )
