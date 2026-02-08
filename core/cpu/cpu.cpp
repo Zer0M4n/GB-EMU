@@ -1,9 +1,8 @@
 #include "cpu.h"
 
-// Debug simple de interrupciones en CPU
-static bool cpu_irq_debug_enabled = true;
+// Debug simple de interrupciones en CPU (desactivado para producción)
+static bool cpu_irq_debug_enabled = false;
 
-// --- Constructor ---
 // --- Constructor ---
 cpu::cpu(mmu& mmu_ref) : memory(mmu_ref) 
 {
@@ -368,29 +367,31 @@ void cpu::requestInterrupt(int bit) {
 }
 
 int cpu::executeInterrupt(int bit) {
-    // TIMING PRECISO: Servir una interrupción toma EXACTAMENTE 5 M-cycles
-    
-    // 1. Deshabilitar interrupciones globales INMEDIATAMENTE
+    // 1. Deshabilitar IME inmediatamente es CRUCIAL
     IME = false;
+    IME_scheduled = false; // Por seguridad, cancelamos cualquier EI pendiente
+
+    // 2. Limpiar el bit en IF ANTES de saltar
+    uint8_t if_before = memory.readMemory(0xFF0F);
+    uint8_t if_new = if_before & ~(1 << bit);
+    memory.writeMemory(0xFF0F, if_new);
+    uint8_t if_after = memory.readMemory(0xFF0F);
     
-    // 2. Wait states (2 M-cycles)
-    // (Estos ciclos están incluidos en el retorno)
-    
-    // 3. Guardar el PC actual en el Stack (2 M-cycles)
+    if (cpu_irq_debug_enabled) {
+        std::cout << "[IRQ CLEAR] bit=" << bit 
+                  << " IF_before=0x" << std::hex << (int)if_before
+                  << " IF_new=0x" << (int)if_new
+                  << " IF_after=0x" << (int)if_after << std::dec << "\n";
+    }
+
+    // 3. Guardar el PC actual (donde la CPU debería volver después)
     push(PC);
-    
-    // 4. Saltar al vector correspondiente (1 M-cycle)
-    // Vectores: 0x40 (VBlank), 0x48 (LCD), 0x50 (Timer), 0x58 (Serial), 0x60 (Joypad)
+
+    // 4. Saltar al vector
     PC = 0x0040 + (bit * 8);
-    
-    // 5. Limpiar el bit de la interrupción en IF (0xFF0F)
-    uint8_t if_reg = memory.readMemory(0xFF0F);
-    if_reg &= ~(1 << bit);
-    memory.writeMemory(0xFF0F, if_reg);
-    
-    // RETORNAR: 5 M-cycles (20 T-cycles)
-    // 2 (wait) + 2 (push) + 1 (jump) = 5 M-cycles
-    return 20; // 20 T-cycles = 5 M-cycles
+
+    // 5. Retornar los 20 T-cycles (5 M-cycles)
+    return 20;
 }
 
 int cpu::handleInterrupts() {
@@ -477,14 +478,14 @@ int cpu::step()
     // DEBUG: Imprimir estado de CPU antes de ejecutar
     uint8_t if_reg = memory.readMemory(0xFF0F);
     uint8_t ie_reg = memory.readMemory(0xFFFF);
-    /*std::cout << "[CPU] PC=0x" << std::hex << pc_before 
-              << " OP=0x" << (int)opcode
-              << " IME=" << std::dec << (IME ? 1 : 0)
-              << " IME_sched=" << (IME_scheduled ? 1 : 0)
-              << " IF=0x" << std::hex << (int)if_reg
-              << " IE=0x" << (int)ie_reg
-              << " A=" << (int)r8[A] << " F=" << (int)r8[F]
-              << " SP=0x" << SP << std::dec << "\n";*/
+    // std::cout << "[CPU] PC=0x" << std::hex << pc_before 
+    //           << " OP=0x" << (int)opcode
+    //           << " IME=" << std::dec << (IME ? 1 : 0)
+    //           << " IME_sched=" << (IME_scheduled ? 1 : 0)
+    //           << " IF=0x" << std::hex << (int)if_reg
+    //           << " IE=0x" << (int)ie_reg
+    //           << " A=" << (int)r8[A] << " F=" << (int)r8[F]
+    //           << " SP=0x" << SP << std::dec << "\n";
 
     // 4. Decode & Execute
     int cycles = 4;

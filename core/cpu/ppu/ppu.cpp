@@ -11,10 +11,11 @@ ppu::ppu(mmu& mmu_ref) : memory(mmu_ref), debug_enabled(false), last_line_logged
 {
     dots_counter = 0;
     current_line = 0;
-    current_mode = 0;
+    current_mode = 2;      // Iniciar en modo 2 (OAM Scan) - estado correcto al boot
     scanline_dots = 0;
     frame_complete = false;
     prev_stat_line = false;
+    vblank_irq_fired = false;
     
     // Inicializar buffer gráfico (160 * 144 píxeles)
     gfx.resize(160 * 144);
@@ -28,7 +29,7 @@ ppu::ppu(mmu& mmu_ref) : memory(mmu_ref), debug_enabled(false), last_line_logged
     
     // Inicializar registros
     memory.writeMemory(0xFF44, 0); // LY = 0
-    memory.writeMemory(0xFF41, 0x80); // STAT (bit 7 siempre en 1)
+    memory.writeMemory(0xFF41, 0x82); // STAT: bit 7 siempre 1, modo 2
 }
 
 // ============================================================
@@ -103,11 +104,11 @@ void ppu::debug_mode_change(uint8_t old_mode, uint8_t new_mode) {
 }
 
 // ============================================================
-// STEP - NUEVO SISTEMA DE TIMING PRECISO
+// STEP - AVANZA LA PPU POR T-CYCLES
 // ============================================================
 void ppu::step(int cpu_cycles) {
-    // Convertir M-cycles de CPU a dots de PPU
-    // 1 M-cycle (CPU) = 4 dots (PPU)
+    // El parámetro es T-cycles. En Game Boy:
+    // 1 T-cycle = 1 dot de PPU (relación 1:1)
     int dots_to_advance = cpu_cycles;
     
     // Avanzar dot por dot para máxima precisión
@@ -117,254 +118,170 @@ void ppu::step(int cpu_cycles) {
 }
 
 // ============================================================
-// STEP ONE DOT - AVANZA UN DOT DE PPU (CORREGIDO)
+// STEP ONE DOT - AVANZA UN DOT DE PPU (WIRED-OR STAT FIX)
 // ============================================================
 void ppu::step_one_dot() {
-    // Verificar si el LCD está encendido (Bit 7 de LCDC - 0xFF40)
+    // 1. Verificar LCD habilitado (bit 7 de LCDC)
     uint8_t lcdc = memory.readMemory(0xFF40);
     if (!(lcdc & 0x80)) {
-        // LCD apagado: resetear estado
+        // LCD apagado: Resetear todo
         scanline_dots = 0;
         current_line = 0;
         current_mode = 0;
-        memory.writeMemory(0xFF44, 0);
-        
-        // Poner STAT en modo 0 con bit 7 en 1
-        memory.writeMemory(0xFF41, 0x80);
+        memory.IO[0x44] = 0;
+        memory.IO[0x41] = (memory.IO[0x41] & 0xFC) | 0x80; // Mantener bits, modo 0
+        vblank_irq_fired = false;
+        prev_stat_line = false;
         return;
     }
-    
-    // LCD encendido: avanzar timing
+
+    // 2. Avanzar tiempo
     dots_counter++;
     scanline_dots++;
     
-    // DEBUG: Mostrar cerca del threshold problemático
-    // if (debug_enabled && scanline_dots >= 250 && scanline_dots <= 255) {
-    //     std::cout << "[PPU DEBUG] THRESHOLD CHECK: LY=" << std::dec << (int)current_line 
-    //               << " dot=" << scanline_dots << " current_mode=" << (int)current_mode << "\n";
-    // }
-    
-    // Determinar modo basado en la línea actual y dots
-    uint8_t prev_mode = current_mode;
-    
+    // Guardar modo anterior para detectar transiciones
+    uint8_t old_mode = current_mode;
+
+    // 3. Evaluar Transiciones de Modo (State Machine)
     if (current_line < 144) {
-        // Líneas visibles (0-143)
-        // Timing correcto de Game Boy DMG:
-        // - Dots 0-79: OAM Scan (Modo 2) = 80 dots
-        // - Dots 80-251: Drawing (Modo 3) = 172 dots
-        // - Dots 252-455: HBlank (Modo 0) = 204 dots
-        // Total = 456 dots
-        
+        // --- LÍNEAS VISIBLES (0-143) ---
         if (scanline_dots <= 80) {
-            // Modo 2: OAM Scan (dots 1-80)
-            current_mode = 2;
-            
-            // Al entrar en modo 2, verificar interrupción
-            if (prev_mode != 2 && scanline_dots == 1) {
-                debug_mode_change(prev_mode, 2);
-                debug_scanline_report("→ OAM Scan");
+            // Modo 2: OAM Scan (80 dots)
+            if (current_mode != 2) {
+                current_mode = 2;
+                // Actualizar registro STAT (bits 0-1)
+                uint8_t stat = memory.IO[0x41];
+                stat = (stat & 0xFC) | 2;
+                memory.IO[0x41] = stat;
+                // Verificar interrupción STAT
                 update_stat_interrupt();
             }
-        }
-        else if (scanline_dots <= 251) {
-            // CORREGIDO: Modo 3: Drawing (dots 81-251)
-            // Ahora es < 252 en lugar de <= 252
-            current_mode = 3;
-            
-            // Modo 3 no tiene interrupción STAT
-            if (prev_mode != 3 && scanline_dots == 81) {
-                debug_mode_change(prev_mode, 3);
-                debug_scanline_report("→ Drawing");
+        } else if (scanline_dots <= 252) {
+            // Modo 3: Drawing (~172 dots, variable)
+            if (current_mode != 3) {
+                current_mode = 3;
+                uint8_t stat = memory.IO[0x41];
+                stat = (stat & 0xFC) | 3;
+                memory.IO[0x41] = stat;
+                // Modo 3 no tiene interrupción STAT asociada
             }
-        }
-        else {
-            // Modo 0: HBlank (dots 252-455)
+        } else {
+            // Modo 0: HBlank (resto hasta 456 dots)
             if (current_mode != 0) {
-                debug_mode_change(prev_mode, 0);
                 current_mode = 0;
-                
-                // Al entrar en HBlank, renderizar la línea
+                uint8_t stat = memory.IO[0x41];
+                stat = (stat & 0xFC) | 0;
+                memory.IO[0x41] = stat;
+                // Renderizar línea al entrar a HBlank
                 draw_scanline();
-                debug_scanline_report("→ HBlank (línea renderizada)");
-                
-                // Verificar interrupción
+                // Verificar interrupción STAT (modo 0 puede disparar)
                 update_stat_interrupt();
             }
         }
-    }
-    else if (current_line < 154) {
-        // Líneas 144-153: VBlank
+    } else {
+        // --- VBLANK (Líneas 144-153) ---
         if (current_mode != 1) {
-            debug_mode_change(prev_mode, 1);
             current_mode = 1;
+            uint8_t stat = memory.IO[0x41];
+            stat = (stat & 0xFC) | 1;
+            memory.IO[0x41] = stat;
             
-            // Al entrar en VBlank (primera vez en línea 144)
-            if (current_line == 144 && scanline_dots == 1) {
-                uint8_t if_old = memory.readMemory(0xFF0F);
-                uint8_t if_new = if_old | 0x01;
-                memory.writeMemory(0xFF0F, if_new);
-
-                uint8_t ie_reg = memory.readMemory(0xFFFF);
-
+            // VBlank IRQ (IF bit 0) - Solo una vez al entrar
+            if (!vblank_irq_fired) {
+                memory.IO[0x0F] |= 0x01;
+                vblank_irq_fired = true;
                 frame_complete = true;
-                debug_scanline_report("→ VBlank iniciado (Frame completo)");
-/*
-                if (debug_enabled) {
-                    std::cout << "[PPU DEBUG] VBlank IRQ solicitada | IF: 0x"
-                              << std::hex << std::setfill('0') << std::setw(2) << (int)if_old
-                              << " → 0x" << std::setw(2) << (int)if_new
-                              << " | IE=0x" << std::setw(2) << (int)ie_reg
-                              << std::dec << "\n";
-                }*/
             }
             
-            // Verificar interrupción STAT para VBlank
+            // STAT IRQ para modo 1 (si está habilitado)
             update_stat_interrupt();
         }
     }
-    
-    // Actualizar registro STAT con el modo actual
-    update_stat_register();
-    
-    // Fin de scanline (456 dots)
+
+    // 4. Fin de Scanline (456 dots)
     if (scanline_dots >= 456) {
-        uint8_t old_line = current_line;
-        scanline_dots = 0;
+        scanline_dots -= 456;
         current_line++;
-        
-        // Actualizar LY
-        memory.writeMemory(0xFF44, current_line);
-        
-        // Debug: reportar fin de línea
-        if (debug_enabled) {
-            /*std::cout << "[PPU DEBUG] Fin de scanline: LY=" << std::dec << (int)old_line 
-                      << " → " << (int)current_line;*/
-            
-            // Alerta si llegamos a VBlank
-            if (current_line == 144) {
-                std::cout << " *** ENTRANDO A VBLANK ***";
-            }
-            std::cout << "\n";
-        }
-        
-        // Verificar coincidencia LYC
+        memory.IO[0x44] = current_line;
+
+        // Verificar coincidencia LY=LYC al cambiar de línea
         check_lyc_coincidence();
-        
-        // Fin de frame (154 líneas = 0-153)
-        if (current_line >= 154) {
+
+        // 5. Fin de Frame (Línea 154 = reset a línea 0)
+        if (current_line > 153) {
             current_line = 0;
-            memory.writeMemory(0xFF44, 0);
-            frame_complete = false;
-            
-            if (debug_enabled) {
-                std::cout << "\n========== FRAME COMPLETO - RESETEANDO A LY=0 ==========\n\n";
-            }
+            memory.IO[0x44] = 0;
+            vblank_irq_fired = false;
+            // El modo cambiará a 2 en el próximo step naturalmente
         }
     }
-}
-
-// ============================================================
-// UPDATE STAT REGISTER - ACTUALIZA BITS DEL REGISTRO STAT
-// ============================================================
-void ppu::update_stat_register() {
-    uint8_t stat = memory.readMemory(0xFF41);
-    
-    // Limpiar bits 0-1 (modo)
-    stat &= 0xFC;
-    
-    // Establecer nuevo modo
-    stat |= (current_mode & 0x03);
-    
-    // Bit 7 siempre en 1 (no usado)
-    stat |= 0x80;
-    
-    // Escribir de vuelta
-    memory.writeMemory(0xFF41, stat);
 }
 
 // ============================================================
 // CHECK LYC COINCIDENCE - VERIFICAR COINCIDENCIA LY == LYC
 // ============================================================
 void ppu::check_lyc_coincidence() {
-    uint8_t ly = memory.readMemory(0xFF44);
-    uint8_t lyc = memory.readMemory(0xFF45);
-    uint8_t stat = memory.readMemory(0xFF41);
+    uint8_t lyc = memory.IO[0x45];  // LYC register
+    uint8_t stat = memory.IO[0x41]; // STAT register
     
-    if (ly == lyc) {
-        // Activar bit 2 (Coincidence Flag)
-        stat |= 0x04;
-        memory.writeMemory(0xFF41, stat);
-        
-        // Debug
-        if (debug_enabled) {
-            std::cout << "[PPU DEBUG] LY=LYC Coincidencia detectada en LY=" 
-                      << std::dec << (int)ly << "\n";
+    if (current_line == lyc) {
+        // Coincidencia: Encendemos el Bit 2 (LYC Flag)
+        if (!(stat & 0x04)) {
+            stat |= 0x04;
+            memory.IO[0x41] = stat;
+            // Al cambiar el bit, el estado de la línea puede cambiar
+            update_stat_interrupt();
         }
-        
-        // Verificar interrupción
-        update_stat_interrupt();
     } else {
-        // Desactivar bit 2
-        stat &= ~0x04;
-        memory.writeMemory(0xFF41, stat);
+        // No coincidencia: Apagamos el Bit 2
+        if (stat & 0x04) {
+            stat &= ~0x04;
+            memory.IO[0x41] = stat;
+            // También verificar si cambia el estado de interrupción
+            update_stat_interrupt();
+        }
     }
 }
 
 // ============================================================
-// UPDATE STAT INTERRUPT - EDGE-TRIGGERED STAT INTERRUPT
+// UPDATE STAT INTERRUPT - WIRED-OR LOGIC (EDGE-TRIGGERED)
 // ============================================================
 void ppu::update_stat_interrupt() {
-    uint8_t stat = memory.readMemory(0xFF41);
-    uint8_t ly = memory.readMemory(0xFF44);
-    uint8_t lyc = memory.readMemory(0xFF45);
-    
-    bool current_stat_line = false;
-    const char* interrupt_reason = "";
-    
-    // Verificar todas las fuentes de interrupción STAT
-    
-    // Bit 6: LYC=LY Interrupt Enable
-    if ((stat & 0x40) && (ly == lyc)) {
-        current_stat_line = true;
-        interrupt_reason = "LY=LYC";
-    }
-    
-    // Bit 5: Mode 2 (OAM) Interrupt Enable
-    if ((stat & 0x20) && (current_mode == 2)) {
-        current_stat_line = true;
-        interrupt_reason = "Mode 2 (OAM)";
-    }
-    
-    // Bit 4: Mode 1 (VBlank) Interrupt Enable
-    if ((stat & 0x10) && (current_mode == 1)) {
-        current_stat_line = true;
-        interrupt_reason = "Mode 1 (VBlank)";
-    }
-    
-    // Bit 3: Mode 0 (HBlank) Interrupt Enable
-    if ((stat & 0x08) && (current_mode == 0)) {
-        current_stat_line = true;
-        interrupt_reason = "Mode 0 (HBlank)";
-    }
-    
-    // EDGE-TRIGGERED: Solo disparar en transición LOW → HIGH
-    if (current_stat_line && !prev_stat_line) {
-        uint8_t if_old = memory.readMemory(0xFF0F);
-        uint8_t if_new = if_old | 0x02;
-        memory.writeMemory(0xFF0F, if_new);
+    uint8_t stat = memory.IO[0x41];
+    bool current_line_state = false;
 
-        if (debug_enabled) {
-            uint8_t ie_reg = memory.readMemory(0xFFFF);
-            /*std::cout << "[PPU DEBUG] Interrupción STAT solicitada: " << interrupt_reason 
-                      << " (LY=" << std::dec << (int)ly << ")\n";
-            std::cout << "[PPU DEBUG] STAT IRQ | IF: 0x" << std::hex << std::setfill('0') << std::setw(2)
-                      << (int)if_old << " → 0x" << std::setw(2) << (int)if_new
-                      << " | IE=0x" << std::setw(2) << (int)ie_reg
-                      << std::dec << "\n";*/
-        }
-    }
+    // 1. Revisar si alguna fuente habilitada está activa (Wired-OR)
     
-    prev_stat_line = current_stat_line;
+    // Bit 3: Habilitar IRQ para Modo 0 (H-Blank)
+    if ((stat & (1 << 3)) && (current_mode == 0)) {
+        current_line_state = true;
+    }
+
+    // Bit 4: Habilitar IRQ para Modo 1 (V-Blank)
+    if ((stat & (1 << 4)) && (current_mode == 1)) {
+        current_line_state = true;
+    }
+
+    // Bit 5: Habilitar IRQ para Modo 2 (OAM)
+    if ((stat & (1 << 5)) && (current_mode == 2)) {
+        current_line_state = true;
+    }
+
+    // Bit 6: Habilitar IRQ para LYC=LY
+    // El bit 2 es el flag de coincidencia que se actualiza en check_lyc
+    if ((stat & (1 << 6)) && (stat & (1 << 2))) {
+        current_line_state = true;
+    }
+
+    // 2. DETECCIÓN DE FLANCO (Rising Edge)
+    // Solo disparamos si antes estaba BAJO y ahora es ALTO
+    if (current_line_state && !prev_stat_line) {
+        // Solicitar Interrupción STAT (Bit 1 del registro IF 0xFF0F)
+        memory.IO[0x0F] |= 0x02;
+    }
+
+    // 3. Guardar estado para el siguiente ciclo (El "Blocking" ocurre aquí)
+    prev_stat_line = current_line_state;
 }
 
 // ============================================================

@@ -41,39 +41,37 @@ extern "C" {
 }
 
 // ============================================================
-// MAIN LOOP - MEJORADO CON TIMER
+// MAIN LOOP - SINCRONIZACIÓN PRECISA CON T-CYCLES
 // ============================================================
 void main_loop() {
     if (!global_cpu || !global_ppu || !global_timer) return;
 
-    // TIMING CORRECTO
-    // La Game Boy funciona a 4,194,304 Hz.
-    // 70224 dots por frame = 17556 M-cycles
-    // A 60 FPS, cada frame debe tomar ~16.74ms
-    const int DOTS_PER_FRAME = 70224;
-    const int M_CYCLES_PER_FRAME = 17556; // 70224 / 4
+    // TIMING GAME BOY:
+    // - CPU: 4,194,304 Hz (T-cycles por segundo)
+    // - 1 Frame = 70224 T-cycles (a ~59.73 FPS)
+    // - 1 T-cycle = 1 dot de PPU
+    // - 1 M-cycle = 4 T-cycles
     
-    int cycles_this_frame = 0;
+    const int T_CYCLES_PER_FRAME = 70224;
+    int t_cycles_this_frame = 0;
 
-    // Ejecutar hasta completar un frame
-    while (cycles_this_frame < M_CYCLES_PER_FRAME) {
+    // Ejecutar hasta completar un frame completo
+    while (t_cycles_this_frame < T_CYCLES_PER_FRAME) {
         
-        // 1. CPU ejecuta UNA instrucción
-        //    step() ahora retorna T-cycles (4 T-cycles = 1 M-cycle)
+        // 1. CPU ejecuta UNA instrucción (o maneja interrupción)
         int cpu_t_cycles = global_cpu->step();
-        int cpu_m_cycles = cpu_t_cycles / 4; // Convertir a M-cycles si es necesario
         
-        // 2. PPU avanza el mismo tiempo
-        //    step() ahora recibe T-cycles directamente
+        // Validación de seguridad: mínimo 4 T-cycles
+        if (cpu_t_cycles < 4) cpu_t_cycles = 4;
+        
+        // 2. PPU avanza EXACTAMENTE los mismos T-cycles
         global_ppu->step(cpu_t_cycles);
         
-        // 3. TIMER avanza el mismo tiempo
-        //    step() recibe T-cycles
+        // 3. Timer avanza EXACTAMENTE los mismos T-cycles
         global_timer->step(cpu_t_cycles);
         
-        // 4. Acumular ciclos del frame
-        //    Usamos M-cycles para contar
-        cycles_this_frame += cpu_m_cycles;
+        // 4. Acumular T-cycles del frame
+        t_cycles_this_frame += cpu_t_cycles;
     }
 
     // Avisar a JS que dibuje cuando el frame está completo

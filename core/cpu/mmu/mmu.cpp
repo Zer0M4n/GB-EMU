@@ -15,7 +15,8 @@ mmu::mmu(const std::string& romPath) : cart(romPath)
     IO.fill(0);
     OAM.fill(0);
     IE = 0;
-    IF = 0;
+    // IF ahora usa IO[0x0F] directamente para evitar desincronización
+    IO[0x0F] = 0; // IF - Interrupt Flag
     
     // IMPORTANTE: Inicializar el joypad correctamente
     // Bits 4-5 deben estar en 1 por defecto (ningún grupo seleccionado)
@@ -46,7 +47,8 @@ void mmu::DMA(uint8_t value)
 uint8_t mmu::readMemory(uint16_t address) 
 {   
     // Interrupciones (Registro IF e IE)
-    if (address == 0xFF0F) return IF;
+    // IF usa IO[0x0F] directamente - bits 5-7 siempre retornan 1
+    if (address == 0xFF0F) return IO[0x0F] | 0xE0;
     if (address == 0xFFFF) return IE;
     
     // ROM (Cartucho)
@@ -150,7 +152,21 @@ void mmu::writeMemory(uint16_t address, uint8_t value)
 {
     // Interrupciones y DMA (Interceptar antes)
     if (address == 0xFF46) { DMA(value); return; }
-    if (address == 0xFF0F) { IF = value & 0x1F; return; } // Solo bits 0-4
+    // IF usa IO[0x0F] directamente - solo bits 0-4 son válidos
+    if (address == 0xFF0F) { 
+        // DEBUG: Rastrear todas las escrituras a IF
+        static int if_write_count = 0;
+        if_write_count++;
+        if (if_write_count <= 20 || (value & 0x01)) {
+            std::cout << "[MMU IF WRITE #" << if_write_count 
+                      << "] value=0x" << std::hex << (int)value
+                      << " masked=0x" << (int)(value & 0x1F)
+                      << " IO[0x0F] was 0x" << (int)IO[0x0F]
+                      << std::dec << "\n";
+        }
+        IO[0x0F] = value & 0x1F; 
+        return; 
+    }
     if (address == 0xFFFF) { IE = value & 0x1F; return; } // Solo bits 0-4
 
     // Zona Prohibida (Ignorar)

@@ -46,6 +46,7 @@ private:
     uint8_t current_line;       // Línea actual (0-153)
     uint8_t current_mode;       // Modo actual (0-3)
     bool prev_stat_line;        // Estado anterior de STAT line (para edge detection)
+    bool vblank_irq_fired;      // Bandera: ¿Ya disparamos IRQ VBlank este frame?
     
     // Paleta de colores
     uint32_t palette[4];
