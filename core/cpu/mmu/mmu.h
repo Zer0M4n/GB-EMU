@@ -12,10 +12,12 @@
 #include "cartridge/cartridge.h"
 
 class ppu; // Forward declaration
+class timer; // Forward declaration
 
 class mmu
 {
     friend class ppu;
+    friend class timer;
     
 public:
     // Constructor explícito que recibe la ruta

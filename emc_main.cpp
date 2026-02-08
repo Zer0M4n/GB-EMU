@@ -94,12 +94,15 @@ int main(int argc, char **argv) {
         global_mmu = new mmu(romPath);
         
         // 2. Inicializar PPU (necesita acceso a MMU)
+        const bool enable_debug = true;
+
         global_ppu = new ppu(*global_mmu); 
-                global_ppu->enable_debug(true);  // ← AQUÍ: Habilitar debugger de scanline
+        global_ppu->enable_debug(enable_debug);
 
         
         // 3. Inicializar Timer (necesita acceso a MMU)
         global_timer = new timer(*global_mmu);
+        global_timer->enable_debug(enable_debug);
         
         // 4. Inicializar CPU (necesita acceso a MMU)
         global_cpu = new cpu(*global_mmu); 

@@ -117,7 +117,7 @@ void ppu::step(int cpu_cycles) {
 }
 
 // ============================================================
-// STEP ONE DOT - AVANZA UN DOT DE PPU
+// STEP ONE DOT - AVANZA UN DOT DE PPU (CORREGIDO)
 // ============================================================
 void ppu::step_one_dot() {
     // Verificar si el LCD está encendido (Bit 7 de LCDC - 0xFF40)
@@ -138,13 +138,25 @@ void ppu::step_one_dot() {
     dots_counter++;
     scanline_dots++;
     
+    // DEBUG: Mostrar cerca del threshold problemático
+    if (debug_enabled && scanline_dots >= 250 && scanline_dots <= 255) {
+        std::cout << "[PPU DEBUG] THRESHOLD CHECK: LY=" << std::dec << (int)current_line 
+                  << " dot=" << scanline_dots << " current_mode=" << (int)current_mode << "\n";
+    }
+    
     // Determinar modo basado en la línea actual y dots
     uint8_t prev_mode = current_mode;
     
     if (current_line < 144) {
         // Líneas visibles (0-143)
+        // Timing correcto de Game Boy DMG:
+        // - Dots 0-79: OAM Scan (Modo 2) = 80 dots
+        // - Dots 80-251: Drawing (Modo 3) = 172 dots
+        // - Dots 252-455: HBlank (Modo 0) = 204 dots
+        // Total = 456 dots
+        
         if (scanline_dots <= 80) {
-            // Modo 2: OAM Scan (80 dots)
+            // Modo 2: OAM Scan (dots 1-80)
             current_mode = 2;
             
             // Al entrar en modo 2, verificar interrupción
@@ -154,10 +166,9 @@ void ppu::step_one_dot() {
                 update_stat_interrupt();
             }
         }
-        else if (scanline_dots <= 252) {
-            // Modo 3: Drawing (~172 dots)
-            // En realidad puede variar entre 172-289 dependiendo de sprites
-            // Usamos 172 como baseline
+        else if (scanline_dots <= 251) {
+            // CORREGIDO: Modo 3: Drawing (dots 81-251)
+            // Ahora es < 252 en lugar de <= 252
             current_mode = 3;
             
             // Modo 3 no tiene interrupción STAT
@@ -167,7 +178,7 @@ void ppu::step_one_dot() {
             }
         }
         else {
-            // Modo 0: HBlank (resto hasta 456)
+            // Modo 0: HBlank (dots 252-455)
             if (current_mode != 0) {
                 debug_mode_change(prev_mode, 0);
                 current_mode = 0;
@@ -181,7 +192,7 @@ void ppu::step_one_dot() {
             }
         }
     }
-    else {
+    else if (current_line < 154) {
         // Líneas 144-153: VBlank
         if (current_mode != 1) {
             debug_mode_change(prev_mode, 1);
@@ -189,13 +200,22 @@ void ppu::step_one_dot() {
             
             // Al entrar en VBlank (primera vez en línea 144)
             if (current_line == 144 && scanline_dots == 1) {
-                // Solicitar interrupción VBlank (Bit 0 de IF)
-                uint8_t if_reg = memory.readMemory(0xFF0F);
-                memory.writeMemory(0xFF0F, if_reg | 0x01);
-                
-                // Marcar frame como completo
+                uint8_t if_old = memory.readMemory(0xFF0F);
+                uint8_t if_new = if_old | 0x01;
+                memory.writeMemory(0xFF0F, if_new);
+
+                uint8_t ie_reg = memory.readMemory(0xFFFF);
+
                 frame_complete = true;
                 debug_scanline_report("→ VBlank iniciado (Frame completo)");
+
+                if (debug_enabled) {
+                    std::cout << "[PPU DEBUG] VBlank IRQ solicitada | IF: 0x"
+                              << std::hex << std::setfill('0') << std::setw(2) << (int)if_old
+                              << " → 0x" << std::setw(2) << (int)if_new
+                              << " | IE=0x" << std::setw(2) << (int)ie_reg
+                              << std::dec << "\n";
+                }
             }
             
             // Verificar interrupción STAT para VBlank
@@ -218,20 +238,26 @@ void ppu::step_one_dot() {
         // Debug: reportar fin de línea
         if (debug_enabled) {
             std::cout << "[PPU DEBUG] Fin de scanline: LY=" << std::dec << (int)old_line 
-                      << " → " << (int)current_line << "\n";
+                      << " → " << (int)current_line;
+            
+            // Alerta si llegamos a VBlank
+            if (current_line == 144) {
+                std::cout << " *** ENTRANDO A VBLANK ***";
+            }
+            std::cout << "\n";
         }
         
         // Verificar coincidencia LYC
         check_lyc_coincidence();
         
-        // Fin de frame (154 líneas)
+        // Fin de frame (154 líneas = 0-153)
         if (current_line >= 154) {
             current_line = 0;
             memory.writeMemory(0xFF44, 0);
             frame_complete = false;
             
             if (debug_enabled) {
-                std::cout << "[PPU DEBUG] ========== FRAME COMPLETO ==========\n";
+                std::cout << "\n========== FRAME COMPLETO - RESETEANDO A LY=0 ==========\n\n";
             }
         }
     }
@@ -323,14 +349,18 @@ void ppu::update_stat_interrupt() {
     
     // EDGE-TRIGGERED: Solo disparar en transición LOW → HIGH
     if (current_stat_line && !prev_stat_line) {
-        // Solicitar interrupción STAT (Bit 1 de IF)
-        uint8_t if_reg = memory.readMemory(0xFF0F);
-        memory.writeMemory(0xFF0F, if_reg | 0x02);
-        
-        // Debug
+        uint8_t if_old = memory.readMemory(0xFF0F);
+        uint8_t if_new = if_old | 0x02;
+        memory.writeMemory(0xFF0F, if_new);
+
         if (debug_enabled) {
+            uint8_t ie_reg = memory.readMemory(0xFFFF);
             std::cout << "[PPU DEBUG] Interrupción STAT solicitada: " << interrupt_reason 
                       << " (LY=" << std::dec << (int)ly << ")\n";
+            std::cout << "[PPU DEBUG] STAT IRQ | IF: 0x" << std::hex << std::setfill('0') << std::setw(2)
+                      << (int)if_old << " → 0x" << std::setw(2) << (int)if_new
+                      << " | IE=0x" << std::setw(2) << (int)ie_reg
+                      << std::dec << "\n";
         }
     }
     

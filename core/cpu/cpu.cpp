@@ -1,5 +1,8 @@
 #include "cpu.h"
 
+// Debug simple de interrupciones en CPU
+static bool cpu_irq_debug_enabled = true;
+
 // --- Constructor ---
 // --- Constructor ---
 cpu::cpu(mmu& mmu_ref) : memory(mmu_ref) 
@@ -398,6 +401,16 @@ int cpu::handleInterrupts() {
     uint8_t pending = if_reg & ie_reg & 0x1F; // Solo bits 0-4 son válidos
 
     if (pending > 0) {
+        if (cpu_irq_debug_enabled) {
+            std::cout << "[CPU IRQ] IF=0x" << std::hex << (int)if_reg
+                      << " IE=0x" << (int)ie_reg
+                      << " PENDING=0x" << (int)pending
+                      << " IME=" << std::dec << (IME ? 1 : 0)
+                      << " HALT=" << (isHalted ? 1 : 0)
+                      << " STOP=" << (isStopped ? 1 : 0)
+                      << " PC=0x" << std::hex << (int)PC << std::dec << "\n";
+        }
+
         // IMPORTANTE: Despertar a la CPU si estaba dormida
         // Esto ocurre INCLUSO si IME está deshabilitado
         if (isHalted) {
@@ -418,9 +431,16 @@ int cpu::handleInterrupts() {
             // Prioridad: VBlank (0) > LCD (1) > Timer (2) > Serial (3) > Joypad (4)
             for (int i = 0; i < 5; i++) {
                 if ((pending >> i) & 1) {
+                    if (cpu_irq_debug_enabled) {
+                        std::cout << "[CPU IRQ] Servicing IRQ " << i
+                                  << " vector=0x" << std::hex << (0x40 + i * 8)
+                                  << std::dec << "\n";
+                    }
                     return executeInterrupt(i); // Retorna los ciclos consumidos
                 }
             }
+        } else if (cpu_irq_debug_enabled) {
+            std::cout << "[CPU IRQ] Pending but IME=0, not serviced\n";
         }
     }
     
