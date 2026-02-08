@@ -100,31 +100,26 @@ uint8_t mmu::readMemory(uint16_t address)
             // Mantener bits 4-5 (selección de grupo)
             result |= (p1 & 0x30);
             
-            // IMPORTANTE: Por defecto, todos los botones NO presionados (bits en 1)
+            // Por defecto, todos los botones NO presionados (bits en 1)
             uint8_t button_state = 0x0F;
-            
-            // TODO: Aquí deberías verificar el estado real de los botones
-            // Por ahora, simulamos que NO hay botones presionados
             
             bool select_dpad = !(p1 & 0x10);    // Bit 4 = 0 → D-Pad seleccionado
             bool select_buttons = !(p1 & 0x20); // Bit 5 = 0 → Botones seleccionados
             
-            // Ejemplo de cómo leerías botones reales:
-            /*
+            // Leer estado real de los botones
             if (select_dpad) {
-                if (button_right_pressed)  button_state &= ~0x01;
-                if (button_left_pressed)   button_state &= ~0x02;
-                if (button_up_pressed)     button_state &= ~0x04;
-                if (button_down_pressed)   button_state &= ~0x08;
+                if (button_right)  button_state &= ~0x01;
+                if (button_left)   button_state &= ~0x02;
+                if (button_up)     button_state &= ~0x04;
+                if (button_down)   button_state &= ~0x08;
             }
             
             if (select_buttons) {
-                if (button_a_pressed)      button_state &= ~0x01;
-                if (button_b_pressed)      button_state &= ~0x02;
-                if (button_select_pressed) button_state &= ~0x04;
-                if (button_start_pressed)  button_state &= ~0x08;
+                if (button_a)      button_state &= ~0x01;
+                if (button_b)      button_state &= ~0x02;
+                if (button_select) button_state &= ~0x04;
+                if (button_start)  button_state &= ~0x08;
             }
-            */
             
             // Combinar resultado final
             result |= button_state;
@@ -241,28 +236,8 @@ void mmu::writeMemory(uint16_t address, uint8_t value)
 }
 
 // ============================================================
-// FUNCIÓN PARA ACTUALIZAR ESTADO DE BOTONES (NUEVA)
+// FUNCIÓN PARA ACTUALIZAR ESTADO DE BOTONES
 // ============================================================
-// Añade esta función al mmu.h y mmu.cpp para permitir
-// que JavaScript actualice el estado de los botones
-
-/*
-// En mmu.h, añadir:
-private:
-    // Estado de los botones (false = no presionado, true = presionado)
-    bool button_right = false;
-    bool button_left = false;
-    bool button_up = false;
-    bool button_down = false;
-    bool button_a = false;
-    bool button_b = false;
-    bool button_select = false;
-    bool button_start = false;
-
-public:
-    void setButton(int button_id, bool pressed);
-    
-// Luego implementar en mmu.cpp:
 void mmu::setButton(int button_id, bool pressed) {
     switch(button_id) {
         case 0: button_right = pressed; break;
@@ -275,19 +250,3 @@ void mmu::setButton(int button_id, bool pressed) {
         case 7: button_start = pressed; break;
     }
 }
-
-// Y usar en readMemory (0xFF00):
-if (select_dpad) {
-    if (button_right)  button_state &= ~0x01;
-    if (button_left)   button_state &= ~0x02;
-    if (button_up)     button_state &= ~0x04;
-    if (button_down)   button_state &= ~0x08;
-}
-
-if (select_buttons) {
-    if (button_a)      button_state &= ~0x01;
-    if (button_b)      button_state &= ~0x02;
-    if (button_select) button_state &= ~0x04;
-    if (button_start)  button_state &= ~0x08;
-}
-*/

@@ -103,73 +103,92 @@ void timer::debug_interrupt_state(const char* event) {
 // ============================================================
 // STEP - AVANZA EL TIMER (T-CYCLES CORRECTOS)
 // ============================================================
+// ARQUITECTURA DEL TIMER DE GAME BOY:
+// 
+// DIV (0xFF04): Contador de libre ejecución. SIEMPRE incrementa
+//               cada 256 T-cycles (16384 Hz). NO depende de TAC.
+//               Cualquier escritura lo resetea a 0.
+//
+// TIMA (0xFF05): Timer configurable. SOLO incrementa si TAC bit 2 = 1.
+//                La frecuencia depende de TAC bits 0-1.
+//                Al hacer overflow (0xFF→0x00), genera interrupción
+//                y se recarga con el valor de TMA.
+//
+// TMA (0xFF06): Valor de recarga para TIMA tras overflow.
+//
+// TAC (0xFF07): Bit 2 = Timer Enable
+//               Bits 0-1 = Frecuencia de TIMA
+// ============================================================
+
 static int timer_log_counter = 0;
+static uint8_t last_div_logged = 0;
 
 void timer::step(int t_cycles) {
     // ============================================================
-    // DIV (0xFF04) - Incrementa cada 256 T-cycles
+    // PARTE 1: DIV - SIEMPRE CORRE (FREE-RUNNING)
     // ============================================================
-    // DIV incrementa cada 256 T-cycles (16384 Hz)
-    // Cualquier escritura a DIV lo resetea a 0
-    
-    uint8_t& div_reg = memory.IO[0x04];
+    // DIV incrementa cada 256 T-cycles independientemente de TAC
     
     div_counter += t_cycles;
-
+    
     while (div_counter >= 256) {
         div_counter -= 256;
-        div_reg++;
-        // DIV overflow silencioso (no genera interrupción)
+        memory.IO[0x04]++;  // DIV siempre incrementa
     }
-
-    // ============================================================
-    // TIMA (0xFF05) - Timer configurable
-    // ============================================================
-    uint8_t tac = memory.IO[0x07];
     
-    // Log periódico del estado del TAC (cada ~1 segundo de emulación)
+    // ============================================================
+    // DEBUG: Log periódico (cada ~1 segundo emulado)
+    // ============================================================
     timer_log_counter += t_cycles;
-    if (debug_enabled && timer_log_counter >= 4194304) {  // ~1 segundo
+    if (debug_enabled && timer_log_counter >= 4194304) {
         timer_log_counter = 0;
-        std::cout << "[TIMER] TAC=0x" << std::hex << (int)tac 
+        uint8_t current_div = memory.IO[0x04];
+        uint8_t tac = memory.IO[0x07];
+        
+        std::cout << "[TIMER] DIV=0x" << std::hex << (int)current_div
+                  << " (delta=" << std::dec << (int)(uint8_t)(current_div - last_div_logged) << ")"
+                  << " TAC=0x" << std::hex << (int)tac 
                   << " TIMA=0x" << (int)memory.IO[0x05]
                   << " TMA=0x" << (int)memory.IO[0x06]
                   << " IF=0x" << (int)memory.IO[0x0F]
                   << " Timer " << ((tac & 0x04) ? "ENABLED" : "DISABLED")
                   << std::dec << "\n";
+        
+        last_div_logged = current_div;
     }
     
-    // Bit 2 de TAC = Timer Enable
+    // ============================================================
+    // PARTE 2: TIMA - SOLO SI TAC BIT 2 ESTÁ ACTIVO
+    // ============================================================
+    uint8_t tac = memory.IO[0x07];
+    
+    // Si Timer está deshabilitado (TAC bit 2 = 0), no procesar TIMA
     if (!(tac & 0x04)) {
-        // Timer deshabilitado - no hacer nada
-        return;
+        return;  // DIV ya se actualizó arriba, solo salir
     }
     
-    // Determinar umbral según bits 0-1 de TAC
-    // IMPORTANTE: Estos valores están en T-cycles
+    // Determinar frecuencia de TIMA según TAC bits 0-1
+    // Valores en T-cycles entre cada incremento de TIMA
     int threshold;
     switch (tac & 0x03) {
-        case 0: threshold = 1024; break;  // 4096 Hz   (CPU_FREQ / 1024)
-        case 1: threshold = 16;   break;  // 262144 Hz (CPU_FREQ / 16)
-        case 2: threshold = 64;   break;  // 65536 Hz  (CPU_FREQ / 64)
-        case 3: threshold = 256;  break;  // 16384 Hz  (CPU_FREQ / 256)
+        case 0: threshold = 1024; break;  // 4096 Hz   (4194304 / 1024)
+        case 1: threshold = 16;   break;  // 262144 Hz (4194304 / 16)
+        case 2: threshold = 64;   break;  // 65536 Hz  (4194304 / 64)
+        case 3: threshold = 256;  break;  // 16384 Hz  (4194304 / 256)
         default: threshold = 1024; break;
     }
-
+    
     tima_counter += t_cycles;
-
+    
     while (tima_counter >= threshold) {
         tima_counter -= threshold;
-
-        uint8_t& tima = memory.IO[0x05];
+        
+        uint8_t tima = memory.IO[0x05];
         
         if (tima == 0xFF) {
-            // TIMA overflow: resetear a TMA y solicitar interrupción
-            tima = memory.IO[0x06]; // TMA
-            
-            // CRÍTICO: Usar OR para no sobrescribir otras interrupciones
-            // Bit 2 de IF = Timer Interrupt
-            memory.IO[0x0F] |= 0x04;
+            // TIMA overflow: recargar con TMA y solicitar interrupción
+            memory.IO[0x05] = memory.IO[0x06];  // TIMA = TMA
+            memory.IO[0x0F] |= 0x04;            // IF bit 2 = Timer IRQ
             
             if (debug_enabled) {
                 std::cout << "[TIMER] Overflow! TIMA reset to TMA=0x" 
@@ -177,7 +196,7 @@ void timer::step(int t_cycles) {
                           << ", Timer IRQ requested (IF |= 0x04)\n";
             }
         } else {
-            tima++;
+            memory.IO[0x05] = tima + 1;
         }
     }
 }

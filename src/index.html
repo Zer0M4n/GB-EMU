@@ -63,7 +63,8 @@
 
         onRuntimeInitialized: function() {
             console.log("WASM Cargado y listo!");
-            document.querySelector('.controls p').innerText = "EMULADOR CORRIENDO";
+            document.querySelector('.controls p').innerText = "EMULADOR CORRIENDO - Usa ← ↑ → ↓ Z X Enter Space";
+            setupKeyboard();
         }
     };
 
@@ -83,6 +84,49 @@
         const ctx = canvas.getContext('2d');
         const imgData = new ImageData(data, 160, 144);
         ctx.putImageData(imgData, 0, 0);
+    }
+    
+    // ============================================================
+    // KEYBOARD MAPPING - Mapeo de teclas a botones de Game Boy
+    // ============================================================
+    // Botón IDs (deben coincidir con setButton en mmu.cpp):
+    // 0 = Right, 1 = Left, 2 = Up, 3 = Down
+    // 4 = A, 5 = B, 6 = Select, 7 = Start
+    
+    const KEY_MAP = {
+        'ArrowRight': 0,  // Right
+        'ArrowLeft': 1,   // Left
+        'ArrowUp': 2,     // Up
+        'ArrowDown': 3,   // Down
+        'KeyZ': 4,        // A
+        'KeyX': 5,        // B
+        'Space': 6,       // Select
+        'Enter': 7        // Start
+    };
+    
+    function setupKeyboard() {
+        document.addEventListener('keydown', function(e) {
+            const buttonId = KEY_MAP[e.code];
+            if (buttonId !== undefined) {
+                e.preventDefault();
+                if (Module._set_button) {
+                    Module._set_button(buttonId, 1); // 1 = pressed
+                    console.log(`[JOYPAD] Button ${buttonId} pressed`);
+                }
+            }
+        });
+        
+        document.addEventListener('keyup', function(e) {
+            const buttonId = KEY_MAP[e.code];
+            if (buttonId !== undefined) {
+                e.preventDefault();
+                if (Module._set_button) {
+                    Module._set_button(buttonId, 0); // 0 = released
+                }
+            }
+        });
+        
+        console.log("[JOYPAD] Keyboard setup complete. Controls: Arrows, Z=A, X=B, Enter=Start, Space=Select");
     }
 </script>
 
