@@ -68,8 +68,11 @@ private:
     
     void draw_scanline();             // Renderiza una línea completa
     void draw_background();           // Renderiza el fondo
-    // TODO: void draw_sprites();     // Renderizar sprites
+    void draw_sprites();              // Renderizar sprites
     // TODO: void draw_window();      // Renderizar ventana
+    
+    // Buffer para prioridad de fondo (para mezcla con sprites)
+    uint8_t bg_priority[160];         // Color del BG por pixel (0-3)
 };
 
 #endif // PPU_H

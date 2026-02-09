@@ -13,11 +13,15 @@
 
 class ppu; // Forward declaration
 class timer; // Forward declaration
+class cpu; // Forward declaration
+class emcc_main; // Forward declaration
 
 class mmu
 {
     friend class ppu;
     friend class timer;
+    friend class cpu;
+    friend class emcc_main;
     
 public:
     // Constructor explícito que recibe la ruta

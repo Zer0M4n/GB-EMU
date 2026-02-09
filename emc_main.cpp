@@ -75,9 +75,91 @@ void main_loop() {
     }
 
     // Avisar a JS que dibuje cuando el frame está completo
+    static int frame_count = 0;
+    frame_count++;
+    if (frame_count <= 3) {
+        std::cout << "[MAIN LOOP] Frame #" << frame_count << " complete. Calling drawCanvas()...\n";
+    }
+    
+    // ============================================================
+    // DIAGNOSTIC: Monitor GAME_STATUS and countdown timers
+    // ============================================================
+    // GAME_STATUS is at 0xFF99 (HRAM[0x19])
+    // COUNTDOWN is at 0xFFA6-0xFFA7 (HRAM[0x26-0x27])
+    uint8_t game_status = global_mmu->readMemory(0xFF99);
+    uint8_t countdown_lo = global_mmu->readMemory(0xFFA6);
+    uint8_t countdown_hi = global_mmu->readMemory(0xFFA7);
+    
+    // State name lookup
+    const char* state_name = "UNKNOWN";
+    switch (game_status) {
+        case 36: state_name = "MENU_COPYRIGHT_INIT"; break;
+        case 37: state_name = "MENU_COPYRIGHT_1"; break;
+        case 53: state_name = "MENU_COPYRIGHT_2"; break;
+        case 6:  state_name = "MENU_TITLE_INIT"; break;
+        case 7:  state_name = "MENU_TITLE"; break;
+        case 8:  state_name = "MENU_GAME_TYPE"; break;
+        case 20: state_name = "PLAYING"; break;
+    }
+    
+    // Log state changes
+    static uint8_t last_game_status = 0xFF;
+    static uint8_t last_countdown = 0xFF;
+    
+    if (game_status != last_game_status) {
+        std::cout << "\n[STATE CHANGE] Frame " << frame_count 
+                  << ": GAME_STATUS = " << (int)game_status 
+                  << " (" << state_name << ")\n\n";
+        last_game_status = game_status;
+    }
+    
+    // Log countdown every 60 frames (1 second) while in copyright
+    if (game_status == 37 && frame_count % 60 == 0) {
+        uint16_t countdown = (countdown_hi << 8) | countdown_lo;
+        std::cout << "[COPYRIGHT] Frame " << frame_count 
+                  << " COUNTDOWN=" << countdown
+                  << " (0x" << std::hex << countdown << std::dec << ")\n";
+        
+        // Check if countdown changed
+        if (countdown_lo != last_countdown) {
+            std::cout << "  → Countdown IS changing!\n";
+        } else {
+            std::cout << "  → Countdown NOT changing (stuck?)\n";
+        }
+        last_countdown = countdown_lo;
+    }
+    
+    // AUTO-PRESS START after 2 seconds (120 frames) to test if game advances
+    static bool start_pressed = false;
+    if (frame_count == 120 && !start_pressed) {
+        std::cout << "\n[AUTO-TEST] Pressing START button...\n";
+        std::cout << "  Current state: " << (int)game_status << " (" << state_name << ")\n\n";
+        global_mmu->setButton(7, true);  // Press START
+        start_pressed = true;
+    }
+    if (frame_count == 140 && start_pressed) {
+        std::cout << "\n[AUTO-TEST] Releasing START button...\n";
+        std::cout << "  Current state: " << (int)game_status << " (" << state_name << ")\n\n";
+        global_mmu->setButton(7, false); // Release START
+    }
+    
+    // Log state after START press
+    if (frame_count == 180) {
+        std::cout << "\n[AUTO-TEST RESULT] 1 second after START:\n";
+        std::cout << "  GAME_STATUS = " << (int)game_status << " (" << state_name << ")\n";
+        if (game_status == 37) {
+            std::cout << "  *** STILL STUCK ON COPYRIGHT! ***\n";
+        } else if (game_status == 6 || game_status == 7) {
+            std::cout << "  *** SUCCESS! Game advanced to title! ***\n";
+        }
+        std::cout << "\n";
+    }
+    
     EM_ASM({
         if (typeof drawCanvas === 'function') {
             drawCanvas();
+        } else {
+            console.error("drawCanvas is not defined!");
         }
     });
 }

@@ -1,7 +1,13 @@
 #include "cpu.h"
+#include <iomanip>
 
 // Debug simple de interrupciones en CPU (desactivado para producción)
 static bool cpu_irq_debug_enabled = false;
+
+// DEBUG: Rastrear opcodes ejecutados
+static int opcode_counts[256] = {0};
+static int total_instructions = 0;
+static int last_dump_instructions = 0;
 
 // --- Constructor ---
 cpu::cpu(mmu& mmu_ref) : memory(mmu_ref) 
@@ -367,6 +373,16 @@ void cpu::requestInterrupt(int bit) {
 }
 
 int cpu::executeInterrupt(int bit) {
+    // DEBUG: Ver si las interrupciones se sirven
+    static int irq_served_count = 0;
+    irq_served_count++;
+    if (irq_served_count <= 20) {
+        std::cout << "[IRQ SERVICED #" << irq_served_count << "] bit=" << bit
+                  << " PC_before=0x" << std::hex << PC
+                  << " vector=0x" << (0x0040 + (bit * 8))
+                  << " IME_was=" << (IME ? 1 : 0) << std::dec << "\n";
+    }
+    
     // 1. Deshabilitar IME inmediatamente es CRUCIAL
     IME = false;
     IME_scheduled = false; // Por seguridad, cancelamos cualquier EI pendiente
@@ -402,6 +418,18 @@ int cpu::handleInterrupts() {
     uint8_t pending = if_reg & ie_reg & 0x1F; // Solo bits 0-4 son válidos
 
     if (pending > 0) {
+        // DEBUG: Log wake-up from HALT
+        static int wakeup_count = 0;
+        if (isHalted && wakeup_count < 20) {
+            wakeup_count++;
+            std::cout << "[CPU WAKEUP #" << wakeup_count << "] Waking from HALT!"
+                      << " IF=0x" << std::hex << (int)if_reg
+                      << " IE=0x" << (int)ie_reg
+                      << " PENDING=0x" << (int)pending
+                      << " IME=" << std::dec << (IME ? 1 : 0)
+                      << "\n";
+        }
+        
         if (cpu_irq_debug_enabled) {
             std::cout << "[CPU IRQ] IF=0x" << std::hex << (int)if_reg
                       << " IE=0x" << (int)ie_reg
@@ -474,6 +502,98 @@ int cpu::step()
     // 3. Fetch (Traer instrucción)
     uint16_t pc_before = PC;
     uint8_t opcode = fetch();
+    
+    // ============================================================
+    // DEBUG: EARLY BOOT TRACE - First 100 instructions
+    // ============================================================
+    static int boot_trace_count = 0;
+    boot_trace_count++;
+    if (boot_trace_count <= 100) {
+        std::cout << "[BOOT TRACE #" << std::dec << boot_trace_count 
+                  << "] PC=0x" << std::hex << pc_before
+                  << " OP=0x" << std::setw(2) << std::setfill('0') << (int)opcode;
+        
+        // Decode common opcodes for readability
+        if (opcode == 0x00) std::cout << " (NOP)";
+        else if (opcode == 0xC3) std::cout << " (JP a16)";
+        else if (opcode == 0xAF) std::cout << " (XOR A)";
+        else if (opcode == 0x21) std::cout << " (LD HL,d16)";
+        else if (opcode == 0x31) std::cout << " (LD SP,d16)";
+        else if (opcode == 0xE0) std::cout << " (LDH [a8],A)";
+        else if (opcode == 0x3E) std::cout << " (LD A,d8)";
+        else if (opcode == 0xCD) std::cout << " (CALL a16)";
+        else if (opcode == 0xC9) std::cout << " (RET)";
+        else if (opcode == 0xFB) std::cout << " (EI)";
+        
+        std::cout << std::dec << "\n";
+        
+        // Log key PC values we expect to see
+        if (pc_before == 0x0100) std::cout << "  ^-- Entry point (should see JP)\n";
+        if (pc_before == 0x0150) std::cout << "  ^-- Start: (should see JP to Init)\n";
+        if (pc_before == 0x0211) std::cout << "  ^-- Init: (game initialization begins!)\n";
+    }
+    
+    // DEBUG: Trace when game EXITS the polling loop at 0x2F0
+    // JR Z at 0x2F0 doesn't jump when Z=0 (A != 0), so next PC would be 0x2F2
+    static int loop_exit_count = 0;
+    static uint16_t last_pc = 0;
+    if (last_pc == 0x2F0 && pc_before != 0x2ED) {
+        // We just executed JR Z but didn't jump back - we exited the loop!
+        loop_exit_count++;
+        if (loop_exit_count <= 50 || loop_exit_count % 1000 == 0) {
+            std::cout << "[LOOP EXIT #" << loop_exit_count << "] Exited to PC=0x" << std::hex << pc_before
+                      << " OP=0x" << (int)opcode << " A=0x" << (int)r8[A] 
+                      << " FF85=" << (int)memory.HRAM[0x05] << std::dec << "\n";
+        }
+    }
+    last_pc = pc_before;
+    
+    // DEBUG: Trace stuck loop at PC=0x2ED-0x2F2
+    static int stuck_loop_trace = 0;
+    if (pc_before >= 0x2ED && pc_before <= 0x2F2) {
+        stuck_loop_trace++;
+        if (stuck_loop_trace <= 20 || stuck_loop_trace % 500000 == 0) {
+            std::cout << "[LOOP TRACE #" << stuck_loop_trace << "] PC=0x" << std::hex << pc_before
+                      << " OP=0x" << (int)opcode
+                      << " A=0x" << (int)r8[A]
+                      << " Z=" << (int)getZ()
+                      << " FF44=" << (int)memory.IO[0x44]
+                      << " FF85=" << (int)memory.HRAM[0x05]
+                      << std::dec << "\n";
+        }
+    }
+    
+    // DEBUG: Contar opcodes y detectar loops
+    opcode_counts[opcode]++;
+    total_instructions++;
+    
+    // Log periódico cada ~1 millón de instrucciones
+    if (total_instructions - last_dump_instructions >= 1000000) {
+        last_dump_instructions = total_instructions;
+        std::cout << "\n[CPU DEBUG] After " << total_instructions << " instructions:\n";
+        std::cout << "  HALT(0x76) executed: " << opcode_counts[0x76] << " times\n";
+        std::cout << "  Current PC=0x" << std::hex << pc_before << std::dec << "\n";
+        std::cout << "  IME=" << (IME ? 1 : 0) << " isHalted=" << (isHalted ? 1 : 0) << "\n";
+        std::cout << "  IF=0x" << std::hex << (int)memory.IO[0x0F]
+                  << " IE=0x" << (int)memory.readMemory(0xFFFF) << std::dec << "\n";
+        
+        // Mostrar los 5 opcodes más ejecutados
+        int top5[5] = {0, 0, 0, 0, 0};
+        for (int i = 0; i < 256; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (opcode_counts[i] > opcode_counts[top5[j]]) {
+                    for (int k = 4; k > j; k--) top5[k] = top5[k-1];
+                    top5[j] = i;
+                    break;
+                }
+            }
+        }
+        std::cout << "  Top opcodes: ";
+        for (int j = 0; j < 5; j++) {
+            std::cout << "0x" << std::hex << top5[j] << "(" << std::dec << opcode_counts[top5[j]] << ") ";
+        }
+        std::cout << "\n";
+    }
 
     // DEBUG: Imprimir estado de CPU antes de ejecutar
     uint8_t if_reg = memory.readMemory(0xFF0F);
@@ -585,6 +705,13 @@ int cpu::HALT(uint8_t opcode)
 {
     (void)opcode;
     
+    // DEBUG: Log CADA ejecución de HALT
+    std::cout << "[CPU] *** HALT EXECUTED *** PC=0x" << std::hex << PC
+              << " IME=" << std::dec << (IME ? 1 : 0)
+              << " IF=0x" << std::hex << (int)memory.IO[0x0F]
+              << " IE=0x" << (int)memory.readMemory(0xFFFF)
+              << std::dec << "\n";
+    
     isHalted = true;
     
     // HALT bug del hardware real:
@@ -596,10 +723,8 @@ int cpu::HALT(uint8_t opcode)
     
     if (!IME && pending > 0) {
         // HALT bug: salir inmediatamente de HALT
-        // pero el PC no se incrementará en la siguiente instrucción
         isHalted = false;
-        // En una implementación más precisa, aquí se marcaría
-        // que la siguiente instrucción se ejecuta dos veces
+        std::cout << "[CPU] HALT BUG triggered - exiting immediately\n";
     }
     
     return 4;
@@ -750,8 +875,36 @@ int cpu::DEC_r8(uint8_t opcode) {
     static const R8 hardwareToYourEnum[] = {B, C, D, E, H, L, H, A}; 
     R8 target = hardwareToYourEnum[regBits];
 
+    // Handle [HL] case specially
+    if (regBits == 6) {
+        uint16_t addr = getHL();
+        uint8_t prevValue = memory.readMemory(addr);
+        uint8_t newValue = prevValue - 1;
+        memory.writeMemory(addr, newValue);
+        
+        setZ(newValue == 0);
+        setN(true);
+        setH((prevValue & 0x0F) == 0);
+        return 12;
+    }
+
     uint8_t prevValue = r8[target];
     r8[target]--;
+
+    // DEBUG: Track DEC B during Init loop (PC=0x215)
+    static int dec_b_trace = 0;
+    if (opcode == 0x05) {  // DEC B
+        dec_b_trace++;
+        if (dec_b_trace <= 10 || (dec_b_trace % 256 == 0 && dec_b_trace <= 5000)) {
+            std::cout << "[DEC B #" << dec_b_trace << "] Before=" << std::hex 
+                      << (int)prevValue << " After=" << (int)r8[target]
+                      << " Z=" << std::dec << (r8[target] == 0 ? 1 : 0) << "\n";
+        }
+        // Special trace when B becomes 0
+        if (r8[target] == 0 && dec_b_trace <= 5000) {
+            std::cout << "[DEC B] B reached 0! Should exit inner loop. Z will be set to 1\n";
+        }
+    }
 
     // Banderas
     setZ(r8[target] == 0);
@@ -759,11 +912,15 @@ int cpu::DEC_r8(uint8_t opcode) {
     // Half Carry: se activa si hubo préstamo del bit 4 (0x0F -> 0x10)
     setH((prevValue & 0x0F) == 0); 
     
-    return (regBits == 6) ? 12 : 4; // Si es [HL] tarda más
+    return 4;
 }
 int cpu::JR_cc_r8(uint8_t opcode) {
+    // PC BEFORE reading operand (gives us the instruction address)
+    uint16_t instr_pc = PC - 1;  // -1 because opcode was already fetched
+    
     // Leer el desplazamiento (signed!)
     int8_t offset = (int8_t)readImmediateByte(); 
+    uint16_t target_pc = PC + offset;
     
     // Determinar la condición
     int condition = (opcode >> 3) & 0x03;
@@ -774,6 +931,35 @@ int cpu::JR_cc_r8(uint8_t opcode) {
         case 1: jump = (getZ() == 1); break; // Z
         case 2: jump = (getC() == 0); break; // NC
         case 3: jump = (getC() == 1); break; // C
+    }
+
+    // DEBUG: Trace JR NZ at Init loop (PC=0x216)
+    static int jr_init_trace = 0;
+    if (instr_pc == 0x216 && opcode == 0x20) {  // JR NZ in Init loop
+        jr_init_trace++;
+        if (jr_init_trace <= 10 || (jr_init_trace % 256 == 0 && jr_init_trace <= 5000)) {
+            std::cout << "[JR NZ @0x216 #" << jr_init_trace << "] Z=" << (int)getZ()
+                      << " Jump=" << (jump ? "YES" : "NO")
+                      << " B=" << std::hex << (int)r8[B] 
+                      << " C=" << (int)r8[C] << std::dec << "\n";
+        }
+        // Trace when we should NOT jump (Z=1)
+        if (getZ() == 1) {
+            std::cout << "[JR NZ @0x216] Z=1, should NOT jump! Continuing to 0x218\n";
+        }
+    }
+
+    // DEBUG: Trace jump decisions in critical loop (0x2ED-0x2F2)
+    static int jr_trace_count = 0;
+    if ((PC - 2) >= 0x2ED && (PC - 2) <= 0x2F2) {  // PC already advanced by 2 (opcode + offset)
+        jr_trace_count++;
+        if (jr_trace_count <= 50) {
+            const char* cond_names[] = {"NZ", "Z", "NC", "C"};
+            std::cout << "[JR TRACE #" << jr_trace_count << "] Cond=" << cond_names[condition]
+                      << " Z=" << (int)getZ() << " Jump=" << (jump ? "YES" : "NO")
+                      << " Offset=" << (int)offset
+                      << " Target=0x" << std::hex << target_pc << std::dec << "\n";
+        }
     }
 
     if (jump) {
@@ -800,6 +986,19 @@ int cpu::LDH_n_A(uint8_t opcode) {
     // Lee el offset (ej: 0x40)
     uint8_t offset = readImmediateByte();
     
+    // DEBUG: Track writes to 0xFF85 with PC context
+    if (offset == 0x85) {
+        static int ff85_ldh_write_count = 0;
+        ff85_ldh_write_count++;
+        if (ff85_ldh_write_count <= 30) {
+            // PC-2 because we already fetched the opcode (E0) and operand (85)
+            uint16_t instr_pc = PC - 2;
+            std::cout << "[FF85 WRITE #" << ff85_ldh_write_count << "] PC=0x" 
+                      << std::hex << instr_pc << " A=0x" << (int)r8[A]
+                      << " (LDH [0xFF85],A)" << std::dec << "\n";
+        }
+    }
+    
     // Escribe A en 0xFF00 + offset
     memory.writeMemory(0xFF00 | offset, r8[A]);
     
@@ -810,6 +1009,22 @@ int cpu::LDH_n_A(uint8_t opcode) {
 int cpu::LDH_A_n(uint8_t opcode) {
     (void)opcode;
     uint8_t offset = readImmediateByte();
+    
+    // DEBUG: Rastrear qué registros lee el juego en su polling loop
+    static int ldh_counts[256] = {0};
+    static int total_ldh = 0;
+    ldh_counts[offset]++;
+    total_ldh++;
+    
+    if (total_ldh == 10000) {
+        std::cout << "[LDH DEBUG] After 10K LDH reads:\n";
+        for (int i = 0; i < 256; i++) {
+            if (ldh_counts[i] > 100) {
+                std::cout << "  0xFF" << std::hex << std::setw(2) << std::setfill('0') << i 
+                          << ": " << std::dec << ldh_counts[i] << " reads\n";
+            }
+        }
+    }
     
     // Lee de 0xFF00 + offset y guarda en A
     r8[A] = memory.readMemory(0xFF00 | offset);
@@ -836,6 +1051,19 @@ int cpu::LD_a16_A(uint8_t opcode) {
     (void)opcode;
     // 1. Leer la dirección de destino (2 bytes)
     uint16_t addr = readImmediateWord();
+    
+    // DEBUG: Track writes to 0xFF85 with PC context
+    if (addr == 0xFF85) {
+        static int ff85_ld16_write_count = 0;
+        ff85_ld16_write_count++;
+        if (ff85_ld16_write_count <= 30) {
+            // PC-3 because we already fetched opcode (EA) and 2-byte operand
+            uint16_t instr_pc = PC - 3;
+            std::cout << "[FF85 WRITE via LD #" << ff85_ld16_write_count << "] PC=0x" 
+                      << std::hex << instr_pc << " A=0x" << (int)r8[A]
+                      << " (LD [0xFF85],A)" << std::dec << "\n";
+        }
+    }
     
     // 2. Escribir A en esa dirección
     memory.writeMemory(addr, r8[A]);
@@ -1326,6 +1554,19 @@ int cpu::LD_C_A(uint8_t opcode) {
     (void)opcode;
     // Dirección base de IO (0xFF00) + Registro C
     uint16_t addr = 0xFF00 | r8[C];
+    
+    // DEBUG: Track writes to 0xFF85 via LD (C),A
+    if (addr == 0xFF85) {
+        static int ff85_ldc_write_count = 0;
+        ff85_ldc_write_count++;
+        if (ff85_ldc_write_count <= 30) {
+            // PC-1 because we already fetched opcode (E2)
+            uint16_t instr_pc = PC - 1;
+            std::cout << "[FF85 WRITE via LD(C) #" << ff85_ldc_write_count << "] PC=0x" 
+                      << std::hex << instr_pc << " A=0x" << (int)r8[A]
+                      << " C=0x" << (int)r8[C] << std::dec << "\n";
+        }
+    }
     
     memory.writeMemory(addr, r8[A]);
     

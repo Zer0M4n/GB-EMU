@@ -12,8 +12,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
         .gb-case {
             background-color: #c0c0c0;
@@ -28,16 +29,65 @@
             margin-bottom: 20px;
         }
         canvas {
-            background-color: #9bbc0f; /* Color base pantalla apagada */
-            width: 320px;  /* Escalado 2x visualmente */
+            background-color: #9bbc0f;
+            width: 320px;
             height: 288px;
-            image-rendering: pixelated; /* Para que se vea retro y nítido */
+            image-rendering: pixelated;
             border: 2px solid #333;
         }
         .controls {
             text-align: center;
             font-size: 12px;
             color: #333;
+        }
+        
+        /* Debug Panel Styles */
+        .debug-panel {
+            margin-top: 20px;
+            background: #1a1a2e;
+            border: 2px solid #4a4a6a;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 350px;
+        }
+        .debug-title {
+            color: #00ff00;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #4a4a6a;
+            padding-bottom: 5px;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .btn-indicator {
+            padding: 8px 4px;
+            text-align: center;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #333;
+            color: #666;
+            border: 1px solid #444;
+            transition: all 0.1s;
+        }
+        .btn-indicator.active {
+            background: #00ff00;
+            color: #000;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+        .debug-log {
+            font-size: 11px;
+            color: #aaa;
+            max-height: 60px;
+            overflow-y: auto;
+            background: #0a0a15;
+            padding: 8px;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -51,34 +101,127 @@
             <p>CARGANDO WASM...</p>
         </div>
     </div>
+    
+    <!-- DEBUG PANEL -->
+    <div class="debug-panel">
+        <div class="debug-title">🎮 JOYPAD DEBUG - [UI Layer]</div>
+        <div class="button-grid">
+            <div class="btn-indicator" id="btn-up">↑ UP</div>
+            <div class="btn-indicator" id="btn-down">↓ DOWN</div>
+            <div class="btn-indicator" id="btn-left">← LEFT</div>
+            <div class="btn-indicator" id="btn-right">→ RIGHT</div>
+            <div class="btn-indicator" id="btn-a">Z = A</div>
+            <div class="btn-indicator" id="btn-b">X = B</div>
+            <div class="btn-indicator" id="btn-select">SPC = SEL</div>
+            <div class="btn-indicator" id="btn-start">⏎ START</div>
+        </div>
+        <div class="debug-log" id="debug-log">Waiting for input...</div>
+    </div>
 
    <script>
+    // ============================================================
+    // DEBUG STATE
+    // ============================================================
+    const buttonState = {
+        0: false, 1: false, 2: false, 3: false,  // D-Pad
+        4: false, 5: false, 6: false, 7: false   // Buttons
+    };
+    
+    const BUTTON_NAMES = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'A', 'B', 'SELECT', 'START'];
+    const BUTTON_ELEMENTS = {
+        0: 'btn-right', 1: 'btn-left', 2: 'btn-up', 3: 'btn-down',
+        4: 'btn-a', 5: 'btn-b', 6: 'btn-select', 7: 'btn-start'
+    };
+    
+    function updateDebugUI() {
+        // Update visual indicators
+        for (let id = 0; id < 8; id++) {
+            const el = document.getElementById(BUTTON_ELEMENTS[id]);
+            if (el) {
+                el.classList.toggle('active', buttonState[id]);
+            }
+        }
+        
+        // Update log
+        const pressed = [];
+        for (let id = 0; id < 8; id++) {
+            if (buttonState[id]) pressed.push(BUTTON_NAMES[id]);
+        }
+        
+        const logEl = document.getElementById('debug-log');
+        if (pressed.length > 0) {
+            logEl.textContent = `[UI DEBUG] Keys Pressed: ${pressed.join(' | ')}`;
+        } else {
+            logEl.textContent = 'No buttons pressed';
+        }
+    }
+    
+    // ============================================================
+    // WASM MODULE
+    // ============================================================
     var Module = {
         canvas: () => document.getElementById('lcd'),
 
-        // Asegura que .wasm y .data se busquen junto al HTML
         locateFile: function (path) {
             return path;
         },
 
         onRuntimeInitialized: function() {
             console.log("WASM Cargado y listo!");
-            document.querySelector('.controls p').innerText = "EMULADOR CORRIENDO - Usa ← ↑ → ↓ Z X Enter Space";
+            document.querySelector('.controls p').innerText = "← ↑ → ↓ | Z=A | X=B | Enter=START | Space=SELECT";
             setupKeyboard();
         }
     };
 
+    let drawCanvasCallCount = 0;
+    
     function drawCanvas() {
-        if (!Module || !Module._get_video_buffer) return;
+        if (!Module || !Module._get_video_buffer) {
+            return;
+        }
 
         const bufferPointer = Module._get_video_buffer();
-        if (bufferPointer === 0) return;
+        if (bufferPointer === 0) {
+            console.warn("[drawCanvas] Buffer pointer is null!");
+            return;
+        }
+        
+        drawCanvasCallCount++;
 
-        const data = new Uint8ClampedArray(
-            Module.HEAPU8.buffer,
-            bufferPointer,
-            160 * 144 * 4
-        );
+        // DEBUG: Log periodically to see buffer content
+        if (drawCanvasCallCount === 1 || drawCanvasCallCount === 60 || drawCanvasCallCount === 120) {
+            console.log(`[drawCanvas #${drawCanvasCallCount}] bufferPointer=${bufferPointer}`);
+            
+            // Sample pixels from different parts of the screen
+            const samples = [
+                { name: "TopLeft(0,0)", offset: 0 },
+                { name: "Center(80,72)", offset: (72 * 160 + 80) * 4 },
+                { name: "TitleArea(80,40)", offset: (40 * 160 + 80) * 4 }
+            ];
+            
+            for (const s of samples) {
+                const r = Module.HEAPU8[bufferPointer + s.offset];
+                const g = Module.HEAPU8[bufferPointer + s.offset + 1];
+                const b = Module.HEAPU8[bufferPointer + s.offset + 2];
+                const a = Module.HEAPU8[bufferPointer + s.offset + 3];
+                console.log(`  ${s.name}: RGBA(${r}, ${g}, ${b}, ${a})`);
+            }
+            
+            // Count unique colors in first row
+            const colorSet = new Set();
+            for (let x = 0; x < 160; x++) {
+                const off = x * 4;
+                const pixel = `${Module.HEAPU8[bufferPointer+off]},${Module.HEAPU8[bufferPointer+off+1]},${Module.HEAPU8[bufferPointer+off+2]}`;
+                colorSet.add(pixel);
+            }
+            console.log(`  Unique colors in row 0: ${colorSet.size}`);
+        }
+
+        // IMPORTANTE: Copiar los datos del heap de WASM a un nuevo array
+        // ImageData puede no funcionar bien con SharedArrayBuffer o vistas del heap WASM
+        const srcData = Module.HEAPU8.subarray(bufferPointer, bufferPointer + 160 * 144 * 4);
+        const data = new Uint8ClampedArray(160 * 144 * 4);
+        data.set(srcData);
 
         const canvas = document.getElementById('lcd');
         const ctx = canvas.getContext('2d');
@@ -87,21 +230,20 @@
     }
     
     // ============================================================
-    // KEYBOARD MAPPING - Mapeo de teclas a botones de Game Boy
+    // KEYBOARD MAPPING
     // ============================================================
-    // Botón IDs (deben coincidir con setButton en mmu.cpp):
-    // 0 = Right, 1 = Left, 2 = Up, 3 = Down
-    // 4 = A, 5 = B, 6 = Select, 7 = Start
+    // Button IDs (must match mmu.cpp setButton):
+    // 0=Right, 1=Left, 2=Up, 3=Down, 4=A, 5=B, 6=Select, 7=Start
     
     const KEY_MAP = {
-        'ArrowRight': 0,  // Right
-        'ArrowLeft': 1,   // Left
-        'ArrowUp': 2,     // Up
-        'ArrowDown': 3,   // Down
-        'KeyZ': 4,        // A
-        'KeyX': 5,        // B
-        'Space': 6,       // Select
-        'Enter': 7        // Start
+        'ArrowRight': 0,
+        'ArrowLeft': 1,
+        'ArrowUp': 2,
+        'ArrowDown': 3,
+        'KeyZ': 4,
+        'KeyX': 5,
+        'Space': 6,
+        'Enter': 7
     };
     
     function setupKeyboard() {
@@ -109,9 +251,18 @@
             const buttonId = KEY_MAP[e.code];
             if (buttonId !== undefined) {
                 e.preventDefault();
+                
+                // Avoid repeat events
+                if (buttonState[buttonId]) return;
+                
+                buttonState[buttonId] = true;
+                updateDebugUI();
+                
                 if (Module._set_button) {
-                    Module._set_button(buttonId, 1); // 1 = pressed
-                    console.log(`[JOYPAD] Button ${buttonId} pressed`);
+                    console.log(`[UI→WASM] set_button(${BUTTON_NAMES[buttonId]}, PRESSED)`);
+                    Module._set_button(buttonId, 1);
+                } else {
+                    console.warn('[UI] Module._set_button not available!');
                 }
             }
         });
@@ -120,13 +271,19 @@
             const buttonId = KEY_MAP[e.code];
             if (buttonId !== undefined) {
                 e.preventDefault();
+                
+                buttonState[buttonId] = false;
+                updateDebugUI();
+                
                 if (Module._set_button) {
-                    Module._set_button(buttonId, 0); // 0 = released
+                    console.log(`[UI→WASM] set_button(${BUTTON_NAMES[buttonId]}, RELEASED)`);
+                    Module._set_button(buttonId, 0);
                 }
             }
         });
         
-        console.log("[JOYPAD] Keyboard setup complete. Controls: Arrows, Z=A, X=B, Enter=Start, Space=Select");
+        console.log("[JOYPAD] Keyboard initialized. Press keys to test!");
+        updateDebugUI();
     }
 </script>
 
