@@ -191,3 +191,14 @@ Este emulador tiene como finalidad:
 
 
 💡 *Pull Requests, ideas y feedback son bienvenidos.*
+
+## ⚖️ Aviso Legal
+
+Este proyecto es un **emulador independiente y no oficial**, desarrollado **únicamente con fines educativos**.
+
+- Este repositorio **NO incluye** ROMs, archivos BIOS ni otros recursos protegidos por derechos de autor.
+- Los usuarios deben proporcionar sus **propias ROMs de Game Boy obtenidas legalmente**.
+- Cualquier nombre de archivo de ROM mostrado en los ejemplos (por ejemplo, `your_game.gb`) es **solo un marcador de posición**.
+- Este proyecto **no está afiliado, patrocinado ni asociado con Nintendo**.
+
+Todas las marcas comerciales y marcas registradas son propiedad de sus respectivos dueños.

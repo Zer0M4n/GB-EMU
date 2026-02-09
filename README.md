@@ -194,3 +194,15 @@ This project aims to:
 
 
 💡 *Issues, pull requests, and feedback are welcome.*
+---
+
+## ⚖️ Legal Disclaimer
+
+This project is an **independent, unofficial emulator** developed for **educational purposes only**.
+
+- This repository **does NOT include** any copyrighted ROMs, BIOS files, or proprietary assets.
+- Users must provide their **own legally obtained Game Boy ROMs**.
+- Any ROM filenames shown in examples (e.g. `your_game.gb`) are **placeholders only**.
+- This project is **not affiliated with, endorsed by, or associated with Nintendo**.
+
+All trademarks and registered trademarks are the property of their respective owners.
