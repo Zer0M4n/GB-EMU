@@ -18,6 +18,7 @@ include_directories(
     core/cpu/ppu
     core/cpu/mmu
     core/cpu/timer
+    core/cpu/APU
     core/cartridge
     core/cartridge/IMBC
 )
@@ -28,6 +29,7 @@ set(CORE_SOURCES
     core/cpu/mmu/mmu.cpp
     core/cpu/ppu/ppu.cpp
     core/cpu/timer/timer.cpp
+    core/cpu/APU/apu.cpp
     core/cartridge/cartridge.cpp
     core/cartridge/IMBC/type_cartridge/RomOnly.cpp
     core/cartridge/IMBC/type_cartridge/MBC1.cpp
@@ -46,8 +48,8 @@ target_link_options(gb-emu PRIVATE
         "SHELL:-s USE_SDL=0"
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
         "SHELL:-s NO_EXIT_RUNTIME=1"
-        "SHELL:-s EXPORTED_FUNCTIONS=['_main','_get_video_buffer','_get_video_buffer_size','_set_button']"
-        "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8']" 
+        "SHELL:-s EXPORTED_FUNCTIONS=['_main','_get_video_buffer','_get_video_buffer_size','_set_button','_get_audio_buffer','_get_audio_samples_available','_fill_audio_buffer','_consume_audio_samples','_set_audio_muted']"
+        "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8','HEAPF32']" 
         #"SHELL:--emrun"
         "SHELL:--preload-file /home/developer/projects/roms_backup@/roms"
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/src/index.html"

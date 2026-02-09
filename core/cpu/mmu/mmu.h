@@ -15,6 +15,7 @@ class ppu; // Forward declaration
 class timer; // Forward declaration
 class cpu; // Forward declaration
 class emcc_main; // Forward declaration
+class APU; // Forward declaration - Audio Processing Unit
 
 class mmu
 {
@@ -34,10 +35,18 @@ public:
     // NUEVA: Función para establecer estado de botones
     // ============================================================
     void setButton(int button_id, bool pressed);
+    
+    // ============================================================
+    // NUEVA: Función para conectar la APU
+    // ============================================================
+    void setAPU(APU* apu_ptr);
 
 private:
     // Instancia del cartucho
     cartridge cart;
+    
+    // Puntero a la APU (Audio)
+    APU* apu = nullptr;
 
     // Regiones de memoria interna
     std::array<uint8_t, 0x2000> VRAM; // 8KB Video RAM

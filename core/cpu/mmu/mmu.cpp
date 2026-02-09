@@ -4,6 +4,7 @@
 // Reemplaza la función readMemory en tu mmu.cpp
 
 #include "mmu.h"
+#include "../APU/apu.h"  // APU para registros de audio
 #include <iostream>
 #include <iomanip>
 
@@ -227,6 +228,17 @@ uint8_t mmu::readMemory(uint16_t address)
             return result;
         }
         
+        // ============================================================
+        // REGISTROS DE AUDIO (APU) - $FF10-$FF3F
+        // ============================================================
+        if (address >= 0xFF10 && address <= 0xFF3F) {
+            if (apu) {
+                return apu->readByte(address);
+            }
+            // Si no hay APU conectada, retornar valor por defecto
+            return 0xFF;
+        }
+        
         // Otros registros I/O
         return IO[offSet(address, 0xFF00)];
     }
@@ -365,6 +377,16 @@ void mmu::writeMemory(uint16_t address, uint8_t value)
             return;
         }
         
+        // ============================================================
+        // REGISTROS DE AUDIO (APU) - $FF10-$FF3F
+        // ============================================================
+        if (address >= 0xFF10 && address <= 0xFF3F) {
+            if (apu) {
+                apu->writeByte(address, value);
+            }
+            return;
+        }
+        
         // Otros registros I/O normales
         IO[offSet(address, 0xFF00)] = value;
         return;
@@ -439,4 +461,12 @@ void mmu::setButton(int button_id, bool pressed) {
     if (pressed) {
         IO[0x0F] |= 0x10;  // Set Joypad interrupt flag
     }
+}
+
+// ============================================================
+// FUNCIÓN PARA CONECTAR LA APU
+// ============================================================
+void mmu::setAPU(APU* apu_ptr) {
+    apu = apu_ptr;
+    std::cout << "[MMU] APU conectada para manejar registros de audio ($FF10-$FF3F)\n";
 }

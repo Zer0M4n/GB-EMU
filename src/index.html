@@ -89,6 +89,66 @@
             padding: 8px;
             border-radius: 4px;
         }
+        
+        /* Audio Panel Styles */
+        .audio-panel {
+            margin-top: 15px;
+            padding: 10px;
+            background: #0a0a15;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .audio-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .audio-title {
+            color: #00aaff;
+            font-size: 12px;
+        }
+        .audio-meter {
+            width: 100px;
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .audio-meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff00, #ffff00, #ff4444);
+            transition: width 0.05s;
+        }
+        .mute-btn {
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border: 2px solid #00aaff;
+            border-radius: 6px;
+            background: transparent;
+            color: #00aaff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mute-btn:hover {
+            background: #00aaff22;
+        }
+        .mute-btn.muted {
+            background: #ff4444;
+            border-color: #ff4444;
+            color: white;
+        }
+        .mute-btn.muted:hover {
+            background: #ff6666;
+        }
+        .audio-status {
+            font-size: 11px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -116,9 +176,182 @@
             <div class="btn-indicator" id="btn-start">⏎ START</div>
         </div>
         <div class="debug-log" id="debug-log">Waiting for input...</div>
+        
+        <!-- AUDIO PANEL -->
+        <div class="audio-panel">
+            <div>
+                <span class="audio-title">🔊 AUDIO</span>
+                <span class="audio-status" id="audio-status">Click to start</span>
+            </div>
+            <button class="mute-btn" id="mute-btn" onclick="toggleMute()">🔊 SOUND ON</button>
+        </div>
     </div>
 
    <script>
+    // ============================================================
+    // AUDIO STATE & WEB AUDIO API - IMPROVED VERSION
+    // ============================================================
+    let audioContext = null;
+    let scriptNode = null;
+    let isMuted = false;
+    let audioInitialized = false;
+    let audioUnderrunCount = 0;
+    
+    // Audio configuration
+    const SAMPLE_RATE = 44100;
+    const BUFFER_SIZE = 1024;  // Smaller = less latency, but more risk of underruns
+    const TARGET_LATENCY_SAMPLES = BUFFER_SIZE * 2;  // Keep 2 buffers worth
+    
+    // Audio statistics for debugging
+    let audioStats = {
+        samplesProcessed: 0,
+        underruns: 0,
+        lastSamplesAvailable: 0
+    };
+    
+    // Toggle mute function
+    function toggleMute() {
+        isMuted = !isMuted;
+        const btn = document.getElementById('mute-btn');
+        const status = document.getElementById('audio-status');
+        
+        if (isMuted) {
+            btn.textContent = '🔇 MUTED';
+            btn.classList.add('muted');
+            status.textContent = 'Audio muted';
+            if (Module._set_audio_muted) {
+                Module._set_audio_muted(1);
+            }
+        } else {
+            btn.textContent = '🔊 SOUND ON';
+            btn.classList.remove('muted');
+            status.textContent = 'Audio playing';
+            if (Module._set_audio_muted) {
+                Module._set_audio_muted(0);
+            }
+            // Resume audio context if suspended
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+    }
+    
+    // Initialize Web Audio API with improved buffer handling
+    async function initAudio() {
+        if (audioInitialized) return;
+        
+        try {
+            // Create audio context with desired sample rate
+            audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                sampleRate: SAMPLE_RATE,
+                latencyHint: 'interactive'  // Lower latency
+            });
+            
+            console.log('[AUDIO] Context created. Sample rate: ' + audioContext.sampleRate + ' Hz');
+            console.log('[AUDIO] Base latency: ' + (audioContext.baseLatency * 1000).toFixed(2) + ' ms');
+            
+            // Create ScriptProcessorNode
+            // Note: ScriptProcessorNode is deprecated but works well for emulators
+            // AudioWorklet is more complex but could be used for even lower latency
+            scriptNode = audioContext.createScriptProcessor(BUFFER_SIZE, 0, 1);
+            
+            scriptNode.onaudioprocess = function(e) {
+                const outputBuffer = e.outputBuffer.getChannelData(0);
+                const bufferLength = outputBuffer.length;
+                
+                // Check if we should output silence
+                if (isMuted || !Module._fill_audio_buffer || !Module._get_audio_buffer) {
+                    for (let i = 0; i < bufferLength; i++) {
+                        outputBuffer[i] = 0;
+                    }
+                    return;
+                }
+                
+                // Check samples available before filling
+                const available = Module._get_audio_samples_available();
+                audioStats.lastSamplesAvailable = available;
+                
+                if (available < bufferLength) {
+                    // Underrun - not enough samples
+                    audioStats.underruns++;
+                    
+                    // Log first few underruns
+                    if (audioStats.underruns <= 10) {
+                        console.warn('[AUDIO] Underrun #' + audioStats.underruns + 
+                                   ' - available: ' + available + ', needed: ' + bufferLength);
+                    }
+                }
+                
+                // Fill the output buffer from WASM
+                // This copies from ring buffer to linear output buffer
+                const samplesCopied = Module._fill_audio_buffer(bufferLength);
+                
+                if (samplesCopied > 0) {
+                    // Get pointer to the linear output buffer
+                    const audioBufferPtr = Module._get_audio_buffer();
+                    
+                    // Read samples from WASM HEAPF32
+                    // The pointer is in bytes, divide by 4 for float32 index
+                    const floatArrayStart = audioBufferPtr / 4;
+                    
+                    // Copy samples to Web Audio output
+                    for (let i = 0; i < samplesCopied; i++) {
+                        outputBuffer[i] = Module.HEAPF32[floatArrayStart + i];
+                    }
+                    
+                    // Fill any remaining with silence (smooth transition)
+                    if (samplesCopied < bufferLength) {
+                        const lastSample = samplesCopied > 0 ? outputBuffer[samplesCopied - 1] : 0;
+                        for (let i = samplesCopied; i < bufferLength; i++) {
+                            // Fade to silence to avoid pops
+                            const fadeRatio = (bufferLength - i) / (bufferLength - samplesCopied);
+                            outputBuffer[i] = lastSample * fadeRatio * 0.5;
+                        }
+                    }
+                    
+                    audioStats.samplesProcessed += samplesCopied;
+                } else {
+                    // No samples - fill with silence
+                    for (let i = 0; i < bufferLength; i++) {
+                        outputBuffer[i] = 0;
+                    }
+                }
+            };
+            
+            // Connect to destination (speakers)
+            scriptNode.connect(audioContext.destination);
+            audioInitialized = true;
+            
+            document.getElementById('audio-status').textContent = 'Audio ready';
+            console.log('[AUDIO] Web Audio API initialized successfully');
+            console.log('[AUDIO] Buffer size: ' + BUFFER_SIZE + ' samples');
+            console.log('[AUDIO] Latency: ~' + ((BUFFER_SIZE / SAMPLE_RATE) * 1000).toFixed(1) + ' ms');
+            
+            // Log audio stats periodically
+            setInterval(() => {
+                if (audioStats.samplesProcessed > 0 && !isMuted) {
+                    console.log('[AUDIO STATS] Samples: ' + audioStats.samplesProcessed + 
+                               ', Underruns: ' + audioStats.underruns +
+                               ', Available: ' + audioStats.lastSamplesAvailable);
+                }
+            }, 5000);
+            
+        } catch (err) {
+            console.error('[AUDIO] Failed to initialize:', err);
+            document.getElementById('audio-status').textContent = 'Audio error: ' + err.message;
+        }
+    }
+    
+    // Initialize audio on first user interaction (required by browsers)
+    function initAudioOnInteraction() {
+        if (!audioInitialized) {
+            initAudio();
+        }
+    }
+    
+    document.addEventListener('click', initAudioOnInteraction, { once: true });
+    document.addEventListener('keydown', initAudioOnInteraction, { once: true });
+    
     // ============================================================
     // DEBUG STATE
     // ============================================================

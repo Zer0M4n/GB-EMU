@@ -10,13 +10,16 @@
 #include "core/cpu/mmu/mmu.h"
 #include "core/cpu/cpu.h"
 #include "core/cpu/ppu/ppu.h"
-#include "core/cpu/timer/timer.h" // AÑADIDO: Timer
+#include "core/cpu/timer/timer.h"
+#include "core/cpu/APU/apu.h" // AÑADIDO: APU
 
 // Punteros globales
 cpu* global_cpu = nullptr;
 ppu* global_ppu = nullptr;
 mmu* global_mmu = nullptr;
-timer* global_timer = nullptr; // NUEVO
+timer* global_timer = nullptr;
+APU* global_apu = nullptr; // AÑADIDO: APU
+bool audio_muted = false;  // Control de mute
 
 // --- EXPORTAR BUFFER A JS ---
 extern "C" {
@@ -38,13 +41,57 @@ extern "C" {
             global_mmu->setButton(button_id, pressed);
         }
     }
+    
+    // ============================================================
+    // FUNCIONES DE AUDIO (APU) PARA WEB AUDIO API
+    // ============================================================
+    
+    // Devuelve el puntero al buffer de audio de SALIDA (floats)
+    // IMPORTANTE: Llamar fill_audio_buffer() ANTES de leer desde este puntero
+    float* get_audio_buffer() {
+        if (global_apu) {
+            return global_apu->getBufferPointer();
+        }
+        return nullptr;
+    }
+    
+    // Devuelve cuántas muestras están disponibles en el ring buffer
+    int get_audio_samples_available() {
+        if (global_apu) {
+            return global_apu->getSamplesAvailable();
+        }
+        return 0;
+    }
+    
+    // Copia muestras del ring buffer al buffer de salida lineal
+    // Retorna el número de muestras copiadas
+    // JS debe llamar esto ANTES de leer desde get_audio_buffer()
+    int fill_audio_buffer(int maxSamples) {
+        if (global_apu) {
+            return global_apu->fillOutputBuffer(maxSamples);
+        }
+        return 0;
+    }
+    
+    // Consume N muestras del buffer (deprecated - usa fill_audio_buffer)
+    void consume_audio_samples(int count) {
+        if (global_apu) {
+            global_apu->consumeSamples(count);
+        }
+    }
+    
+    // Activa/desactiva el mute
+    void set_audio_muted(bool muted) {
+        audio_muted = muted;
+        std::cout << "[APU] Audio " << (muted ? "MUTED" : "UNMUTED") << "\n";
+    }
 }
 
 // ============================================================
 // MAIN LOOP - SINCRONIZACIÓN PRECISA CON T-CYCLES
 // ============================================================
 void main_loop() {
-    if (!global_cpu || !global_ppu || !global_timer) return;
+    if (!global_cpu || !global_ppu || !global_timer || !global_apu) return;
 
     // TIMING GAME BOY:
     // - CPU: 4,194,304 Hz (T-cycles por segundo)
@@ -70,7 +117,12 @@ void main_loop() {
         // 3. Timer avanza EXACTAMENTE los mismos T-cycles
         global_timer->step(cpu_t_cycles);
         
-        // 4. Acumular T-cycles del frame
+        // 4. APU avanza EXACTAMENTE los mismos T-cycles (si no está muted)
+        if (!audio_muted) {
+            global_apu->tick(cpu_t_cycles);
+        }
+        
+        // 5. Acumular T-cycles del frame
         t_cycles_this_frame += cpu_t_cycles;
     }
 
@@ -187,7 +239,13 @@ int main(int argc, char **argv) {
         // 4. Inicializar CPU (necesita acceso a MMU)
         global_cpu = new cpu(*global_mmu); 
         
+        // 5. Inicializar APU (Audio Processing Unit)
+        global_apu = new APU();
+        // Conectar APU a MMU para manejar registros de audio
+        global_mmu->setAPU(global_apu);
+        
         std::cout << "Hardware inicializado correctamente.\n";
+        std::cout << "APU inicializada (Sample Rate: 44100 Hz)\n";
         std::cout << "Iniciando Main Loop a ~60 FPS...\n";
 
         // Iniciar el bucle principal
