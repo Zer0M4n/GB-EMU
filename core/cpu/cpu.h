@@ -161,6 +161,12 @@ private:
     int PUSH_r16(uint8_t opcode);  // 0xC5, 0xD5, 0xE5, 0xF5
     int POP_r16(uint8_t opcode);   // 0xC1, 0xD1, 0xE1, 0xF1
     int LD_a16_SP(uint8_t opcode); // 0x08 (Guardar SP en memoria)
+    // Conditional CALLs (CALL cc, a16)
+    int CALL_cc(uint8_t opcode); // 0xC4, 0xCC, 0xD4, 0xDC
+
+    // SP-relative operations
+    int ADD_SP_r8(uint8_t opcode);   // 0xE8: ADD SP, r8
+    int LD_HL_SP_r8(uint8_t opcode); // 0xF8: LD HL, SP+r8
 
     // --- ARITMÉTICA CON CARRY (ADC / SBC) ---
     int ADC_A_r8(uint8_t opcode);  // 0x88 - 0x8F

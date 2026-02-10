@@ -181,31 +181,6 @@ void main_loop() {
         last_countdown = countdown_lo;
     }
     
-    // AUTO-PRESS START after 2 seconds (120 frames) to test if game advances
-    static bool start_pressed = false;
-    if (frame_count == 120 && !start_pressed) {
-        std::cout << "\n[AUTO-TEST] Pressing START button...\n";
-        std::cout << "  Current state: " << (int)game_status << " (" << state_name << ")\n\n";
-        global_mmu->setButton(7, true);  // Press START
-        start_pressed = true;
-    }
-    if (frame_count == 140 && start_pressed) {
-        std::cout << "\n[AUTO-TEST] Releasing START button...\n";
-        std::cout << "  Current state: " << (int)game_status << " (" << state_name << ")\n\n";
-        global_mmu->setButton(7, false); // Release START
-    }
-    
-    // Log state after START press
-    if (frame_count == 180) {
-        std::cout << "\n[AUTO-TEST RESULT] 1 second after START:\n";
-        std::cout << "  GAME_STATUS = " << (int)game_status << " (" << state_name << ")\n";
-        if (game_status == 37) {
-            std::cout << "  *** STILL STUCK ON COPYRIGHT! ***\n";
-        } else if (game_status == 6 || game_status == 7) {
-            std::cout << "  *** SUCCESS! Game advanced to title! ***\n";
-        }
-        std::cout << "\n";
-    }
     
     EM_ASM({
         if (typeof drawCanvas === 'function') {

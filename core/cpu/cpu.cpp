@@ -87,6 +87,9 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
     // LD SP
     table_opcode[0xF9] = &cpu::LD_SP_HL;  // LD SP, HL
     table_opcode[0x08] = &cpu::LD_a16_SP; // LD [a16], SP
+    // SP-relative operations
+    table_opcode[0xE8] = &cpu::ADD_SP_r8;   // ADD SP, r8
+    table_opcode[0xF8] = &cpu::LD_HL_SP_r8; // LD HL, SP+r8
 
     // INC r16 (Incrementos de 16 bits)
     table_opcode[0x03] = &cpu::INC_r16; // INC BC
@@ -253,6 +256,11 @@ cpu::cpu(mmu& mmu_ref) : memory(mmu_ref)
 
     // Calls
     table_opcode[0xCD] = &cpu::CALL;
+    // Conditional CALLs (CALL cc,a16)
+    table_opcode[0xC4] = &cpu::CALL_cc; // CALL NZ,a16
+    table_opcode[0xCC] = &cpu::CALL_cc; // CALL Z,a16
+    table_opcode[0xD4] = &cpu::CALL_cc; // CALL NC,a16
+    table_opcode[0xDC] = &cpu::CALL_cc; // CALL C,a16
     // (CALL CC opcionalmente va en C4, CC, D4, DC si los implementas)
 
     // Returns
@@ -980,6 +988,46 @@ int cpu::LD_SP_HL(uint8_t opcode) {
     return 8;
 }
 
+// Opcode 0xE8: ADD SP, r8
+int cpu::ADD_SP_r8(uint8_t opcode) {
+    (void)opcode;
+    int8_t offset = (int8_t)readImmediateByte();
+
+    uint16_t sp_before = SP;
+    uint8_t uoffset = (uint8_t)offset;
+
+    // Flags: Z = 0, N = 0
+    setZ(false);
+    setN(false);
+
+    // Half carry: from low nibble
+    setH(((sp_before & 0x0F) + (uoffset & 0x0F)) > 0x0F);
+    // Carry: from low byte addition
+    setC(((sp_before & 0xFF) + uoffset) > 0xFF);
+
+    SP = (uint16_t)(sp_before + (int16_t)offset);
+    return 16; // 4 M-cycles
+}
+
+// Opcode 0xF8: LD HL, SP + r8
+int cpu::LD_HL_SP_r8(uint8_t opcode) {
+    (void)opcode;
+    int8_t offset = (int8_t)readImmediateByte();
+
+    uint16_t sp_before = SP;
+    uint8_t uoffset = (uint8_t)offset;
+
+    // Flags per Game Boy: Z = 0, N = 0
+    setZ(false);
+    setN(false);
+
+    setH(((sp_before & 0x0F) + (uoffset & 0x0F)) > 0x0F);
+    setC(((sp_before & 0xFF) + uoffset) > 0xFF);
+
+    setHL((uint16_t)(sp_before + (int16_t)offset));
+    return 12; // 3 M-cycles
+}
+
 
 int cpu::LDH_n_A(uint8_t opcode) {
     (void)opcode;
@@ -1084,6 +1132,27 @@ int cpu::CALL(uint8_t opcode) {
     
     // std::cout << "CALL " << std::hex << target << "\n";
     return 24; // Toma 6 ciclos (24 ticks)
+}
+// Conditional CALL: CALL cc, a16 (C4, CC, D4, DC)
+int cpu::CALL_cc(uint8_t opcode) {
+    uint16_t target = readImmediateWord();
+
+    int condition = (opcode >> 3) & 0x03; // 0=NZ,1=Z,2=NC,3=C
+    bool take = false;
+    switch (condition) {
+        case 0: take = !getZ(); break; // NZ
+        case 1: take = getZ();  break; // Z
+        case 2: take = !getC(); break; // NC
+        case 3: take = getC();  break; // C
+    }
+
+    if (take) {
+        push(PC);
+        PC = target;
+        return 24; // Taken: 6 machine cycles
+    }
+
+    return 12; // Not taken: 3 machine cycles
 }
 int cpu::JP_cc_a16(uint8_t opcode) {
     uint16_t target = readImmediateWord();
