@@ -180,6 +180,7 @@ http://localhost:8888/gb-emu.html
 * [x] Timers & Interrupts
 * [ ] Joypad input handling — *In progress*
 * [ ] IMBC — *In progress*
+* [ ] Users can put their own ROMs in the UI.
 
 
 ---
