@@ -175,10 +175,12 @@ http://localhost:8888/gb-emu.html
 * [x] ROM loading via Virtual File System
 * [x] Basic emulator architecture
 * [x] WebAssembly compilation pipeline
-* [ ] Complete CPU instruction set
-* [ ] PPU (Graphics & Rendering) — *In progress*
-* [ ] Timers & Interrupts
-* [ ] Joypad input handling
+* [ ] Complete CPU instruction set — *In progress*
+* [x] PPU (Graphics & Rendering) 
+* [x] Timers & Interrupts
+* [ ] Joypad input handling — *In progress*
+* [ ] IMBC — *In progress*
+
 
 ---
 
