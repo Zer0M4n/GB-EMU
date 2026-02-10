@@ -23,7 +23,7 @@ You must include:
 - Which parts were AI-generated
 
 Undeclared AI-generated contributions will be rejected.
-
+ 
 ## Code of Conduct
 Be respectful, inclusive, and professional.
 

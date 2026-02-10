@@ -189,7 +189,7 @@ Este emulador tiene como finalidad:
 
 ---
 
-
+ 
 💡 *Pull Requests, ideas y feedback son bienvenidos.*
 
 ## ⚖️ Aviso Legal

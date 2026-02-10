@@ -23,7 +23,7 @@ Debes incluir:
 - Qué partes fueron generadas por IA
 
 Las contribuciones con IA no declarada serán rechazadas.
-
+ 
 ## Código de Conducta
 Respeto, lenguaje inclusivo y críticas constructivas.
 No se tolera acoso ni comportamiento no profesional.

@@ -191,7 +191,7 @@ This project aims to:
 * Experiment with **C++ + WebAssembly**
 * Build a full emulator **from scratch**, without external emulation libraries
 
-
+ 
 
 💡 *Issues, pull requests, and feedback are welcome.*
 ---

@@ -51,6 +51,6 @@ target_link_options(gb-emu PRIVATE
         "SHELL:-s EXPORTED_FUNCTIONS=['_main','_get_video_buffer','_get_video_buffer_size','_set_button','_get_audio_buffer','_get_audio_samples_available','_fill_audio_buffer','_consume_audio_samples','_set_audio_muted']"
         "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8','HEAPF32']" 
         #"SHELL:--emrun"
-        "SHELL:--preload-file /home/developer/projects/roms_backup@/roms"
+        "SHELL:--preload-file /home/developer/projects/GB-EMU/roms@/roms"
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/src/index.html"
 )
