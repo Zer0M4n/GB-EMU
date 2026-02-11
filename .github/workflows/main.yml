@@ -21,8 +21,7 @@ jobs:
 
       - name: Verify Workspace
         run: |
-          ls -R  # Esto ayuda a debugear si las rutas en CMake son correctas
-
+          ls -R 
 
       - name: Configure and Build
         run: |
@@ -31,6 +30,7 @@ jobs:
           cd build
           emcmake cmake ..
           make
+          cp gb-emu.html index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -38,7 +38,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # IMPORTANTE: Subimos la carpeta build donde están el .html, .js y .wasm
+          # Subimos toda la carpeta build
           path: './build/'
 
       - name: Deploy to GitHub Pages
