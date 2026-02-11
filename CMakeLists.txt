@@ -7,10 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Seguridad: Si intentas compilar esto con g++ normal, dará error y te avisará
 if(NOT EMSCRIPTEN)
-    message(FATAL_ERROR "Este proyecto ahora es SOLO WEB. Usa 'emcmake cmake ..")
+    message(FATAL_ERROR "Este proyecto ahora es SOLO WEB. Usa 'emcmake cmake ..'")
 endif()
 
-# 1. Rutas de cabeceras (.h)
+# ==============================================================================
+# 1. RUTAS DE CABECERAS (.h)
+# ==============================================================================
 include_directories(
     ${CMAKE_SOURCE_DIR}
     core
@@ -23,7 +25,9 @@ include_directories(
     core/cartridge/IMBC
 )
 
-# 2. Archivos fuente
+# ==============================================================================
+# 2. ARCHIVOS FUENTE
+# ==============================================================================
 set(CORE_SOURCES
     core/cpu/cpu.cpp
     core/cpu/mmu/mmu.cpp
@@ -35,7 +39,9 @@ set(CORE_SOURCES
     core/cartridge/IMBC/type_cartridge/MBC1.cpp
 )
 
-# 3. Configuración del Ejecutable
+# ==============================================================================
+# 3. CONFIGURACIÓN DEL EJECUTABLE
+# ==============================================================================
 message(STATUS "Configurando build para WebAssembly...")
 
 add_executable(gb-emu emc_main.cpp ${CORE_SOURCES})
@@ -43,14 +49,29 @@ add_executable(gb-emu emc_main.cpp ${CORE_SOURCES})
 # Generar un .html en lugar de un .js suelto
 set_target_properties(gb-emu PROPERTIES SUFFIX ".html")
 
-# 4. Flags de Emscripten (Linker)
+# ==============================================================================
+# 4. FLAGS DE EMSCRIPTEN (LINKER)
+# ==============================================================================
 target_link_options(gb-emu PRIVATE
-        "SHELL:-s USE_SDL=0"
-        "SHELL:-s ALLOW_MEMORY_GROWTH=1"
-        "SHELL:-s NO_EXIT_RUNTIME=1"
-        "SHELL:-s EXPORTED_FUNCTIONS=['_main','_get_video_buffer','_get_video_buffer_size','_set_button','_get_audio_buffer','_get_audio_samples_available','_fill_audio_buffer','_consume_audio_samples','_set_audio_muted']"
-        "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8','HEAPF32']" 
-        #"SHELL:--emrun"
-        "SHELL:--preload-file /home/developer/projects/GB-EMU/roms@/roms"
-        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/src/index.html"
+    "SHELL:-s USE_SDL=0"
+    "SHELL:-s ALLOW_MEMORY_GROWTH=1"
+    "SHELL:-s NO_EXIT_RUNTIME=1"
+    
+    # IMPORTANTE: Habilita el sistema de archivos virtual para cargar ROMs
+    "SHELL:-s FORCE_FILESYSTEM=1"
+
+    # Funciones de C++ que JS puede llamar
+    # Nota: _load_rom_from_js es la nueva adición crítica
+    "SHELL:-s EXPORTED_FUNCTIONS=['_main','_load_rom_from_js','_get_video_buffer','_get_video_buffer_size','_set_button','_get_audio_buffer','_get_audio_samples_available','_fill_audio_buffer','_set_audio_muted']"
+
+    # Métodos del runtime de Emscripten que JS puede usar
+    # Nota: 'FS' es necesario para escribir archivos desde el navegador
+    "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS','HEAPU8','HEAPF32']" 
+    
+    # Plantilla HTML personalizada
+    "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/src/index.html"
+
+    # OPCIONAL: Precarga de archivos (COMENTADO para permitir carga dinámica pura)
+    # Descomenta esto solo si quieres una ROM por defecto y la ruta existe en tu PC
+    # "SHELL:--preload-file /home/developer/projects/GB-EMU/roms@/roms"
 )

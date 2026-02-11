@@ -1,5 +1,5 @@
 // ============================================================
-// EMC_MAIN.CPP - VERSIÓN MEJORADA CON TIMER
+// EMC_MAIN.CPP - VERSIÓN DINÁMICA (CARGA DE ARCHIVOS USUARIO)
 // ============================================================
 
 #include <iostream>
@@ -11,311 +11,156 @@
 #include "core/cpu/cpu.h"
 #include "core/cpu/ppu/ppu.h"
 #include "core/cpu/timer/timer.h"
-#include "core/cpu/APU/apu.h" // AÑADIDO: APU
+#include "core/cpu/APU/apu.h"
 
 // Punteros globales
 cpu* global_cpu = nullptr;
 ppu* global_ppu = nullptr;
 mmu* global_mmu = nullptr;
 timer* global_timer = nullptr;
-APU* global_apu = nullptr; // AÑADIDO: APU
-bool audio_muted = false;  // Control de mute
+APU* global_apu = nullptr;
 
-// --- EXPORTAR BUFFER A JS ---
+// Estado del sistema
+bool is_game_loaded = false;
+bool audio_muted = false;
+
+// --- FUNCIÓN DE LIMPIEZA ---
+// Borra la memoria del juego anterior antes de cargar uno nuevo
+void reset_emulator() {
+    is_game_loaded = false;
+
+    if (global_cpu) { delete global_cpu; global_cpu = nullptr; }
+    if (global_timer) { delete global_timer; global_timer = nullptr; }
+    if (global_ppu) { delete global_ppu; global_ppu = nullptr; }
+    if (global_apu) { delete global_apu; global_apu = nullptr; }
+    
+    // MMU se borra al final porque otros componentes dependen de él en su destructor
+    if (global_mmu) { delete global_mmu; global_mmu = nullptr; }
+    
+    std::cout << "[C++] Memoria liberada. Listo para cargar ROM.\n";
+}
+
 extern "C" {
-    // Devuelve el puntero al inicio del array de píxeles (uint32_t = RGBA)
+    // --- VIDEO ---
     uint8_t* get_video_buffer() {
-        if (global_ppu) {
-            return reinterpret_cast<uint8_t*>(global_ppu->gfx.data());
-        }
+        if (global_ppu) return reinterpret_cast<uint8_t*>(global_ppu->gfx.data());
         return nullptr;
     }
     
-    int get_video_buffer_size() {
-        return 160 * 144 * 4; 
-    }
+    int get_video_buffer_size() { return 160 * 144 * 4; }
     
-    // NUEVA: Función para establecer estado de botones
+    // --- INPUT ---
     void set_button(int button_id, bool pressed) {
-        if (global_mmu) {
-            global_mmu->setButton(button_id, pressed);
-        }
+        if (global_mmu) global_mmu->setButton(button_id, pressed);
     }
     
-    // ============================================================
-    // FUNCIONES DE AUDIO (APU) PARA WEB AUDIO API
-    // ============================================================
-    
-    // Devuelve el puntero al buffer de audio de SALIDA (floats)
-    // IMPORTANTE: Llamar fill_audio_buffer() ANTES de leer desde este puntero
+    // --- AUDIO ---
     float* get_audio_buffer() {
-        if (global_apu) {
-            return global_apu->getBufferPointer();
-        }
+        if (global_apu) return global_apu->getBufferPointer();
         return nullptr;
     }
     
-    // Devuelve cuántas muestras están disponibles en el ring buffer
     int get_audio_samples_available() {
-        if (global_apu) {
-            return global_apu->getSamplesAvailable();
-        }
+        if (global_apu) return global_apu->getSamplesAvailable();
         return 0;
     }
     
-    // Copia muestras del ring buffer al buffer de salida lineal
-    // Retorna el número de muestras copiadas
-    // JS debe llamar esto ANTES de leer desde get_audio_buffer()
     int fill_audio_buffer(int maxSamples) {
-        if (global_apu) {
-            return global_apu->fillOutputBuffer(maxSamples);
-        }
+        if (global_apu) return global_apu->fillOutputBuffer(maxSamples);
         return 0;
     }
     
-    // Consume N muestras del buffer (deprecated - usa fill_audio_buffer)
-    void consume_audio_samples(int count) {
-        if (global_apu) {
-            global_apu->consumeSamples(count);
-        }
-    }
-    
-    // Activa/desactiva el mute
     void set_audio_muted(bool muted) {
         audio_muted = muted;
-        std::cout << "[APU] Audio " << (muted ? "MUTED" : "UNMUTED") << "\n";
+    }
+
+    // ============================================================
+    // NUEVA FUNCIÓN: CARGAR ROM DESDE JS
+    // ============================================================
+    // Recibe la ruta del archivo (string) que JS escribió en el FS virtual
+    int load_rom_from_js(char* filename) {
+        std::cout << "[C++] Solicitud recibida para cargar: " << filename << "\n";
+        
+        reset_emulator(); // Limpiar lo viejo
+
+        try {
+            std::string romPath(filename);
+
+            // 1. Inicializar MMU (Carga el archivo desde el FS virtual)
+            global_mmu = new mmu(romPath);
+            
+            // 2. Inicializar resto de componentes
+            const bool enable_debug = false; // Debug off para mejor rendimiento en web
+            
+            global_ppu = new ppu(*global_mmu);
+            global_ppu->enable_debug(enable_debug);
+            
+            global_timer = new timer(*global_mmu);
+            global_timer->enable_debug(enable_debug);
+            
+            global_cpu = new cpu(*global_mmu);
+            
+            global_apu = new APU();
+            global_mmu->setAPU(global_apu);
+            
+            std::cout << "[C++] Componentes inicializados. Juego arrancando...\n";
+            is_game_loaded = true;
+            return 1; // Éxito
+
+        } catch (const std::exception& e) {
+            std::cerr << "[C++] ERROR FATAL cargando ROM: " << e.what() << "\n";
+            is_game_loaded = false;
+            return 0; // Fallo
+        }
     }
 }
 
 // ============================================================
-// MAIN LOOP - SINCRONIZACIÓN PRECISA CON T-CYCLES
+// MAIN LOOP
 // ============================================================
 void main_loop() {
-    if (!global_cpu || !global_ppu || !global_timer || !global_apu) return;
+    // Si no hay juego cargado, no hacemos nada (CPU idle)
+    if (!is_game_loaded || !global_cpu) {
+        return; 
+    }
 
-    // TIMING GAME BOY:
-    // - CPU: 4,194,304 Hz (T-cycles por segundo)
-    // - 1 Frame = 70224 T-cycles (a ~59.73 FPS)
-    // - 1 T-cycle = 1 dot de PPU
-    // - 1 M-cycle = 4 T-cycles
-    
     const int T_CYCLES_PER_FRAME = 70224;
     int t_cycles_this_frame = 0;
 
-    // Ejecutar hasta completar un frame completo
     while (t_cycles_this_frame < T_CYCLES_PER_FRAME) {
-        
-        // 1. CPU ejecuta UNA instrucción (o maneja interrupción)
         int cpu_t_cycles = global_cpu->step();
-        
-        // Validación de seguridad: mínimo 4 T-cycles
         if (cpu_t_cycles < 4) cpu_t_cycles = 4;
         
-        // 2. PPU avanza EXACTAMENTE los mismos T-cycles
         global_ppu->step(cpu_t_cycles);
-        
-        // 3. Timer avanza EXACTAMENTE los mismos T-cycles
         global_timer->step(cpu_t_cycles);
         
-        // 4. APU avanza EXACTAMENTE los mismos T-cycles (si no está muted)
         if (!audio_muted) {
             global_apu->tick(cpu_t_cycles);
         }
         
-        // 5. Acumular T-cycles del frame
         t_cycles_this_frame += cpu_t_cycles;
     }
 
-    // Avisar a JS que dibuje cuando el frame está completo
-    static int frame_count = 0;
-    frame_count++;
-    if (frame_count <= 3) {
-        std::cout << "[MAIN LOOP] Frame #" << frame_count << " complete. Calling drawCanvas()...\n";
-    }
-    
-    // ============================================================
-    // DIAGNOSTIC: Monitor GAME_STATUS and countdown timers
-    // ============================================================
-    // GAME_STATUS is at 0xFF99 (HRAM[0x19])
-    // COUNTDOWN is at 0xFFA6-0xFFA7 (HRAM[0x26-0x27])
-    uint8_t game_status = global_mmu->readMemory(0xFF99);
-    uint8_t countdown_lo = global_mmu->readMemory(0xFFA6);
-    uint8_t countdown_hi = global_mmu->readMemory(0xFFA7);
-    
-    // State name lookup
-    const char* state_name = "UNKNOWN";
-    switch (game_status) {
-        case 36: state_name = "MENU_COPYRIGHT_INIT"; break;
-        case 37: state_name = "MENU_COPYRIGHT_1"; break;
-        case 53: state_name = "MENU_COPYRIGHT_2"; break;
-        case 6:  state_name = "MENU_TITLE_INIT"; break;
-        case 7:  state_name = "MENU_TITLE"; break;
-        case 8:  state_name = "MENU_GAME_TYPE"; break;
-        case 20: state_name = "PLAYING"; break;
-    }
-    
-    // Log state changes
-    static uint8_t last_game_status = 0xFF;
-    static uint8_t last_countdown = 0xFF;
-    
-    if (game_status != last_game_status) {
-        std::cout << "\n[STATE CHANGE] Frame " << frame_count 
-                  << ": GAME_STATUS = " << (int)game_status 
-                  << " (" << state_name << ")\n\n";
-        last_game_status = game_status;
-    }
-    
-    // Log countdown every 60 frames (1 second) while in copyright
-    if (game_status == 37 && frame_count % 60 == 0) {
-        uint16_t countdown = (countdown_hi << 8) | countdown_lo;
-        std::cout << "[COPYRIGHT] Frame " << frame_count 
-                  << " COUNTDOWN=" << countdown
-                  << " (0x" << std::hex << countdown << std::dec << ")\n";
-        
-        // Check if countdown changed
-        if (countdown_lo != last_countdown) {
-            std::cout << "  → Countdown IS changing!\n";
-        } else {
-            std::cout << "  → Countdown NOT changing (stuck?)\n";
-        }
-        last_countdown = countdown_lo;
-    }
-    
-    
+    // Dibujar pantalla
     EM_ASM({
         if (typeof drawCanvas === 'function') {
             drawCanvas();
-        } else {
-            console.error("drawCanvas is not defined!");
         }
     });
 }
 
+// ============================================================
+// MAIN - PUNTO DE ENTRADA
+// ============================================================
 int main(int argc, char **argv) {
-    std::cout << "--- Game Boy Emulator Booting WASM ---" << "\n";
+    std::cout << "--- Game Boy Emulator (WASM) ---\n";
+    std::cout << "--- Esperando archivo ROM desde JavaScript ---\n";
 
-    std::string romPath = "/roms/tetris.gb";
-
-    try {
-        // 1. Inicializar MMU (carga la ROM)
-        global_mmu = new mmu(romPath);
-        
-        // 2. Inicializar PPU (necesita acceso a MMU)
-        const bool enable_debug = true;
-
-        global_ppu = new ppu(*global_mmu); 
-        global_ppu->enable_debug(enable_debug);
-
-        
-        // 3. Inicializar Timer (necesita acceso a MMU)
-        global_timer = new timer(*global_mmu);
-        global_timer->enable_debug(enable_debug);
-        
-        // 4. Inicializar CPU (necesita acceso a MMU)
-        global_cpu = new cpu(*global_mmu); 
-        
-        // 5. Inicializar APU (Audio Processing Unit)
-        global_apu = new APU();
-        // Conectar APU a MMU para manejar registros de audio
-        global_mmu->setAPU(global_apu);
-        
-        std::cout << "Hardware inicializado correctamente.\n";
-        std::cout << "APU inicializada (Sample Rate: 44100 Hz)\n";
-        std::cout << "Iniciando Main Loop a ~60 FPS...\n";
-
-        // Iniciar el bucle principal
-        // 0 = usar requestAnimationFrame del navegador (~60 FPS)
-        // 1 = simular bucle infinito
-        emscripten_set_main_loop(main_loop, 0, 1);
-        
-    } catch (const std::exception& e) {
-        std::cout << "Error fatal: " << e.what() << "\n";
-        return 1;
-    }
+    // Ya NO cargamos el juego aquí.
+    // Solo configuramos el bucle principal.
+    
+    // 0 = requestAnimationFrame, 1 = simular bucle infinito
+    emscripten_set_main_loop(main_loop, 0, 1);
 
     return 0;
 }
-
-// ============================================================
-// NOTAS DE IMPLEMENTACIÓN:
-// ============================================================
-/*
-IMPORTANTE: Necesitas asegurarte que:
-
-1. CPU.step() retorna T-cycles (no M-cycles)
-   - Si tu implementación actual retorna M-cycles,
-     multiplica por 4 antes de pasarlo a PPU y Timer
-   
-   Ejemplo:
-   int cpu_m_cycles = global_cpu->step();
-   int cpu_t_cycles = cpu_m_cycles * 4;
-   global_ppu->step(cpu_t_cycles);
-
-2. Timer está correctamente implementado
-   - Debe estar en core/cpu/timer/
-   - Ver timer.h y timer.cpp que ya tienes
-
-3. MMU tiene la función setButton()
-   - Necesaria para que JS pueda actualizar botones
-   - Ver mmu_FIXED.cpp para la implementación
-
-4. El HTML debe llamar a set_button() cuando se presionen teclas
-   - Ver más abajo para el código JavaScript
-*/
-
-// ============================================================
-// CÓDIGO JAVASCRIPT PARA EL HTML (index.html)
-// ============================================================
-/*
-Añade este código a tu index.html para manejar el teclado:
-
-<script>
-// Mapeo de teclas a botones de Game Boy
-const keyMap = {
-    'ArrowRight': 0,  // Right
-    'ArrowLeft': 1,   // Left
-    'ArrowUp': 2,     // Up
-    'ArrowDown': 3,   // Down
-    'KeyX': 4,        // A
-    'KeyZ': 5,        // B
-    'Shift': 6,       // Select
-    'Enter': 7        // Start
-};
-
-// Manejar presión de teclas
-document.addEventListener('keydown', (e) => {
-    const button = keyMap[e.code];
-    if (button !== undefined && Module._set_button) {
-        e.preventDefault();
-        Module._set_button(button, true);
-    }
-});
-
-// Manejar liberación de teclas
-document.addEventListener('keyup', (e) => {
-    const button = keyMap[e.code];
-    if (button !== undefined && Module._set_button) {
-        e.preventDefault();
-        Module._set_button(button, false);
-    }
-});
-
-function drawCanvas() {
-    if (!Module || !Module._get_video_buffer) return;
-
-    const bufferPointer = Module._get_video_buffer();
-    if (bufferPointer === 0) return;
-
-    const data = new Uint8ClampedArray(
-        Module.HEAPU8.buffer,
-        bufferPointer,
-        160 * 144 * 4
-    );
-
-    const canvas = document.getElementById('lcd');
-    const ctx = canvas.getContext('2d');
-    const imgData = new ImageData(data, 160, 144);
-    ctx.putImageData(imgData, 0, 0);
-}
-</script>
-*/
