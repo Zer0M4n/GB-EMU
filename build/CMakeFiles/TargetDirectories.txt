@@ -1,0 +1,3 @@
+/home/developer/projects/GB-EMU/build/CMakeFiles/gb-emu.dir
+/home/developer/projects/GB-EMU/build/CMakeFiles/edit_cache.dir
+/home/developer/projects/GB-EMU/build/CMakeFiles/rebuild_cache.dir
