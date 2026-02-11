@@ -1,6 +1,6 @@
 name: Deploy GB-EMU to GitHub Pages
 
-on:
+on: 
   push:
     branches: [ main ]
 
