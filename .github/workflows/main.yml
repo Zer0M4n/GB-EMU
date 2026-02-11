@@ -23,13 +23,13 @@ jobs:
         run: |
           ls -R  # Esto ayuda a debugear si las rutas en CMake son correctas
 
+
       - name: Configure and Build
         run: |
+          rm -rf build
           mkdir build
           cd build
-          # Usamos emcmake para que detecte el compilador de Emscripten
           emcmake cmake ..
-          # Compilamos
           make
 
       - name: Setup Pages
