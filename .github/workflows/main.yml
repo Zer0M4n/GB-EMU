@@ -1,0 +1,46 @@
+name: Deploy GB-EMU to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Verify Workspace
+        run: |
+          ls -R  # Esto ayuda a debugear si las rutas en CMake son correctas
+
+      - name: Configure and Build
+        run: |
+          mkdir build
+          cd build
+          # Usamos emcmake para que detecte el compilador de Emscripten
+          emcmake cmake ..
+          # Compilamos
+          make
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # IMPORTANTE: Subimos la carpeta build donde están el .html, .js y .wasm
+          path: './build/'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
