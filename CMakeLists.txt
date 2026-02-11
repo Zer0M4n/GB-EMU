@@ -42,14 +42,12 @@ set(CORE_SOURCES
 # ==============================================================================
 # 3. CONFIGURACIÓN DEL EJECUTABLE
 # ==============================================================================
-# Cambia esto:
+message(STATUS "Configurando build para WebAssembly...")
+
 add_executable(gb-emu emc_main.cpp ${CORE_SOURCES})
 
-# Por esto:
-add_executable(index emc_main.cpp ${CORE_SOURCES})
-
-# Y asegúrate de que el sufijo siga siendo .html
-set_target_properties(index PROPERTIES SUFFIX ".html")
+# Generar un .html en lugar de un .js suelto
+set_target_properties(gb-emu PROPERTIES SUFFIX ".html")
 
 # ==============================================================================
 # 4. FLAGS DE EMSCRIPTEN (LINKER)
