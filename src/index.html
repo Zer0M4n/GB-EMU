@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GameBoy Emulator - WebAssembly</title>
     <style>
         body {
@@ -33,7 +34,7 @@
             box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
         }
         canvas {
-            background-color: #9bbc0f; /* Color clásico GB apagado */
+            background-color: #9bbc0f;
             width: 320px;
             height: 288px;
             image-rendering: pixelated;
@@ -41,7 +42,6 @@
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
         
-        /* --- ESTILOS DEL CARGADOR DE ROM (NUEVO) --- */
         .cartridge-slot {
             margin-bottom: 15px;
             width: 100%;
@@ -166,6 +166,142 @@
             color: #666;
             display: block;
         }
+
+        /* ── CONTROLES TÁCTILES ───────────────────────────────
+           Ocultos en desktop, visibles en mobile/touch           */
+        .touch-controls {
+            display: none;
+            width: 100%;
+            max-width: 360px;
+            margin-top: 16px;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 0 4px;
+        }
+        @media (max-width: 600px), (pointer: coarse) {
+            .touch-controls { display: flex; }
+            .controls { display: none; }  /* ocultar hint de teclado */
+        }
+
+        /* D-PAD */
+        .touch-dpad {
+            position: relative;
+            width: 108px;
+            height: 108px;
+            flex-shrink: 0;
+        }
+        .dpad-h, .dpad-v {
+            position: absolute;
+            background: #444;
+            border-radius: 4px;
+            box-shadow: 0 3px 0 #222, inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: filter 0.07s;
+        }
+        .dpad-h { width: 100%; height: 34%; top: 33%; }
+        .dpad-v { width: 34%; height: 100%; left: 33%; }
+        .dpad-h.lit, .dpad-v.lit { filter: brightness(1.6); }
+        .dpad-center {
+            position: absolute;
+            width: 34%; height: 34%;
+            top: 33%; left: 33%;
+            background: #333;
+            border-radius: 3px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .dpad-btn {
+            position: absolute;
+            z-index: 3;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+        }
+        .dpad-up    { width: 34%; height: 35%; top: 0;    left: 33%; }
+        .dpad-down  { width: 34%; height: 35%; bottom: 0; left: 33%; }
+        .dpad-left  { width: 35%; height: 34%; top: 33%;  left: 0;   }
+        .dpad-right { width: 35%; height: 34%; top: 33%;  right: 0;  }
+        .dpad-arrow {
+            position: absolute;
+            pointer-events: none;
+            color: rgba(255,255,255,0.25);
+            font-size: 10px;
+            line-height: 1;
+            z-index: 4;
+        }
+        .arr-up    { top: 4px;    left: 50%; transform: translateX(-50%); }
+        .arr-down  { bottom: 4px; left: 50%; transform: translateX(-50%); }
+        .arr-left  { left: 4px;   top: 50%;  transform: translateY(-50%); }
+        .arr-right { right: 4px;  top: 50%;  transform: translateY(-50%); }
+
+        /* SELECT / START */
+        .touch-sys {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .sys-row { display: flex; gap: 12px; }
+        .touch-sys-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+        }
+        .sys-cap {
+            width: 38px;
+            height: 13px;
+            background: #555;
+            border-radius: 7px;
+            box-shadow: 0 3px 0 #333, inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: transform 0.07s, box-shadow 0.07s;
+        }
+        .touch-sys-btn.pressed .sys-cap {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #333;
+        }
+        .sys-label {
+            font-size: 9px;
+            color: #777;
+            letter-spacing: 0.5px;
+        }
+
+        /* A / B */
+        .touch-ab {
+            position: relative;
+            width: 96px;
+            height: 80px;
+            flex-shrink: 0;
+        }
+        .touch-action-btn {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.2);
+            transition: transform 0.07s, box-shadow 0.07s;
+        }
+        .touch-action-btn.pressed {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+        }
+        .touch-btn-a {
+            background: radial-gradient(circle at 35% 35%, #e04060, #a02040);
+            top: 0; right: 0;
+        }
+        .touch-btn-b {
+            background: radial-gradient(circle at 35% 35%, #a03060, #702040);
+            bottom: 0; left: 0;
+        }
     </style>
 </head>
 <body>
@@ -185,6 +321,43 @@
         
         <div class="controls">
             <p>ARROWS | Z=A | X=B | ENTER=START | SHIFT=SEL</p>
+        </div>
+
+        <!-- CONTROLES TÁCTILES — solo visibles en mobile -->
+        <div class="touch-controls">
+
+            <div class="touch-dpad" id="dpad-root">
+                <div class="dpad-h" id="dpad-h"></div>
+                <div class="dpad-v" id="dpad-v"></div>
+                <div class="dpad-center"></div>
+                <div class="dpad-btn dpad-up"    data-btn="2"></div>
+                <div class="dpad-btn dpad-down"  data-btn="3"></div>
+                <div class="dpad-btn dpad-left"  data-btn="1"></div>
+                <div class="dpad-btn dpad-right" data-btn="0"></div>
+                <span class="dpad-arrow arr-up">▲</span>
+                <span class="dpad-arrow arr-down">▼</span>
+                <span class="dpad-arrow arr-left">◀</span>
+                <span class="dpad-arrow arr-right">▶</span>
+            </div>
+
+            <div class="touch-sys">
+                <div class="sys-row">
+                    <div class="touch-sys-btn" data-btn="6">
+                        <div class="sys-cap"></div>
+                        <span class="sys-label">SELECT</span>
+                    </div>
+                    <div class="touch-sys-btn" data-btn="7">
+                        <div class="sys-cap"></div>
+                        <span class="sys-label">START</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="touch-ab">
+                <button class="touch-action-btn touch-btn-b" data-btn="5">B</button>
+                <button class="touch-action-btn touch-btn-a" data-btn="4">A</button>
+            </div>
+
         </div>
     </div>
     
@@ -213,73 +386,94 @@
 
     <script>
     // ============================================================
-    // 1. GESTIÓN DE CARGA DE ROM (NUEVO)
+    // 1. GESTIÓN DE CARGA DE ROM
     // ============================================================
     const romInput = document.getElementById('rom-upload');
     const romNameDisplay = document.getElementById('rom-name');
 
+    // ROM pendiente si el usuario carga antes de que WASM esté listo
+    let pendingRomData = null;
+    let wasmReady = false;
+
+    function loadRomData(data, fileName) {
+        try {
+            Module.FS.writeFile('/game.gb', data);
+            console.log("[JS] ROM escrita en FS virtual: " + data.length + " bytes");
+            const success = Module.ccall('load_rom_from_js', 'number', ['string'], ['/game.gb']);
+            if (success) {
+                console.log("[JS] ROM cargada correctamente.");
+                romNameDisplay.innerText = "Playing: " + fileName;
+                romNameDisplay.style.color = "#008800";
+                initAudioOnInteraction();
+            } else {
+                console.error("[JS] C++ reporta fallo al cargar la ROM.");
+                romNameDisplay.innerText = "Error loading ROM";
+                romNameDisplay.style.color = "#cc0000";
+            }
+        } catch (err) {
+            console.error("[JS] Error con Module:", err);
+            romNameDisplay.innerText = "WASM Error (See Console)";
+        }
+    }
+
     romInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-
         romNameDisplay.innerText = "Loading: " + file.name;
-
         const reader = new FileReader();
         reader.onload = function(event) {
             const data = new Uint8Array(event.target.result);
-            
-            // 1. Escribir el archivo en el sistema de archivos virtual de Emscripten
-            // IMPORTANTE: 'FS' debe estar exportado en CMake
-            try {
-                Module.FS.writeFile('/game.gb', data);
-                console.log("[JS] Archivo escrito en FS virtual: /game.gb (" + data.length + " bytes)");
-                
-                // 2. Llamar a la función C++ para cargar la ROM
-                // ccall(nombre_funcion, tipo_retorno, [tipos_args], [args])
-                const success = Module.ccall(
-                    'load_rom_from_js', // Nombre en C++ (exportado)
-                    'number',           // Retorna int
-                    ['string'],         // Recibe string (char*)
-                    ['/game.gb']        // Argumento
-                );
-
-                if (success) {
-                    console.log("[JS] C++ reporta éxito cargando la ROM.");
-                    romNameDisplay.innerText = "Playing: " + file.name;
-                    romNameDisplay.style.color = "#008800";
-                    
-                    // Inicializar audio si es la primera interacción
-                    initAudioOnInteraction();
-                } else {
-                    console.error("[JS] C++ reporta fallo cargando la ROM.");
-                    romNameDisplay.innerText = "Error loading ROM";
-                    romNameDisplay.style.color = "#cc0000";
-                }
-
-            } catch (err) {
-                console.error("[JS] Error interactuando con Module:", err);
-                romNameDisplay.innerText = "WASM Error (See Console)";
+            if (wasmReady) {
+                // WASM ya listo → cargar directo
+                loadRomData(data, file.name);
+            } else {
+                // WASM todavía inicializando → guardar para cuando esté listo
+                console.log("[JS] WASM no listo todavía, ROM guardada como pendiente.");
+                pendingRomData = { data, name: file.name };
+                romNameDisplay.innerText = "Waiting for WASM...";
             }
         };
         reader.readAsArrayBuffer(file);
     });
 
-
     // ============================================================
-    // 2. AUDIO SYSTEM
+    // 2. AUDIO SYSTEM — AudioWorkletNode (reemplaza ScriptProcessor)
     // ============================================================
     let audioContext = null;
-    let scriptNode = null;
-    let isMuted = false;
+    let workletNode  = null;
+    let isMuted      = false;
     let audioInitialized = false;
     const SAMPLE_RATE = 44100;
-    const BUFFER_SIZE = 2048; // Aumentado ligeramente para evitar crujidos en JS
-    
+    const BUFFER_SIZE = 2048;
+
+    // El AudioWorkletProcessor se inyecta como Blob para no necesitar
+    // un archivo .js separado (funciona con file:// y sin servidor)
+    const WORKLET_CODE = `
+class GBProcessor extends AudioWorkletProcessor {
+    process(inputs, outputs) {
+        const out = outputs[0][0];
+        if (!out) return true;
+
+        // Comunicación con el hilo principal vía MessagePort
+        // El hilo principal nos envía los samples via postMessage
+        if (this._buffer && this._buffer.length > 0) {
+            const len = Math.min(out.length, this._buffer.length);
+            for (let i = 0; i < len; i++) out[i] = this._buffer[i];
+            this._buffer = this._buffer.slice(len);
+            if (len < out.length) out.fill(0, len);
+        } else {
+            out.fill(0);
+        }
+        return true;
+    }
+}
+registerProcessor('gb-processor', GBProcessor);
+`;
+
     function toggleMute() {
         isMuted = !isMuted;
-        const btn = document.getElementById('mute-btn');
+        const btn    = document.getElementById('mute-btn');
         const status = document.getElementById('audio-status');
-        
         if (isMuted) {
             btn.textContent = '🔇 OFF';
             btn.classList.add('muted');
@@ -293,134 +487,214 @@
             if (audioContext && audioContext.state === 'suspended') audioContext.resume();
         }
     }
-    
+
     async function initAudio() {
         if (audioInitialized) return;
-        
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)({
                 sampleRate: SAMPLE_RATE
             });
-            
-            // ScriptProcessor (Deprecated pero simple para emuladores)
-            scriptNode = audioContext.createScriptProcessor(BUFFER_SIZE, 0, 1);
-            
-            scriptNode.onaudioprocess = function(e) {
-                const outputBuffer = e.outputBuffer.getChannelData(0);
-                
-                // Si no hay módulo o está muteado, silencio
-                if (isMuted || !Module._fill_audio_buffer) {
-                    outputBuffer.fill(0);
-                    return;
+
+            // Registrar el worklet desde un Blob URL (no necesita archivo externo)
+            const blob    = new Blob([WORKLET_CODE], { type: 'application/javascript' });
+            const blobURL = URL.createObjectURL(blob);
+            await audioContext.audioWorklet.addModule(blobURL);
+            URL.revokeObjectURL(blobURL);
+
+            workletNode = new AudioWorkletNode(audioContext, 'gb-processor', {
+                numberOfInputs:  0,
+                numberOfOutputs: 1,
+                outputChannelCount: [1]
+            });
+            workletNode.connect(audioContext.destination);
+
+            // Tick de audio: pedimos samples a C++ y los enviamos al worklet
+            // Usamos un ScriptProcessor SOLO como temporizador (sin audio), o
+            // simplemente un setInterval que corre en el hilo principal.
+            // Frecuencia: BUFFER_SIZE / SAMPLE_RATE ≈ cada 46ms
+            const TICK_MS = Math.floor(BUFFER_SIZE / SAMPLE_RATE * 1000);
+            setInterval(() => {
+                if (isMuted || !Module._fill_audio_buffer) return;
+                const n = Module._fill_audio_buffer(BUFFER_SIZE);
+                if (n > 0) {
+                    const ptr  = Module._get_audio_buffer();
+                    // Copiar desde memoria WASM (no podemos enviar la vista directamente
+                    // porque el buffer WASM puede moverse; slice() hace una copia segura)
+                    const samples = Module.HEAPF32.slice(ptr >> 2, (ptr >> 2) + n);
+                    workletNode.port.postMessage({ samples }, [samples.buffer]);
                 }
-                
-                // Pedir a C++ que llene su buffer interno y lo prepare
-                const samplesCopied = Module._fill_audio_buffer(outputBuffer.length);
-                
-                if (samplesCopied > 0) {
-                    // Leer directamente de la memoria WASM
-                    const ptr = Module._get_audio_buffer();
-                    // HEAPF32 usa índices de floats (bytes / 4)
-                    const wasmView = Module.HEAPF32.subarray(ptr >> 2, (ptr >> 2) + samplesCopied);
-                    
-                    // Copiar
-                    outputBuffer.set(wasmView);
-                    
-                    // Si faltaron samples, rellenar con el último valor (o 0)
-                    if (samplesCopied < outputBuffer.length) {
-                        outputBuffer.fill(0, samplesCopied);
-                    }
-                } else {
-                    outputBuffer.fill(0);
-                }
-            };
-            
-            scriptNode.connect(audioContext.destination);
+            }, TICK_MS);
+
+            // El worklet recibe los samples y los bufferiza
+            workletNode.port.onmessage = null; // el worklet no nos envía mensajes
+
             audioInitialized = true;
             document.getElementById('audio-status').textContent = 'Audio Ready';
-            console.log('[AUDIO] Inicializado.');
-            
+            console.log('[AUDIO] AudioWorklet inicializado.');
         } catch (err) {
             console.error('[AUDIO] Error:', err);
+            // Fallback: ScriptProcessorNode si AudioWorklet no está disponible
+            try {
+                const sp = audioContext.createScriptProcessor(BUFFER_SIZE, 0, 1);
+                sp.onaudioprocess = function(e) {
+                    const out = e.outputBuffer.getChannelData(0);
+                    if (isMuted || !Module._fill_audio_buffer) { out.fill(0); return; }
+                    const n = Module._fill_audio_buffer(out.length);
+                    if (n > 0) {
+                        const ptr = Module._get_audio_buffer();
+                        out.set(Module.HEAPF32.subarray(ptr >> 2, (ptr >> 2) + n));
+                        if (n < out.length) out.fill(0, n);
+                    } else { out.fill(0); }
+                };
+                sp.connect(audioContext.destination);
+                audioInitialized = true;
+                document.getElementById('audio-status').textContent = 'Audio Ready (fallback)';
+                console.warn('[AUDIO] Usando ScriptProcessor como fallback.');
+            } catch (err2) {
+                console.error('[AUDIO] Fallback también falló:', err2);
+            }
         }
     }
-    
+
     function initAudioOnInteraction() {
         if (!audioInitialized) initAudio();
         else if (audioContext && audioContext.state === 'suspended') audioContext.resume();
     }
-    
-    document.addEventListener('click', initAudioOnInteraction, { once: true });
+
+    document.addEventListener('click',   initAudioOnInteraction, { once: true });
     document.addEventListener('keydown', initAudioOnInteraction, { once: true });
-    
+
     // ============================================================
-    // 3. DEBUG UI & INPUT
+    // 3. DEBUG UI (sin cambios)
     // ============================================================
-    const buttonState = { 0: false, 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false };
-    const BUTTON_NAMES = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'A', 'B', 'SELECT', 'START'];
-    const BUTTON_ELEMENTS = { 0: 'btn-right', 1: 'btn-left', 2: 'btn-up', 3: 'btn-down', 4: 'btn-a', 5: 'btn-b', 6: 'btn-select', 7: 'btn-start' };
-    
+    const BUTTON_NAMES    = ['RIGHT','LEFT','UP','DOWN','A','B','SELECT','START'];
+    const BUTTON_ELEMENTS = { 0:'btn-right', 1:'btn-left', 2:'btn-up', 3:'btn-down', 4:'btn-a', 5:'btn-b', 6:'btn-select', 7:'btn-start' };
+    const buttonState     = { 0:false, 1:false, 2:false, 3:false, 4:false, 5:false, 6:false, 7:false };
+
     function updateDebugUI() {
         for (let id = 0; id < 8; id++) {
             const el = document.getElementById(BUTTON_ELEMENTS[id]);
             if (el) el.classList.toggle('active', buttonState[id]);
         }
-        
         const pressed = Object.keys(buttonState).filter(k => buttonState[k]).map(k => BUTTON_NAMES[k]);
         document.getElementById('debug-log').textContent = pressed.length > 0 ? `Pressed: ${pressed.join('|')}` : 'Idle';
     }
-    
+
     // ============================================================
-    // 4. WASM MODULE & MAIN LOOP
+    // 4. FUNCIÓN CENTRAL DE BOTÓN (teclado + táctil comparten esto)
+    // ============================================================
+    function pressBtn(id, down) {
+        id = parseInt(id);
+        if (buttonState[id] === down) return;
+        buttonState[id] = down;
+
+        if (Module._set_button) Module._set_button(id, down ? 1 : 0);
+
+        updateDebugUI();
+
+        // Feedback visual en el botón táctil
+        const touchEl = document.querySelector(`.touch-controls [data-btn="${id}"]`);
+        if (touchEl) touchEl.classList.toggle('pressed', down);
+
+        initAudioOnInteraction();
+    }
+
+    // ============================================================
+    // 5. INPUT DE TECLADO (sin cambios)
+    // ============================================================
+    const KEY_MAP = {
+        'ArrowRight':0, 'ArrowLeft':1, 'ArrowUp':2, 'ArrowDown':3,
+        'KeyZ':4, 'KeyX':5, 'ShiftLeft':6, 'Enter':7
+    };
+
+    function setupKeyboard() {
+        const handler = (e, isDown) => {
+            const btn = KEY_MAP[e.code];
+            if (btn !== undefined) { e.preventDefault(); pressBtn(btn, isDown); }
+        };
+        document.addEventListener('keydown', e => handler(e, true));
+        document.addEventListener('keyup',   e => handler(e, false));
+    }
+
+    // ============================================================
+    // 6. INPUT TÁCTIL (NUEVO)
+    // ============================================================
+    function setupTouchInput() {
+
+        // A, B, SELECT, START — touch simple
+        document.querySelectorAll('.touch-controls [data-btn]').forEach(el => {
+            if (el.classList.contains('dpad-btn')) return; // d-pad se maneja aparte
+
+            el.addEventListener('touchstart', e => { e.preventDefault(); pressBtn(el.dataset.btn, true);  }, { passive: false });
+            el.addEventListener('touchend',   e => { e.preventDefault(); pressBtn(el.dataset.btn, false); }, { passive: false });
+            el.addEventListener('touchcancel',e => { e.preventDefault(); pressBtn(el.dataset.btn, false); }, { passive: false });
+        });
+
+        // D-PAD — touch con soporte diagonal
+        const dpad = document.getElementById('dpad-root');
+        let activeDpadBtns = new Set();
+
+        function getDirsFromTouch(touch, rect) {
+            const cx = rect.left + rect.width  / 2;
+            const cy = rect.top  + rect.height / 2;
+            const dx = touch.clientX - cx;
+            const dy = touch.clientY - cy;
+            const threshold = rect.width * 0.15;
+            const dirs = new Set();
+            if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
+                if (Math.abs(dx) >= Math.abs(dy) * 0.5) dirs.add(dx > 0 ? 0 : 1); // RIGHT/LEFT
+                if (Math.abs(dy) >= Math.abs(dx) * 0.5) dirs.add(dy > 0 ? 3 : 2); // DOWN/UP
+            }
+            return dirs;
+        }
+
+        function updateDpad(e) {
+            const rect = dpad.getBoundingClientRect();
+            const newActive = new Set();
+            for (const t of e.touches) {
+                if (t.clientX < rect.left || t.clientX > rect.right ||
+                    t.clientY < rect.top  || t.clientY > rect.bottom) continue;
+                getDirsFromTouch(t, rect).forEach(d => newActive.add(d));
+            }
+            activeDpadBtns.forEach(d => { if (!newActive.has(d)) pressBtn(d, false); });
+            newActive.forEach(d => pressBtn(d, true));
+            activeDpadBtns = newActive;
+        }
+
+        dpad.addEventListener('touchstart',  e => { e.preventDefault(); updateDpad(e); }, { passive: false });
+        dpad.addEventListener('touchmove',   e => { e.preventDefault(); updateDpad(e); }, { passive: false });
+        dpad.addEventListener('touchend',    e => { e.preventDefault(); updateDpad(e); }, { passive: false });
+        dpad.addEventListener('touchcancel', e => { e.preventDefault(); updateDpad(e); }, { passive: false });
+    }
+
+    // ============================================================
+    // 7. WASM MODULE & MAIN LOOP (sin cambios, solo +setupTouchInput)
     // ============================================================
     var Module = {
         canvas: document.getElementById('lcd'),
         onRuntimeInitialized: function() {
             console.log("[WASM] Inicializado. Esperando ROM...");
+            wasmReady = true;
             setupKeyboard();
+            setupTouchInput();
+
+            // Si el usuario cargó una ROM antes de que WASM estuviera listo
+            if (pendingRomData) {
+                console.log("[JS] Cargando ROM pendiente...");
+                loadRomData(pendingRomData.data, pendingRomData.name);
+                pendingRomData = null;
+            }
         }
     };
 
     function drawCanvas() {
-        // Esta función es llamada desde C++ (emc_main.cpp) cada frame
         if (!Module._get_video_buffer) return;
-
         const bufferPointer = Module._get_video_buffer();
-        
-        // Si C++ devuelve 0 (nullptr), significa que no hay juego o PPU listo
-        if (bufferPointer === 0) return; 
-
-        // Copiar píxeles de la memoria WASM al Canvas
-        // HEAPU8 es la vista de bytes de toda la memoria
+        if (bufferPointer === 0) return;
         const data = new Uint8ClampedArray(Module.HEAPU8.buffer, bufferPointer, 160 * 144 * 4);
         const imgData = new ImageData(data, 160, 144);
-        
         const ctx = document.getElementById('lcd').getContext('2d');
         ctx.putImageData(imgData, 0, 0);
-    }
-    
-    const KEY_MAP = {
-        'ArrowRight': 0, 'ArrowLeft': 1, 'ArrowUp': 2, 'ArrowDown': 3,
-        'KeyZ': 4, 'KeyX': 5, 'ShiftLeft': 6, 'Enter': 7
-    };
-    
-    function setupKeyboard() {
-        const handler = (e, isDown) => {
-            const btn = KEY_MAP[e.code];
-            if (btn !== undefined) {
-                e.preventDefault();
-                if (buttonState[btn] !== isDown) {
-                    buttonState[btn] = isDown;
-                    updateDebugUI();
-                    if (Module._set_button) Module._set_button(btn, isDown);
-                    
-                    // Iniciar audio en primera tecla si no se hizo click
-                    if (isDown) initAudioOnInteraction();
-                }
-            }
-        };
-        document.addEventListener('keydown', e => handler(e, true));
-        document.addEventListener('keyup', e => handler(e, false));
     }
     </script>
 
