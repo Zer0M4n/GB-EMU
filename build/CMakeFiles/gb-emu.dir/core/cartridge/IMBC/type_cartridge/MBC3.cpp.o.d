@@ -1,7 +1,8 @@
-CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
-  /home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp \
-  /home/developer/projects/GB-EMU/core/cartridge/cartridge.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/cstdint \
+CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC3.cpp.o: \
+  /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC3.cpp \
+  /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC3.h \
+  /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/../IMBC.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/fstream \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__config \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__config_site \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__configuration/abi.h \
@@ -9,11 +10,6 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__configuration/platform.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__configuration/availability.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__configuration/language.h \
-  /home/developer/emsdk/upstream/lib/clang/22/include/stdint.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/stdint.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/bits/alltypes.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/bits/stdint.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/string \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/max.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/comp.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/desugars_to.h \
@@ -119,10 +115,20 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/byte.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__cstddef/max_align_t.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__cstddef/nullptr_t.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/path.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/replace.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/replace_copy.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/unary_function.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/functional.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/back_insert_iterator.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/iterator.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__memory/addressof.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_pointer.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/remove_pointer.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/string \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/min.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/min_element.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/identity.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/functional.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/invoke.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_base_of.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_core_convertible.h \
@@ -135,7 +141,6 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/segmented_iterator.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/unwrap_iter.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__memory/pointer_traits.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__memory/addressof.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/conjunction.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__bit/countr.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__bit/rotate.h \
@@ -154,7 +159,6 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_empty.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_literal_type.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_pod.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_pointer.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_polymorphic.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_scalar.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_standard_layout.h \
@@ -162,12 +166,16 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_trivially_assignable.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_trivially_constructible.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_trivially_copyable.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/cstdint \
+  /home/developer/emsdk/upstream/lib/clang/22/include/stdint.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/stdint.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/bits/alltypes.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/bits/stdint.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_trivially_destructible.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_unsigned.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_volatile.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/make_unsigned.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/rank.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/remove_pointer.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/remove_volatile.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/result_of.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/underlying_type.h \
@@ -205,7 +213,6 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__debug_utils/sanitizers.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__format/enable_insertable.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/hash.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/unary_function.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__utility/pair.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__compare/common_comparison_category.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__compare/ordering.h \
@@ -257,7 +264,6 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__utility/convert_to_integral.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__utility/unreachable.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/iter_swap.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/iterator.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/next.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/prev.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__ranges/subrange.h \
@@ -433,7 +439,6 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__atomic/kill_dependency.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/concepts \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iterator \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/back_insert_iterator.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/front_insert_iterator.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/insert_iterator.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/istream_iterator.h \
@@ -519,8 +524,6 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/prev_permutation.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/remove_copy.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/remove_copy_if.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/replace.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/replace_copy.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/replace_copy_if.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/replace_if.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/reverse_copy.h \
@@ -548,33 +551,14 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/pstl.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/sample.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/bit \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/vector \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/comparison.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/lexicographical_compare_three_way.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/three_way_comp_ref_type.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/vector.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/swap.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/vector.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/ranges_copy_n.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/in_out_result.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/ranges_copy.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/unreachable_sentinel.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__memory/temp_value.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__split_buffer \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/container_traits.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/container_traits.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/vector_bool.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__bit_reference \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/pmr.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/array \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/static_bounded_iter.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/cerrno \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/clocale \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/locale.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/locale \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iomanip \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__ostream/put_character_sequence.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__locale_dir/pad_and_output.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/ios \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__locale \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__locale_dir/locale_base_api.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/compat/xlocale.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/locale.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__locale_dir/locale_base_api/bsd_locale_fallbacks.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/compat/stdarg.h \
   /home/developer/emsdk/upstream/lib/clang/22/include/stdarg.h \
@@ -587,11 +571,11 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/lib/clang/22/include/__stdarg_va_copy.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__mutex/once_flag.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__utility/no_destroy.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__locale_dir/pad_and_output.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/ios \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/clocale \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__system_error/error_category.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__system_error/error_code.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__system_error/errc.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/cerrno \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__system_error/error_condition.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__system_error/system_error.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/mutex \
@@ -603,17 +587,21 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__mutex/lock_guard.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__thread/id.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/system_error \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/locale \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/streambuf \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/cstdarg \
-  /home/developer/projects/GB-EMU/core/cartridge/IMBC/IMBC.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/fstream \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/path.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iomanip \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__ostream/put_character_sequence.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/array \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/lexicographical_compare_three_way.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/three_way_comp_ref_type.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/static_bounded_iter.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/bitset \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__bit_reference \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_char_like_type.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/deque \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/deque.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__memory/temp_value.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__split_buffer \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/container_traits.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/functional \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/binary_negate.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/bind.h \
@@ -627,6 +615,15 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/function.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/strip_signature.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/boyer_moore_searcher.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/vector.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/ranges_copy_n.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/in_out_result.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/ranges_copy.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__iterator/unreachable_sentinel.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/vector.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/comparison.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/container_traits.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/swap.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/unordered_map \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/is_transparent.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__hash_table \
@@ -638,6 +635,9 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/default_searcher.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/not_fn.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/perfect_forward.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/vector \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/vector_bool.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/pmr.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/format \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/queue \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/queue.h \
@@ -665,8 +665,4 @@ CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/path_iterator.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/recursive_directory_iterator.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/u8path.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iostream \
-  /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.h \
-  /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/../IMBC.h \
-  /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC1.h \
-  /home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC3.h
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iostream

@@ -9,6 +9,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC1.cpp" "CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.o.d"
+  "/home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/MBC3.cpp" "CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC3.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC3.cpp.o.d"
   "/home/developer/projects/GB-EMU/core/cartridge/IMBC/type_cartridge/RomOnly.cpp" "CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o.d"
   "/home/developer/projects/GB-EMU/core/cartridge/cartridge.cpp" "CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cartridge/cartridge.cpp.o.d"
   "/home/developer/projects/GB-EMU/core/cpu/APU/apu.cpp" "CMakeFiles/gb-emu.dir/core/cpu/APU/apu.cpp.o" "gcc" "CMakeFiles/gb-emu.dir/core/cpu/APU/apu.cpp.o.d"

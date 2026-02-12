@@ -658,8 +658,28 @@ CMakeFiles/gb-emu.dir/emc_main.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h \
   /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.h \
   /home/developer/projects/GB-EMU/core/cartridge/cartridge.h \
+  /home/developer/projects/GB-EMU/core/cartridge/IMBC/IMBC.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/fstream \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/path.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iomanip \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/filesystem \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/copy_options.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/directory_entry.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/file_status.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/file_type.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/perms.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/file_time_type.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__chrono/file_clock.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/filesystem_error.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/operations.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/perm_options.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/space_info.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/directory_iterator.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/directory_options.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/path_iterator.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/recursive_directory_iterator.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/u8path.h \
   /home/developer/projects/GB-EMU/core/cpu/cpu.h \
   /home/developer/projects/GB-EMU/core/cpu/ppu/ppu.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iomanip \
   /home/developer/projects/GB-EMU/core/cpu/timer/timer.h \
   /home/developer/projects/GB-EMU/core/cpu/APU/apu.h

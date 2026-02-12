@@ -1,7 +1,7 @@
 CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o: \
   /home/developer/projects/GB-EMU/core/cpu/ppu/ppu.cpp \
   /home/developer/projects/GB-EMU/core/cpu/ppu/ppu.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/vector \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/cstdint \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__config \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__config_site \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__configuration/abi.h \
@@ -9,6 +9,11 @@ CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__configuration/platform.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__configuration/availability.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__configuration/language.h \
+  /home/developer/emsdk/upstream/lib/clang/22/include/stdint.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/stdint.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/bits/alltypes.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/bits/stdint.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/vector \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__vector/comparison.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/equal.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__algorithm/comp.h \
@@ -152,11 +157,6 @@ CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/datasizeof.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_always_bitcastable.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_trivially_copyable.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/cstdint \
-  /home/developer/emsdk/upstream/lib/clang/22/include/stdint.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/stdint.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/bits/alltypes.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/bits/stdint.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_constant_evaluated.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_equality_comparable.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_trivially_lexicographically_comparable.h \
@@ -605,18 +605,17 @@ CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/system_error \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/streambuf \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/cstdarg \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iostream \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/istream \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__ostream/basic_ostream.h \
+  /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.h \
+  /home/developer/projects/GB-EMU/core/cartridge/cartridge.h \
+  /home/developer/projects/GB-EMU/core/cartridge/IMBC/IMBC.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/fstream \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/path.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iomanip \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__ostream/put_character_sequence.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/bitset \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_char_like_type.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/ostream \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/format \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/queue \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/deque.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/queue.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/deque \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/deque.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/functional \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/binary_negate.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/bind.h \
@@ -641,10 +640,31 @@ CMakeFiles/gb-emu.dir/core/cpu/ppu/ppu.cpp.o: \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/default_searcher.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/not_fn.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__functional/perfect_forward.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/format \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/queue \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/queue.h \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/stack \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__fwd/stack.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/istream \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__ostream/basic_ostream.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/ostream \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/print \
   /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/unistd.h \
-  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iomanip \
-  /home/developer/projects/GB-EMU/core/cpu/mmu/mmu.h \
-  /home/developer/projects/GB-EMU/core/cartridge/cartridge.h
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/filesystem \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/copy_options.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/directory_entry.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/file_status.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/file_type.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/perms.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/file_time_type.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__chrono/file_clock.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/filesystem_error.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/operations.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/perm_options.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/space_info.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/directory_iterator.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/directory_options.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/path_iterator.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/recursive_directory_iterator.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__filesystem/u8path.h \
+  /home/developer/emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/iostream

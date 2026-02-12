@@ -153,6 +153,30 @@ core/cartridge/IMBC/type_cartridge/MBC1.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC1.cpp.s
 .PHONY : core/cartridge/IMBC/type_cartridge/MBC1.cpp.s
 
+core/cartridge/IMBC/type_cartridge/MBC3.o: core/cartridge/IMBC/type_cartridge/MBC3.cpp.o
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC3.o
+
+# target to build an object file
+core/cartridge/IMBC/type_cartridge/MBC3.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC3.cpp.o
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC3.cpp.o
+
+core/cartridge/IMBC/type_cartridge/MBC3.i: core/cartridge/IMBC/type_cartridge/MBC3.cpp.i
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC3.i
+
+# target to preprocess a source file
+core/cartridge/IMBC/type_cartridge/MBC3.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC3.cpp.i
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC3.cpp.i
+
+core/cartridge/IMBC/type_cartridge/MBC3.s: core/cartridge/IMBC/type_cartridge/MBC3.cpp.s
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC3.s
+
+# target to generate assembly for a file
+core/cartridge/IMBC/type_cartridge/MBC3.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gb-emu.dir/build.make CMakeFiles/gb-emu.dir/core/cartridge/IMBC/type_cartridge/MBC3.cpp.s
+.PHONY : core/cartridge/IMBC/type_cartridge/MBC3.cpp.s
+
 core/cartridge/IMBC/type_cartridge/RomOnly.o: core/cartridge/IMBC/type_cartridge/RomOnly.cpp.o
 .PHONY : core/cartridge/IMBC/type_cartridge/RomOnly.o
 
@@ -357,6 +381,9 @@ help:
 	@echo "... core/cartridge/IMBC/type_cartridge/MBC1.o"
 	@echo "... core/cartridge/IMBC/type_cartridge/MBC1.i"
 	@echo "... core/cartridge/IMBC/type_cartridge/MBC1.s"
+	@echo "... core/cartridge/IMBC/type_cartridge/MBC3.o"
+	@echo "... core/cartridge/IMBC/type_cartridge/MBC3.i"
+	@echo "... core/cartridge/IMBC/type_cartridge/MBC3.s"
 	@echo "... core/cartridge/IMBC/type_cartridge/RomOnly.o"
 	@echo "... core/cartridge/IMBC/type_cartridge/RomOnly.i"
 	@echo "... core/cartridge/IMBC/type_cartridge/RomOnly.s"
